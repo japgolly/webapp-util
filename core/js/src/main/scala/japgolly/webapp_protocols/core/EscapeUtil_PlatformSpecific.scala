@@ -13,7 +13,7 @@ trait EscapeUtil_PlatformSpecific { self: EscapeUtil.type =>
   override def quote(s: String): String =
     scala.scalajs.js.JSON.stringify(s)
 
-  override def quote(sb: JStringBuilder, s: String): Unit =
+  override def appendQuoted(sb: JStringBuilder, s: String): Unit =
     sb.append(quote(s))
 
   override def escape(s: String): String =
@@ -24,7 +24,7 @@ trait EscapeUtil_PlatformSpecific { self: EscapeUtil.type =>
       q.substring(1, q.length - 1)
     }
 
-  override def escape(sb: JStringBuilder, s: String): Unit =
+  override def appendEscaped(sb: JStringBuilder, s: String): Unit =
     sb.append(escape(s))
 
 }

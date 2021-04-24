@@ -12,23 +12,23 @@ trait EscapeUtil_PlatformSpecific { self: EscapeUtil.type =>
 
   override def quote(s: String): String = {
     val sb = new JStringBuilder()
-    quote(sb, s)
+    appendQuoted(sb, s)
     sb.toString
   }
 
-  override def quote(sb: JStringBuilder, s: String): Unit = {
+  override def appendQuoted(sb: JStringBuilder, s: String): Unit = {
     sb.append('"')
-    escape(sb, s)
+    appendEscaped(sb, s)
     sb.append('"')
   }
 
   override def escape(s: String): String = {
     val sb = new JStringBuilder()
-    escape(sb, s)
+    appendEscaped(sb, s)
     sb.toString
   }
 
-  override def escape(sb: JStringBuilder, s: String): Unit = {
+  override def appendEscaped(sb: JStringBuilder, s: String): Unit = {
     val chars = s.toCharArray()
     var i = 0
     var c = 'x'

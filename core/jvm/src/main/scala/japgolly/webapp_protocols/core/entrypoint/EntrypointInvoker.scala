@@ -23,7 +23,7 @@ final class EntrypointInvoker[Input](defn: EntrypointDef[Input], onLoadWrapper: 
 
   private val appendEncoded: (JStringBuilder, String) => Unit =
     if (defn.codec.escapeEncodedString)
-      EscapeUtil.escape
+      EscapeUtil.appendEscaped
     else
       _.append(_)
 
