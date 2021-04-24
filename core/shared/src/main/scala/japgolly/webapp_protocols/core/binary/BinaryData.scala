@@ -2,8 +2,10 @@ package japgolly.webapp_protocols.core.binary
 
 import japgolly.univeq.UnivEq
 import java.io.OutputStream
+import java.lang.{StringBuilder => JStringBuilder}
 import java.nio.ByteBuffer
 import java.util.Arrays
+import java.util.Base64
 import scala.collection.immutable.ArraySeq
 
 object BinaryData extends BinaryData_PlatformSpecific_Object {
@@ -186,4 +188,19 @@ final class BinaryData(private[BinaryData] val bytes: Array[Byte],
     val m = n.min(length)
     drop(length - m)
   }
+
+  def toBase64: String =
+    Base64.getEncoder.encodeToString(unsafeArray)
+
+  def appendBase64(sb: JStringBuilder): Unit = {
+    val b64 = Base64.getEncoder.encode(unsafeArray)
+    var i = 0
+    while (i < b64.length) {
+      sb.append(b64(i).toChar)
+      i += 1
+    }
+  }
+
+  @inline def appendBase64(sb: StringBuilder): Unit =
+    appendBase64(sb.underlying)
 }
