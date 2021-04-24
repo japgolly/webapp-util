@@ -16,8 +16,8 @@ object Dependencies {
 
     // Internal
     val microlibs    = "2.6-RC3"
-    val mUnit        = "0.7.25"
     val nyaya        = "0.10.0-RC2"
+    val utest        = "0.7.9"
   }
 
 
@@ -34,7 +34,6 @@ object Dependencies {
     val microlibsStdlibExt  = Def.setting("com.github.japgolly.microlibs"     %%% "stdlib-ext"    % Ver.microlibs)
     val microlibsTestUtil   = Def.setting("com.github.japgolly.microlibs"     %%% "test-util"     % Ver.microlibs)
     val microlibsUtils      = Def.setting("com.github.japgolly.microlibs"     %%% "utils"         % Ver.microlibs)
-    val mUnit               = Def.setting("org.scalameta"                     %%% "munit"         % Ver.mUnit)
     val nyayaGen            = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-gen"     % Ver.nyaya)
     val nyayaProp           = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-prop"    % Ver.nyaya)
     val nyayaTest           = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-test"    % Ver.nyaya)
@@ -43,6 +42,7 @@ object Dependencies {
     val scalaJsReactExtra   = Def.setting("com.github.japgolly.scalajs-react" %%% "extra"         % Ver.scalaJsReact)
     val scalaJsReactTest    = Def.setting("com.github.japgolly.scalajs-react" %%% "test"          % Ver.scalaJsReact)
     val univEq              = Def.setting("com.github.japgolly.univeq"        %%% "univeq"        % Ver.univEq)
+    val utest               = Def.setting("com.lihaoyi"                       %%% "utest"         % Ver.utest)
   }
 
 }

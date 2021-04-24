@@ -70,18 +70,17 @@ object Build {
 
   def testSettings = ConfigureBoth(
     _.settings(
-      testFrameworks += new TestFramework("munit.Framework"),
+      testFrameworks += new TestFramework("utest.runner.Framework"),
       libraryDependencies ++= Seq(
         Dep.microlibsTestUtil.value % Test,
-        Dep.mUnit.value % Test,
         Dep.nyayaGen.value % Test,
         Dep.nyayaProp.value % Test,
         Dep.nyayaTest.value % Test,
+        Dep.utest.value % Test,
       ),
     ))
     .jsConfigure(_.settings(
-      // Test / jsEnv := new JSDOMNodeJSEnv,
-      Test / scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) }, // see munit doc
+      Test / jsEnv := new JSDOMNodeJSEnv,
     ))
 
   lazy val root = project
