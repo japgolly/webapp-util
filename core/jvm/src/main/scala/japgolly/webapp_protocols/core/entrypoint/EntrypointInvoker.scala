@@ -1,7 +1,7 @@
 package japgolly.webapp_protocols.core.entrypoint
 
-import java.lang.{StringBuilder => JStringBuilder}
 import japgolly.webapp_protocols.core.EscapeUtil
+import java.lang.{StringBuilder => JStringBuilder}
 
 object EntrypointInvoker {
 

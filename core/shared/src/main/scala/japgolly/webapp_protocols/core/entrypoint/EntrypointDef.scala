@@ -1,6 +1,6 @@
 package japgolly.webapp_protocols.core.entrypoint
 
-import EntrypointDef._
+import japgolly.webapp_protocols.core.entrypoint.EntrypointDef._
 
 final case class EntrypointDef[Input](objectName: String)(implicit _codec: Codec[Input]) {
 
