@@ -1,44 +1,52 @@
 package japgolly.webapp_protocols.core.entrypoint
 
+import java.lang.{StringBuilder => JStringBuilder}
 import japgolly.webapp_protocols.core.EscapeUtil
 
 object EntrypointInvoker {
-  final case class JS(val asString: String) extends AnyVal {
-    // def asXml = <script type="text/javascript">{invokeOnLoadJs(i)}</script>
-  }
+
+  def apply[I](defn: EntrypointDef[I]): EntrypointInvoker[I] =
+    new EntrypointInvoker(defn, Js.Wrapper.onLoad)
+
+  def apply[I](defn: EntrypointDef[I], bundle: LoadJs.Bundle): EntrypointInvoker[I] =
+    new EntrypointInvoker(defn, bundle.jsWrapper)
+
+  // TODO Potential optimisation: have this estimate a good initial SB size for itself by observing past results
+  private[EntrypointInvoker] final val ExpectedJsLength = 256
 }
 
-final class EntrypointInvoker[Input](defn: EntrypointDef[Input]) {
-  import EntrypointInvoker.JS
+final class EntrypointInvoker[Input](defn: EntrypointDef[Input], onLoadWrapper: Js.Wrapper) {
+  import EntrypointInvoker.ExpectedJsLength
 
   private val runCmdHead =
     defn.objectAndMethod + "('"
 
-  private val appendEncoded: (StringBuilder, String) => Unit =
+  private val appendEncoded: (JStringBuilder, String) => Unit =
     if (defn.codec.escapeEncodedString)
       EscapeUtil.escape
     else
       _.append(_)
 
-  private def call(sb: StringBuilder, i: Input): Unit = {
+  private def call(sb: JStringBuilder, i: Input): Unit = {
     sb.append(runCmdHead)
     appendEncoded(sb, defn.codec.encode(i))
     sb.append("')")
   }
 
-  def apply(i: Input): JS = {
-    // TODO Potential optimisation: have this estimate a good initial SB size for itself by observing past results
-    val sb = new StringBuilder(256)
+  def apply(i: Input): Js = {
+    val sb = new JStringBuilder(ExpectedJsLength)
     call(sb, i)
-    JS(sb.toString)
+    Js(sb.toString)
   }
 
-  def onLoad(i: Input): JS = {
-    // TODO Potential optimisation: have this estimate a good initial SB size for itself by observing past results
-    val sb = new StringBuilder(256)
-    sb.append("window.onload=function(){")
+  def wrapped(w: Js.Wrapper, i: Input): Js = {
+    val sb = new JStringBuilder(ExpectedJsLength + w.totalLength)
+    sb.append(w.before)
     call(sb, i)
-    sb.append("};") // why'd I add a semi-colon here again? Can't remember...
-    JS(sb.toString)
+    sb.append(w.after)
+    Js(sb.toString)
   }
+
+  def onLoad(i: Input): Js =
+    wrapped(onLoadWrapper, i)
 }

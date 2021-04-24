@@ -20,6 +20,7 @@ the low commit count is not an indication of immaturity.
     * `EntrypointDef` - definition of a JS app entrypoint (JVM & JS)
     * `Entrypoint` - abstract class for a JS app entrypoint (JS)
     * `EntrypointInvoker` - generate JS to invoke an entrypoint (JVM)
+    * `LoadJs` - define a bundle of JS assets to be loaded via `loadjs` before entrypoint invocation (JVM)
 
 
 # TODO:
