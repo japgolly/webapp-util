@@ -91,6 +91,9 @@ object Build {
   lazy val coreJS  = core.js
   lazy val core = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings)
+    .settings(
+      libraryDependencies += Dep.univEq.value,
+    )
     .jsSettings(
       libraryDependencies += Dep.scalaJsDom.value,
     )

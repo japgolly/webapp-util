@@ -12,6 +12,7 @@ object Dependencies {
     val scala213     = "2.13.5"
     val scalaJsDom   = "1.1.0"
     val scalaJsReact = "1.7.7"
+    val univEq       = "1.4.0-RC3"
 
     // Internal
     val microlibs    = "2.6-RC3"
@@ -37,6 +38,7 @@ object Dependencies {
     val scalaJsReactCore    = Def.setting("com.github.japgolly.scalajs-react" %%% "core"          % Ver.scalaJsReact)
     val scalaJsReactExtra   = Def.setting("com.github.japgolly.scalajs-react" %%% "extra"         % Ver.scalaJsReact)
     val scalaJsReactTest    = Def.setting("com.github.japgolly.scalajs-react" %%% "test"          % Ver.scalaJsReact)
+    val univEq              = Def.setting("com.github.japgolly.univeq"        %%% "univeq"        % Ver.univEq)
   }
 
 }
