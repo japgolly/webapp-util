@@ -6,12 +6,14 @@ package japgolly.webapp_protocols.core
 // *        *
 // **********
 
+import java.lang.{StringBuilder => JStringBuilder}
+
 trait EscapeUtil_PlatformSpecific { self: EscapeUtil.type =>
 
   override def quote(s: String): String =
     scala.scalajs.js.JSON.stringify(s)
 
-  override def quote(sb: StringBuilder, s: String): Unit =
+  override def quote(sb: JStringBuilder, s: String): Unit =
     sb.append(quote(s))
 
   override def escape(s: String): String =
@@ -22,7 +24,7 @@ trait EscapeUtil_PlatformSpecific { self: EscapeUtil.type =>
       q.substring(1, q.length - 1)
     }
 
-  override def escape(sb: StringBuilder, s: String): Unit =
+  override def escape(sb: JStringBuilder, s: String): Unit =
     sb.append(escape(s))
 
 }
