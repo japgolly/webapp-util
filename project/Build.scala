@@ -101,6 +101,7 @@ object Build {
       libraryDependencies ++= Seq(
         Dep.scalaJsDom.value,
         Dep.scalaJsReactCore.value,
+        Dep.scalaJsReactExtra.value,
       ),
     )
 }
