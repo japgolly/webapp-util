@@ -19,7 +19,7 @@ final class EntrypointInvoker[Input](defn: EntrypointDef[Input], onLoadWrapper: 
   import EntrypointInvoker.ExpectedJsLength
 
   private val runCmdHead =
-    defn.objectAndMethod + "('"
+    defn.objectAndMethod + "(\""
 
   private val appendEncoded: (JStringBuilder, String) => Unit =
     if (defn.codec.escapeEncodedString)
@@ -30,7 +30,7 @@ final class EntrypointInvoker[Input](defn: EntrypointDef[Input], onLoadWrapper: 
   private def call(sb: JStringBuilder, i: Input): Unit = {
     sb.append(runCmdHead)
     appendEncoded(sb, defn.codec.encode(i))
-    sb.append("')")
+    sb.append("\")")
   }
 
   def apply(i: Input): Js = {

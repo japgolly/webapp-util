@@ -34,20 +34,15 @@ trait EscapeUtil_PlatformSpecific { self: EscapeUtil.type =>
     var c = 'x'
     while (i < chars.length) {
       c = chars(i)
-      if (c == '\'')
-        sb.append("\\'")
-      else if (c == '\"')
-        sb.append("\\\"")
-      else if (c == '\r')
-        sb.append("\\r")
-      else if (c == '\n')
-        sb.append("\\n")
-      else if (c == '\t')
-        sb.append("\\t")
-      else if (c < 32 || c >= 127)
-        sb.append(String.format("\\u%04x", c.toInt))
-      else
-        sb.append(c)
+      if (c == '\\') sb.append("\\\\")
+      else if (c == '\"') sb.append("\\\"")
+      else if (c == '\r') sb.append("\\r")
+      else if (c == '\n') sb.append("\\n")
+      else if (c == '\t') sb.append("\\t")
+      else if (c == '\b') sb.append("\\b")
+      else if (c == '\f') sb.append("\\f")
+      else if (c < 32) sb.append(String.format("\\u%04x", c.toInt))
+      else sb.append(c)
       i += 1
     }
   }
