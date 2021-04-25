@@ -57,6 +57,15 @@ object BinaryDataTest extends TestSuite {
         "range" - assertEq(BinaryData.fromHex(bd.hex), bd)
       }
 
+      "base64" - {
+        "str" - assertEq(BinaryData.fromArray("A 3".getBytes).toBase64, "QSAz")
+        "roundTrip" - assertEq(BinaryData.fromBase64(bd.toBase64), bd)
+        "sb" - {
+          val sb = new StringBuilder
+          bd.appendBase64(sb)
+          assertEq(BinaryData.fromBase64(sb.toString), bd)
+        }
+      }
     }
 
     // -----------------------------------------------------------------------------------------------------------------

@@ -31,6 +31,9 @@ object BinaryData extends BinaryData_PlatformSpecific_Object {
   def fromArraySeq(a: ArraySeq[Byte]): BinaryData =
     unsafeFromArray(a.unsafeArray.asInstanceOf[Array[Byte]])
 
+  def fromBase64(base64: String): BinaryData =
+    unsafeFromArray(Base64.getDecoder.decode(base64))
+
   def fromByteBuffer(bb: ByteBuffer): BinaryData =
     if (bb.hasArray) {
       val offset = bb.arrayOffset()
