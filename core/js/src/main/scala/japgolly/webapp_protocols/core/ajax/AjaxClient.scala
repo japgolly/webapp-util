@@ -24,62 +24,94 @@ object AjaxClient {
         ServerSideProcInvoker.const(AsyncCallback.never[Either[ErrorMsg, p.protocol.ResponseType]])
     }
 
-  trait Binary[P[_]] {
-    def encode[A](p: P[A], a: A): BinaryData
-    def decode[A](p: P[A], b: BinaryData): Result[A]
+  trait Response[A] {
+    def shouldRetry: Boolean
+    def result: Either[ErrorMsg, A]
+  }
 
-    trait Result[A] {
-      def allowRetry: Boolean
-      def result: Either[ErrorMsg, A]
-    }
+  trait WithRetries[P[_]] extends AjaxClient[P] {
 
-    val isSuccess: XMLHttpRequest => Boolean =
-      _.status == 200
+    protected def call(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]]
 
-    val maxRetries: Int =
+    protected val maxRetries: Int =
       2
 
-    final lazy val ajaxClient: AjaxClient[P] = new AjaxClient[P] {
-
-      def runOnce(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Result[p.protocol.ResponseType]] = {
-        val prep   = p.protocol.prepareSend(req)
-        val reqBin = encode(p.prepReq.codec, prep.request)
-
-        Ajax("POST", p.url.relativeUrl)
-          .setRequestHeader("Content-Type", "application/octet-stream")
-          .and(_.responseType = "arraybuffer")
-          .send(reqBin.unsafeArrayBuffer)
-          .asAsyncCallback
-          .map { xhr =>
-            if (isSuccess(xhr)) {
-              val ab       = xhr.response.asInstanceOf[ArrayBuffer]
-              val resCodec = prep.response.codec
-              val bin      = BinaryData.unsafeFromArrayBuffer(ab)
-              decode(resCodec, bin)
-            } else
-              throw AjaxException(xhr)
+    protected def callWithRetry(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]] = {
+      val once = call(p)(req)
+      AsyncCallback.tailrec(maxRetries) { retriesRemaining =>
+        if (retriesRemaining > 0)
+          once.attempt.flatMap {
+            case Right(r)               if r.shouldRetry   => AsyncCallback.pure(Left(retriesRemaining - 1))
+            case Right(r)                                  => AsyncCallback.pure(Right(r))
+            case Left(AjaxException(x)) if x.status == 501 => AsyncCallback.pure(Left(retriesRemaining - 1)) // server rejected due to protocol ver diff
+            case Left(e)                                   => AsyncCallback.throwException(e)
           }
+        else
+          once.map(Right(_))
       }
+    }
 
-      def runWithRetry(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Result[p.protocol.ResponseType]] = {
-        val once = runOnce(p)(req)
-        AsyncCallback.tailrec(maxRetries) { retriesRemaining =>
-          if (retriesRemaining > 0)
-            once.attempt.flatMap {
-              case Right(r)               if r.allowRetry    => AsyncCallback.pure(Left(retriesRemaining - 1))
-              case Right(r)                                  => AsyncCallback.pure(Right(r))
-              case Left(AjaxException(x)) if x.status == 501 => AsyncCallback.pure(Left(retriesRemaining - 1)) // server rejected due to protocol ver diff
-              case Left(e)                                   => AsyncCallback.throwException(e)
-            }
-          else
-            once.map(Right(_))
+    override def invoker(p: AjaxProtocol[P]): ServerSideProcInvoker[p.protocol.RequestType, ErrorMsg, p.protocol.ResponseType] =
+      ServerSideProcInvoker
+        .fromSimple((req: p.protocol.RequestType) => CallbackTo(callWithRetry(p)(req).map(_.result)))
+        .mergeFailure
+  }
+
+  trait Binary[P[_]] extends WithRetries[P] {
+    protected def encode[A](p: P[A], a: A): BinaryData
+    protected def decode[A](p: P[A], b: BinaryData): Response[A]
+
+    protected def isSuccess(xhr: XMLHttpRequest): Boolean =
+      xhr.status >= 200 && xhr.status < 300
+
+    override protected def call(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]] = {
+      val prep   = p.protocol.prepareSend(req)
+      val reqBin = encode(p.prepReq.codec, prep.request)
+
+      Ajax("POST", p.url.relativeUrl)
+        .setRequestHeader("Content-Type", "application/octet-stream")
+        .and(_.responseType = "arraybuffer")
+        .send(reqBin.unsafeArrayBuffer)
+        .asAsyncCallback
+        .map { xhr =>
+          if (isSuccess(xhr)) {
+            val ab       = xhr.response.asInstanceOf[ArrayBuffer]
+            val resBin   = BinaryData.unsafeFromArrayBuffer(ab)
+            val resCodec = prep.response.codec
+            decode(resCodec, resBin)
+          } else
+            throw AjaxException(xhr)
         }
-      }
-
-      override def invoker(p: AjaxProtocol[P]): ServerSideProcInvoker[p.protocol.RequestType, ErrorMsg, p.protocol.ResponseType] =
-        ServerSideProcInvoker
-          .fromSimple((req: p.protocol.RequestType) => CallbackTo(runWithRetry(p)(req).map(_.result)))
-          .mergeFailure
     }
   }
+
+  trait Json[P[_]] extends WithRetries[P] {
+    protected def encode[A](p: P[A], a: A): String
+    protected def decode[A](p: P[A], j: String): Response[A]
+
+    protected def isSuccess(xhr: XMLHttpRequest): Boolean =
+      (xhr.status >= 200 && xhr.status < 300) && (xhr.getResponseHeader("Content-Type") match {
+        case null => true
+        case t    => t.takeWhile(_ != ';') == "application/json"
+      })
+
+    override def call(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]] = {
+      val prep    = p.protocol.prepareSend(req)
+      val reqJson = encode(p.prepReq.codec, prep.request)
+
+      Ajax("POST", p.url.relativeUrl)
+        .setRequestContentTypeJsonUtf8
+        .send(reqJson)
+        .asAsyncCallback
+        .map { xhr =>
+          if (isSuccess(xhr)) {
+            val resJson  = xhr.responseText
+            val resCodec = prep.response.codec
+            decode(resCodec, resJson)
+          } else
+            throw AjaxException(xhr)
+        }
+    }
+  }
+
 }
