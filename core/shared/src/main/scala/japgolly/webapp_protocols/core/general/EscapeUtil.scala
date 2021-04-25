@@ -1,4 +1,4 @@
-package japgolly.webapp_protocols.core
+package japgolly.webapp_protocols.core.general
 
 import java.lang.{StringBuilder => JStringBuilder}
 
