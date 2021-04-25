@@ -88,6 +88,7 @@ object Build {
     .configure(commonSettings.jvm, preventPublication)
     .aggregate(
       coreJVM, coreJS,
+      coreTestJVM, coreTestJS,
     )
 
   lazy val coreJVM = core.jvm
@@ -104,4 +105,11 @@ object Build {
         Dep.scalaJsReactExtra.value,
       ),
     )
+
+  lazy val coreTestJVM = coreTest.jvm
+  lazy val coreTestJS  = coreTest.js
+  lazy val coreTest = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, publicationSettings, testSettings)
+    .dependsOn(core)
+    .settings(moduleName := "core-test")
 }

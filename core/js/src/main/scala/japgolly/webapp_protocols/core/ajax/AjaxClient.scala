@@ -29,6 +29,24 @@ object AjaxClient {
     def result: Either[ErrorMsg, A]
   }
 
+  object Response {
+
+    def apply[A](result: Either[ErrorMsg, A]): Response[A] =
+      apply(result, shouldRetry = result.isLeft)
+
+    def apply[A](result: Either[ErrorMsg, A], shouldRetry: Boolean): Response[A] = {
+      val _shouldRetry = shouldRetry
+      val _result      = result
+      new Response[A] {
+        override def shouldRetry = _shouldRetry
+        override def result      = _result
+      }
+    }
+
+    def pass[A](result: A): Response[A] =
+      apply(Right(result))
+  }
+
   trait WithRetries[P[_]] extends AjaxClient[P] {
 
     protected def call(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]]
