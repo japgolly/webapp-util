@@ -1,10 +1,10 @@
 package japgolly.webapp_protocols.core.general
 
-import java.lang.{StringBuilder => JStringBuilder}
 import japgolly.microlibs.testutil.TestUtil._
+import java.lang.{StringBuilder => JStringBuilder}
 import nyaya.gen.Gen
-import utest._
 import sourcecode.Line
+import utest._
 
 object EscapeUtilTest extends TestSuite {
 

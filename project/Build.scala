@@ -98,6 +98,9 @@ object Build {
       libraryDependencies += Dep.univEq.value,
     )
     .jsSettings(
-      libraryDependencies += Dep.scalaJsDom.value,
+      libraryDependencies ++= Seq(
+        Dep.scalaJsDom.value,
+        Dep.scalaJsReactCore.value,
+      ),
     )
 }
