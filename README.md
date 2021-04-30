@@ -9,8 +9,16 @@ the low commit count is not an indication of immaturity.
 
 * The `core` module:
 
-  * `japgolly.webapp_protocols.core`
+  * `japgolly.webapp_protocols.core.general`
+    * `ErrorMsg` - A typed error message, with some util and predefined cases
     * `EscapeUtil` - functions for escaping strings
+    * `Protocol` - Very abstract definitions of protocols
+    * `ServerSideProcInvoker` - Abstract and invokable representation of a server-side procedure (JS)
+    * `Url` - Types for URLs.
+
+  * `japgolly.webapp_protocols.core.ajax`
+    * `AjaxProtocol` - Protocol for an AJAX endpoint (JVM & JS)
+    * `AjaxClient` - Various means for a client to perform AJAX calls (JS)
 
   * `japgolly.webapp_protocols.core.binary`
     * `BinaryData` - immutable representation of BinaryData
@@ -22,8 +30,13 @@ the low commit count is not an indication of immaturity.
     * `EntrypointInvoker` - generate JS to invoke an entrypoint (JVM)
     * `LoadJs` - define a bundle of JS assets to be loaded via `loadjs` before entrypoint invocation (JVM)
 
+* The `core-test` module:
+  * `japgolly.webapp_protocols.core.test`
+    * `TestAjaxClient` - an `AjaxClient` instance for use in tests
+
 
 # TODO:
 * Add ScalaDoc and proper doc
 * Boopickle ext
   * entrypoint codec (see ClientSideProcImpl, ClientSideProcInvoker.invokeSB)
+
