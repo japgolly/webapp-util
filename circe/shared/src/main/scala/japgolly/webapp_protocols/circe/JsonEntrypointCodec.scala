@@ -1,9 +1,9 @@
 package japgolly.webapp_protocols.circe
 
-import japgolly.webapp_protocols.core.entrypoint.EntrypointDef.Codec
 import io.circe._
 import io.circe.parser._
 import io.circe.syntax._
+import japgolly.webapp_protocols.core.entrypoint.EntrypointDef.Codec
 
 object JsonEntrypointCodec {
 

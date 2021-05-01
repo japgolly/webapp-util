@@ -3,11 +3,11 @@ package japgolly.webapp_protocols.circe.test
 import io.circe._
 import io.circe.parser._
 import io.circe.syntax._
+import japgolly.microlibs.testutil.TestUtil._
+import japgolly.webapp_protocols.circe._
 import nyaya.gen.Gen
 import scalaz.Equal
 import scalaz.std.either._
-import japgolly.microlibs.testutil.TestUtil._
-import japgolly.webapp_protocols.circe._
 import sourcecode.Line
 
 object JsonTestUtil extends JsonTestUtil {

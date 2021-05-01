@@ -1,7 +1,7 @@
 package japgolly.webapp_protocols.core.test
 
-import japgolly.webapp_protocols.core.binary.BinaryData
 import japgolly.microlibs.testutil.TestUtil._
+import japgolly.webapp_protocols.core.binary.BinaryData
 import sourcecode.Line
 
 object BinaryTestUtil extends BinaryTestUtil
