@@ -10,8 +10,7 @@ import japgolly.microlibs.testutil.TestUtil._
 import japgolly.webapp_protocols.circe._
 import sourcecode.Line
 
-object JsonTestUtil extends JsonUtil.UnivEqInstances {
-
+object JsonTestUtil extends JsonTestUtil {
   final case class JsonPropTestQty(value: Int) extends AnyVal
 
   object JsonPropTestQty {
@@ -19,7 +18,7 @@ object JsonTestUtil extends JsonUtil.UnivEqInstances {
       apply(50)
   }
 
-  implicit final class JsonUtilExtString(private val self: String) extends AnyVal {
+  class JsonTestUtilExtString(private val self: String) extends AnyVal {
 
     def jsonParseOrThrow: Json =
       parse(self) match {
@@ -33,6 +32,13 @@ object JsonTestUtil extends JsonUtil.UnivEqInstances {
         case Left(e)  => throw new RuntimeException(JsonUtil.errorMsg(e))
       }
   }
+}
+
+trait JsonTestUtil extends JsonUtil.UnivEqInstances {
+  import JsonTestUtil._
+
+  implicit def JsonTestUtilExtString(self: String): JsonTestUtilExtString =
+    new JsonTestUtilExtString(self)
 
   def assertJsonDecodeResult[A: Decoder: Equal](json: Json, expect: Decoder.Result[A])(implicit l: Line): Unit =
     assertEq(json.noSpacesSortKeys.take(180), json.as[A], expect)
