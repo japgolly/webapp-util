@@ -113,7 +113,10 @@ object Build {
   lazy val coreTest = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
     .dependsOn(core)
-    .settings(moduleName := "core-test")
+    .settings(
+      moduleName := "core-test",
+      libraryDependencies += Dep.microlibsTestUtil.value,
+    )
 
   lazy val circeJVM = circe.jvm
   lazy val circeJS  = circe.js
@@ -138,7 +141,6 @@ object Build {
       moduleName := "circe-test",
       libraryDependencies ++= Seq(
         Dep.circeParser.value,
-        Dep.microlibsTestUtil.value,
         Dep.nyayaGen.value,
       ),
     )

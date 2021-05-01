@@ -32,6 +32,7 @@ the low commit count is not an indication of immaturity.
 
 * The `core-test` module:
   * `japgolly.webapp_protocols.core.test`
+    * `BinaryTestUtil` - utilities for testing binary data (JVM & JS)
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests (JS)
 
 * The `circe` module:
