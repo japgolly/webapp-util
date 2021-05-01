@@ -37,8 +37,10 @@ object ErrorMsg {
 
   object ClientSide {
     def errorContactingServer = ErrorMsg("Error contacting server. Please try again.")
+    def failedToParseResponse = ErrorMsg("Failed to understand the response from the server.")
     def noCompatibleServer    = ErrorMsg("Failed to find a compatible server. Please try again, or try reloading the page.")
     def serverCallTimeout     = ErrorMsg("Server didn't respond. Please check your internet connectivity.")
+    def serverProtocolIsNewer = ErrorMsg("Our servers have been upgraded to a newer version. Please reload this page and try again.")
   }
 
   final case class Exception(msg: ErrorMsg) extends RuntimeException(msg.value)
