@@ -10,15 +10,15 @@ the low commit count is not an indication of immaturity.
 * The `core` module:
 
   * `japgolly.webapp_protocols.core.general`
-    * `ErrorMsg` - A typed error message, with some util and predefined cases
+    * `ErrorMsg` - typed error message, with some util and predefined cases
     * `EscapeUtil` - functions for escaping strings
-    * `Protocol` - Very abstract definitions of protocols
-    * `ServerSideProcInvoker` - Abstract and invokable representation of a server-side procedure (JS)
-    * `Url` - Types for URLs
+    * `Protocol` - abstract definitions of protocols
+    * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure (JS)
+    * `Url` - types for URLs
 
   * `japgolly.webapp_protocols.core.ajax`
-    * `AjaxProtocol` - Protocol for an AJAX endpoint (JVM & JS)
-    * `AjaxClient` - Various means for a client to perform AJAX calls (JS)
+    * `AjaxProtocol` - protocol for an AJAX endpoint (JVM & JS)
+    * `AjaxClient` - means for a client to perform AJAX calls (JS)
 
   * `japgolly.webapp_protocols.core.binary`
     * `BinaryData` - immutable representation of BinaryData
@@ -37,12 +37,12 @@ the low commit count is not an indication of immaturity.
 
 * The `circe` module:
   * `japgolly.webapp_protocols.circe`
-    * `JsonCodec` - The composition of Circe's `Encoder` and `Decoder` into a single typeclass
-    * `JsonUtil` - Various utilities to supplement Circe
+    * `JsonCodec` - composition of Circe's `Encoder` and `Decoder` into a single typeclass
+    * `JsonUtil` - utilities to supplement Circe
 
 * The `circe-test` module:
   * `japgolly.webapp_protocols.circe.test`
-    * `JsonTestUtil` - Various utilities to test JSON codecs
+    * `JsonTestUtil` - utilities to test JSON codecs
 
 
 # TODO:
