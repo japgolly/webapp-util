@@ -1,9 +1,21 @@
 # Scala Webapp Utilities
+[![Build Status](https://travis-ci.org/japgolly/webapp-util.svg?branch=master)](https://travis-ci.org/japgolly/webapp-util)
+[![Latest Version](https://maven-badges.herokuapp.com/maven-central/com.github.japgolly.webapp-util/protocol_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.japgolly.webapp-util/protocol_2.13)
 
 This library was initially extracted (with permission) from the closed-source [ShipReq](https://blog.shipreq.com/about/)
 where it when through many evolutions, and was battled-tested on a real-world, large and complex project.
 It was ported without git commit history, so please understand that in this case,
 the low commit count is not an indication of immaturity.
+
+```scala
+val WebappUtilVer = "<version>"
+
+"com.github.japgolly.webapp-util" %%% "protocol"            % WebappUtilVer
+"com.github.japgolly.webapp-util" %%% "protocol-test"       % WebappUtilVer % Test
+"com.github.japgolly.webapp-util" %%% "protocol-circe"      % WebappUtilVer
+"com.github.japgolly.webapp-util" %%% "protocol-circe-test" % WebappUtilVer % Test
+```
+
 
 # Included
 
