@@ -1,5 +1,6 @@
 package japgolly.webapp_protocols.core.entrypoint
 
+import japgolly.webapp_protocols.core.binary.BinaryData
 import japgolly.webapp_protocols.core.entrypoint.EntrypointDef._
 
 final case class EntrypointDef[Input](objectName: String)(implicit _codec: Codec[Input]) {
@@ -14,10 +15,35 @@ final case class EntrypointDef[Input](objectName: String)(implicit _codec: Codec
 object EntrypointDef {
   final val MainMethodName = "m"
 
-  trait Codec[A] {
+  trait Codec[A] { self =>
     val decodeOrThrow: String => A
     val encode: A => String
     val escapeEncodedString = true
+
+    def xmap[B](f: A => B)(g: B => A): Codec[B] =
+      new Codec[B] {
+        override val decodeOrThrow       = s => f(self.decodeOrThrow(s))
+        override val encode              = b => self.encode(g(b))
+        override val escapeEncodedString = self.escapeEncodedString
+      }
+
+    def xmapEncoded(onEncode           : String => String,
+                    onDecode           : String => String,
+                    escapeEncodedString: Boolean = true): Codec[A] = {
+      val _escapeEncodedString = escapeEncodedString
+      new Codec[A] {
+        override val decodeOrThrow       = s => self.decodeOrThrow(onDecode(s))
+        override val encode              = a => onEncode(self.encode(a))
+        override val escapeEncodedString = _escapeEncodedString
+      }
+    }
+
+    def base64: Codec[A] =
+      xmapEncoded(
+        onEncode            = BinaryData.fromStringAsUtf8(_).toBase64,
+        onDecode            = BinaryData.fromBase64(_).toStringAsUtf8,
+        escapeEncodedString = false,
+      )
   }
 
   object Codec {
