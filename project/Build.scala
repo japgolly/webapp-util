@@ -12,7 +12,7 @@ object Build {
   import Dependencies._
   import Lib._
 
-  private val ghProject = "webapp_protocols"
+  private val ghProject = "webapp-util"
 
   private val publicationSettings =
     Lib.publicationSettings(ghProject)
