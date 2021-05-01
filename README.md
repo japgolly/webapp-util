@@ -32,7 +32,7 @@ the low commit count is not an indication of immaturity.
 
 * The `core-test` module:
   * `japgolly.webapp_protocols.core.test`
-    * `TestAjaxClient` - an `AjaxClient` instance for use in tests
+    * `TestAjaxClient` - an `AjaxClient` instance for use in tests (JS)
 
 * The `circe` module:
   * `japgolly.webapp_protocols.circe`
@@ -46,6 +46,3 @@ the low commit count is not an indication of immaturity.
 
 # TODO:
 * Add ScalaDoc and proper doc
-* Boopickle ext
-  * entrypoint codec (see ClientSideProcImpl, ClientSideProcInvoker.invokeSB)
-
