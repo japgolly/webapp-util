@@ -126,6 +126,7 @@ object Build {
     .settings(
       libraryDependencies ++= Seq(
         Dep.circeCore.value,
+        Dep.circeParser.value,
         Dep.microlibsAdtMacros.value,
         Dep.microlibsRecursion.value,
         Dep.microlibsUtils.value,
@@ -139,9 +140,6 @@ object Build {
     .dependsOn(circe, coreTest)
     .settings(
       moduleName := "circe-test",
-      libraryDependencies ++= Seq(
-        Dep.circeParser.value,
-        Dep.nyayaGen.value,
-      ),
+      libraryDependencies += Dep.nyayaGen.value,
     )
 }

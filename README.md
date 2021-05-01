@@ -38,6 +38,7 @@ the low commit count is not an indication of immaturity.
 * The `circe` module:
   * `japgolly.webapp_protocols.circe`
     * `JsonCodec` - composition of Circe's `Encoder` and `Decoder` into a single typeclass
+    * `JsonEntrypointCodec` - creates instances of `EntrypointDef.Codec` using Circe codecs
     * `JsonUtil` - utilities to supplement Circe
 
 * The `circe-test` module:
