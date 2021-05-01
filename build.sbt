@@ -4,8 +4,14 @@ ThisBuild / organization := "com.github.japgolly.webapp_protocols"
 ThisBuild / shellPrompt  := ((s: State) => Project.extract(s).currentRef.project + "> ")
 ThisBuild / startYear    := Some(2021)
 
-val root        = Build.root
-val coreJS      = Build.coreJS
-val coreJVM     = Build.coreJVM
-val coreTestJS  = Build.coreTestJS
-val coreTestJVM = Build.coreTestJVM
+val root         = Build.root
+
+val coreJS       = Build.coreJS
+val coreJVM      = Build.coreJVM
+val coreTestJS   = Build.coreTestJS
+val coreTestJVM  = Build.coreTestJVM
+
+val circeJS      = Build.circeJS
+val circeJVM     = Build.circeJVM
+val circeTestJS  = Build.circeTestJS
+val circeTestJVM = Build.circeTestJVM

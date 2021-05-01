@@ -7,17 +7,17 @@ object Dependencies {
   object Ver {
 
     // Exported
-    val boopickle    = "1.3.3"
-    val circe        = "0.13.0"
-    val scala213     = "2.13.5"
-    val scalaJsDom   = "1.1.0"
-    val scalaJsReact = "1.7.7"
-    val univEq       = "1.4.0-RC3"
+    def boopickle    = "1.3.3"
+    def circe        = "0.13.0"
+    def microlibs    = "2.6-RC3"
+    def nyaya        = "0.10.0-RC2"
+    def scala213     = "2.13.5"
+    def scalaJsDom   = "1.1.0"
+    def scalaJsReact = "1.7.7"
+    def univEq       = "1.4.0-RC3"
 
     // Internal
-    val microlibs    = "2.6-RC3"
-    val nyaya        = "0.10.0-RC2"
-    val utest        = "0.7.9"
+    def utest        = "0.7.9"
   }
 
 

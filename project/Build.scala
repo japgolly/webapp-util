@@ -89,6 +89,8 @@ object Build {
     .aggregate(
       coreJVM, coreJS,
       coreTestJVM, coreTestJS,
+      circeJVM, circeJS,
+      circeTestJVM, circeTestJS,
     )
 
   lazy val coreJVM = core.jvm
@@ -112,4 +114,32 @@ object Build {
     .configureCross(commonSettings, publicationSettings, testSettings)
     .dependsOn(core)
     .settings(moduleName := "core-test")
+
+  lazy val circeJVM = circe.jvm
+  lazy val circeJS  = circe.js
+  lazy val circe = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, publicationSettings, testSettings)
+    .dependsOn(core)
+    .settings(
+      libraryDependencies ++= Seq(
+        Dep.circeCore.value,
+        Dep.microlibsAdtMacros.value,
+        Dep.microlibsRecursion.value,
+        Dep.microlibsUtils.value,
+      ),
+    )
+
+  lazy val circeTestJVM = circeTest.jvm
+  lazy val circeTestJS  = circeTest.js
+  lazy val circeTest = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, publicationSettings, testSettings)
+    .dependsOn(circe, coreTest)
+    .settings(
+      moduleName := "circe-test",
+      libraryDependencies ++= Seq(
+        Dep.circeParser.value,
+        Dep.microlibsTestUtil.value,
+        Dep.nyayaGen.value,
+      ),
+    )
 }

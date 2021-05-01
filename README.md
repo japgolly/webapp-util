@@ -14,7 +14,7 @@ the low commit count is not an indication of immaturity.
     * `EscapeUtil` - functions for escaping strings
     * `Protocol` - Very abstract definitions of protocols
     * `ServerSideProcInvoker` - Abstract and invokable representation of a server-side procedure (JS)
-    * `Url` - Types for URLs.
+    * `Url` - Types for URLs
 
   * `japgolly.webapp_protocols.core.ajax`
     * `AjaxProtocol` - Protocol for an AJAX endpoint (JVM & JS)
@@ -33,6 +33,15 @@ the low commit count is not an indication of immaturity.
 * The `core-test` module:
   * `japgolly.webapp_protocols.core.test`
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests
+
+* The `circe` module:
+  * `japgolly.webapp_protocols.circe`
+    * `JsonCodec` - The composition of Circe's `Encoder` and `Decoder` into a single typeclass
+    * `JsonUtil` - Various utilities to supplement Circe
+
+* The `circe-test` module:
+  * `japgolly.webapp_protocols.circe.test`
+    * `JsonTestUtil` - Various utilities to test JSON codecs
 
 
 # TODO:
