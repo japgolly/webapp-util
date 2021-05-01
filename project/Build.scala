@@ -87,15 +87,15 @@ object Build {
     .in(file("."))
     .configure(commonSettings.jvm, preventPublication)
     .aggregate(
-      coreJVM, coreJS,
-      coreTestJVM, coreTestJS,
-      circeJVM, circeJS,
-      circeTestJVM, circeTestJS,
+      protocolJVM, protocolJS,
+      protocolTestJVM, protocolTestJS,
+      protocolCirceJVM, protocolCirceJS,
+      protocolCirceTestJVM, protocolCirceTestJS,
     )
 
-  lazy val coreJVM = core.jvm
-  lazy val coreJS  = core.js
-  lazy val core = crossProject(JSPlatform, JVMPlatform)
+  lazy val protocolJVM = protocol.jvm
+  lazy val protocolJS  = protocol.js
+  lazy val protocol = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
     .settings(
       libraryDependencies += Dep.univEq.value,
@@ -108,22 +108,23 @@ object Build {
       ),
     )
 
-  lazy val coreTestJVM = coreTest.jvm
-  lazy val coreTestJS  = coreTest.js
-  lazy val coreTest = crossProject(JSPlatform, JVMPlatform)
+  lazy val protocolTestJVM = protocolTest.jvm
+  lazy val protocolTestJS  = protocolTest.js
+  lazy val protocolTest = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
-    .dependsOn(core)
+    .dependsOn(protocol)
     .settings(
-      moduleName := "core-test",
+      moduleName := "protocol-test",
       libraryDependencies += Dep.microlibsTestUtil.value,
     )
 
-  lazy val circeJVM = circe.jvm
-  lazy val circeJS  = circe.js
-  lazy val circe = crossProject(JSPlatform, JVMPlatform)
+  lazy val protocolCirceJVM = protocolCirce.jvm
+  lazy val protocolCirceJS  = protocolCirce.js
+  lazy val protocolCirce = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
-    .dependsOn(core)
+    .dependsOn(protocol)
     .settings(
+      moduleName := "protocol-circe",
       libraryDependencies ++= Seq(
         Dep.circeCore.value,
         Dep.circeParser.value,
@@ -133,13 +134,13 @@ object Build {
       ),
     )
 
-  lazy val circeTestJVM = circeTest.jvm
-  lazy val circeTestJS  = circeTest.js
-  lazy val circeTest = crossProject(JSPlatform, JVMPlatform)
+  lazy val protocolCirceTestJVM = protocolCirceTest.jvm
+  lazy val protocolCirceTestJS  = protocolCirceTest.js
+  lazy val protocolCirceTest = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
-    .dependsOn(circe, coreTest)
+    .dependsOn(protocolCirce, protocolTest)
     .settings(
-      moduleName := "circe-test",
+      moduleName := "protocol-circe-test",
       libraryDependencies += Dep.nyayaGen.value,
     )
 }
