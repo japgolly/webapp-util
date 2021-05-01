@@ -4,6 +4,7 @@ import japgolly.univeq.UnivEq
 import java.io.OutputStream
 import java.lang.{StringBuilder => JStringBuilder}
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 import java.util.{Arrays, Base64}
 import scala.collection.immutable.ArraySeq
 
@@ -70,8 +71,8 @@ object BinaryData extends BinaryData_PlatformSpecific_Object {
     else
       fromByteBuffer(bb)
 
-  def fromStringBytes(str: String): BinaryData =
-    unsafeFromArray(str.getBytes)
+  def fromStringAsUtf8(str: String): BinaryData =
+    unsafeFromArray(str.getBytes(StandardCharsets.UTF_8))
 }
 
 /** Immutable blob of binary data. */
@@ -205,4 +206,7 @@ final class BinaryData(private[BinaryData] val bytes: Array[Byte],
 
   @inline def appendBase64(sb: StringBuilder): Unit =
     appendBase64(sb.underlying)
+
+  def toStringAsUtf8: String =
+    new String(unsafeArray, StandardCharsets.UTF_8)
 }
