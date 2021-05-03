@@ -11,7 +11,7 @@ import java.lang.{StringBuilder => JStringBuilder}
 trait EscapeUtil_PlatformSpecific { self: EscapeUtil.type =>
 
   override def quote(s: String): String = {
-    val sb = new JStringBuilder()
+    val sb = new JStringBuilder(s.length + (s.length >> 1) + 2)
     appendQuoted(sb, s)
     sb.toString
   }
@@ -23,7 +23,7 @@ trait EscapeUtil_PlatformSpecific { self: EscapeUtil.type =>
   }
 
   override def escape(s: String): String = {
-    val sb = new JStringBuilder()
+    val sb = new JStringBuilder(s.length + (s.length >> 1))
     appendEscaped(sb, s)
     sb.toString
   }
