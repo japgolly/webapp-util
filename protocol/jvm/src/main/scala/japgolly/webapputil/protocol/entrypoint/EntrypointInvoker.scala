@@ -6,16 +6,13 @@ import java.lang.{StringBuilder => JStringBuilder}
 object EntrypointInvoker {
 
   def apply[I](defn: EntrypointDef[I]): EntrypointInvoker[I] =
-    new EntrypointInvoker(defn, Js.Wrapper.onLoad)
-
-  def apply[I](defn: EntrypointDef[I], bundle: LoadJs.Bundle): EntrypointInvoker[I] =
-    new EntrypointInvoker(defn, bundle.jsWrapper)
+    new EntrypointInvoker(defn)
 
   // TODO Potential optimisation: have this estimate a good initial SB size for itself by observing past results
   private[EntrypointInvoker] final val ExpectedJsLength = 256
 }
 
-final class EntrypointInvoker[Input](defn: EntrypointDef[Input], onLoadWrapper: Js.Wrapper) {
+final class EntrypointInvoker[Input](defn: EntrypointDef[Input]) {
   import EntrypointInvoker.ExpectedJsLength
 
   private val runCmdHead =
@@ -39,14 +36,13 @@ final class EntrypointInvoker[Input](defn: EntrypointDef[Input], onLoadWrapper: 
     Js(sb.toString)
   }
 
-  def wrapped(w: Js.Wrapper, i: Input): Js = {
+  def apply(w: Js.Wrapper, i: Input): Js = {
     val sb = new JStringBuilder(ExpectedJsLength + w.totalLength)
     sb.append(w.before)
     call(sb, i)
     sb.append(w.after)
     Js(sb.toString)
   }
-
-  def onLoad(i: Input): Js =
-    wrapped(onLoadWrapper, i)
 }
+
+// <script type="text/javascript" async="async" src="https://static.shipreq.com/160e616806adf95cb3d223d7151f4940.js" onload="ga2.i('UA-105581783-1')"></script>
