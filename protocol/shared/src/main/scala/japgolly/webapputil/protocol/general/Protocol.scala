@@ -1,5 +1,6 @@
 package japgolly.webapputil.protocol.general
 
+/** Uni-directional protocol. */
 trait Protocol[F[_]] { self =>
   type Type
   val codec: F[Type]
@@ -24,8 +25,6 @@ object Protocol {
       override val codec = c
     }
 
-  // ===================================================================================================================
-
   trait AndValue[F[_]] {
     type Type
     val codec: F[Type]
@@ -43,6 +42,11 @@ object Protocol {
 
   // ===================================================================================================================
 
+  /** Polymorphic bi-directional protocol.
+    *
+    * This is polymorphic in the sense that the response protocol can vary based on the runtime value of the request.
+    * By calling `prepareSend` with a request value, one can get back the appropriate, associated response protocol.
+    */
   trait RequestResponse[F[_]] {
     type RequestType
     type ResponseType
@@ -54,12 +58,14 @@ object Protocol {
 
   object RequestResponse {
 
+    /** Monomorphic bi-directional protocol. */
     type Simple[F[_], Req, Res] = RequestResponse[F] {
       type RequestType         = Req
       type ResponseType        = Res
       type PreparedRequestType = Req
     }
 
+    /** Monomorphic bi-directional protocol. */
     def simple[F[_], Req, Res](res: Protocol.Of[F, Res]): Simple[F, Req, Res] =
       new RequestResponse[F] {
         override type RequestType         = Req
@@ -68,7 +74,6 @@ object Protocol {
         override def prepareSend(r: Req) = PreparedSend(r, res)
       }
 
-    // -----------------------------------------------------------------------------------------------------------------
     trait PreparedSend[F[_], Req] {
       val request : Req
       val response: Protocol[F]
