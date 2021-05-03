@@ -44,5 +44,3 @@ final class EntrypointInvoker[Input](defn: EntrypointDef[Input]) {
     Js(sb.toString)
   }
 }
-
-// <script type="text/javascript" async="async" src="https://static.shipreq.com/160e616806adf95cb3d223d7151f4940.js" onload="ga2.i('UA-105581783-1')"></script>

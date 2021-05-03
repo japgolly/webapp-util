@@ -47,4 +47,29 @@ trait EscapeUtil_PlatformSpecific { self: EscapeUtil.type =>
     }
   }
 
+  def htmlEscape(s: String): String = {
+    val sb = new JStringBuilder(s.length << 1)
+    appendQuoted(sb, s)
+    sb.toString
+  }
+
+  def htmlAppendEscaped(sb: StringBuilder, s: String): Unit =
+    htmlAppendEscaped(sb.underlying, s)
+
+  def htmlAppendEscaped(sb: JStringBuilder, s: String): Unit = {
+    val chars = s.toCharArray()
+    var i = 0
+    var c = 'x'
+    while (i < chars.length) {
+      c = chars(i)
+      if (c == '\"') sb.append("&quot;")
+      else if (c == '<') sb.append("&lt;")
+      else if (c == '>') sb.append("&gt;")
+      else if (c == '&') sb.append("&amp;")
+      else if (c == '\'') sb.append("&#39;")
+      else sb.append(c)
+      i += 1
+    }
+  }
+
 }
