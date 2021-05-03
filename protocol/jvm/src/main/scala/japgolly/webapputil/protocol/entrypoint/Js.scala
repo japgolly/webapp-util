@@ -9,6 +9,6 @@ object Js {
     val totalLength = before.length + after.length
   }
   object Wrapper {
-    val onLoad = Wrapper("window.onload=function(){", "};") // why'd I add a semi-colon here again? Can't remember...
+    val windowOnLoad = Wrapper("window.onload=function(){", "};") // why'd I add a semi-colon here again? Can't remember...
   }
 }
