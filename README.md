@@ -51,6 +51,7 @@ val WebappUtilVer = "<version>"
 
 * The `protocol-circe` module:
   * `japgolly.webapputil.protocol.circe`
+    * `JsonAjaxClient` - implementation of `AjaxClient` that uses JSON and `JsonCodec` *(JS only)*
     * `JsonCodec` - composition of Circe's `Encoder` and `Decoder` into a single typeclass
     * `JsonEntrypointCodec` - creates instances of `EntrypointDef.Codec` using Circe codecs
     * `JsonUtil` - utilities to supplement Circe
@@ -58,6 +59,7 @@ val WebappUtilVer = "<version>"
 * The `protocol-circe-test` module:
   * `japgolly.webapputil.protocol.circe.test`
     * `JsonTestUtil` - utilities to test JSON codecs
+    * `TestJsonAjaxClient` - implementation of `TestAjaxClient` that uses JSON and `JsonCodec` *(JS only)*
 
 
 # TODO:

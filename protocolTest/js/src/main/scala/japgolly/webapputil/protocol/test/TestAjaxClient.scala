@@ -13,9 +13,9 @@ object TestAjaxClient {
     type Codec[A]
     final type Req                             = TestAjaxClient.Req
     final type ReqOf[P <: AjaxProtocol[Codec]] = TestAjaxClient.ReqOf[Codec, P]
-    final type TestAjaxClient                  = japgolly.webapputil.protocol.test.TestAjaxClient[Codec]
+    final type Client                          = TestAjaxClient[Codec]
 
-    def apply(autoRespondInitially: Boolean): TestAjaxClient =
+    def apply(autoRespondInitially: Boolean): Client =
       new TestAjaxClient(autoRespondInitially)
   }
 
