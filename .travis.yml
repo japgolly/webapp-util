@@ -4,7 +4,7 @@ scala:
   - 2.13.5
 
 jdk:
-  - openjdk8
+  - openjdk11
 
 install:
   - . $HOME/.nvm/nvm.sh
