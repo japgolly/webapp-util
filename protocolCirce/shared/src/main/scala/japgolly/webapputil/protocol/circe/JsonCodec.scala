@@ -1,4 +1,4 @@
-package japgolly.webapputil.circe
+package japgolly.webapputil.protocol.circe
 
 import io.circe._
 import japgolly.microlibs.adt_macros.AdtMacros

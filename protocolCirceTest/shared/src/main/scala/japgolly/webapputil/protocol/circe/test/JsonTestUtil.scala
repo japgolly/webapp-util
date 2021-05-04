@@ -1,10 +1,10 @@
-package japgolly.webapputil.circe.test
+package japgolly.webapputil.protocol.circe.test
 
 import io.circe._
 import io.circe.parser._
 import io.circe.syntax._
 import japgolly.microlibs.testutil.TestUtil._
-import japgolly.webapputil.circe._
+import japgolly.webapputil.protocol.circe._
 import nyaya.gen.Gen
 import scalaz.Equal
 import scalaz.std.either._
