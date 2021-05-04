@@ -2,6 +2,7 @@ package japgolly.webapputil.circe
 
 import io.circe._
 import japgolly.microlibs.utils.StaticLookupFn
+import japgolly.webapputil.protocol.general.ErrorMsg
 
 object JsonUtil {
 
@@ -49,12 +50,12 @@ object JsonUtil {
     )
   }
 
-  def decodingFailureMsg(f: DecodingFailure): String =
-    s"Failed to decode JSON at ${CursorOp.opsToPath(f.history)}: ${f.message}"
+  def decodingFailureMsg(f: DecodingFailure): ErrorMsg =
+    ErrorMsg(s"Failed to decode JSON at ${CursorOp.opsToPath(f.history)}: ${f.message}")
 
-  def errorMsg(e: io.circe.Error): String =
+  def errorMsg(e: io.circe.Error): ErrorMsg =
     e match {
-      case f: ParsingFailure => s"Failed to parse JSON: ${f.message}"
+      case f: ParsingFailure  => ErrorMsg(s"Failed to parse JSON: ${f.message}")
       case f: DecodingFailure => decodingFailureMsg(f)
     }
 

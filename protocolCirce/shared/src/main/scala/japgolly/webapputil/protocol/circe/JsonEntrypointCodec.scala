@@ -13,7 +13,7 @@ object JsonEntrypointCodec {
       override val decodeOrThrow: String => A = str =>
         decode[A](str) match {
           case Right(a) => a
-          case Left(e)  => throw new RuntimeException(JsonUtil.errorMsg(e))
+          case Left(e)  => JsonUtil.errorMsg(e).throwException()
         }
 
       override val encode: A => String =

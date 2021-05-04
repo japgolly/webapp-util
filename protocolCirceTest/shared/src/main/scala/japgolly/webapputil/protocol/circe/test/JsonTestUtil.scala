@@ -23,13 +23,13 @@ object JsonTestUtil extends JsonTestUtil {
     def jsonParseOrThrow: Json =
       parse(self) match {
         case Right(j) => j
-        case Left(e)  => throw new RuntimeException(JsonUtil.errorMsg(e))
+        case Left(e)  => JsonUtil.errorMsg(e).throwException()
       }
 
     def jsonDecodeOrThrow[A: Decoder]: A =
       decode[A](self) match {
         case Right(a) => a
-        case Left(e)  => throw new RuntimeException(JsonUtil.errorMsg(e))
+        case Left(e)  => JsonUtil.errorMsg(e).throwException()
       }
   }
 }
