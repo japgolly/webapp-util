@@ -67,8 +67,13 @@ object JsonCodec {
   lazy val str: JsonCodec[String] =
     summon
 
-  object Implicits {
-    implicit def implicitJsonCodecToDecoder[A](implicit c: JsonCodec[A]): Decoder[A] = c.decoder
-    implicit def implicitJsonCodecToEncoder[A](implicit c: JsonCodec[A]): Encoder[A] = c.encoder
+  object FromCirceImplicitly {
+    @inline implicit def implicitCirceToJsonCodecToDecoder[A: Decoder: Encoder]: JsonCodec[A] =
+      JsonCodec.summon
+  }
+
+  object ToCirceImplicitly {
+    @inline implicit def implicitJsonCodecToDecoder[A](implicit c: JsonCodec[A]): Decoder[A] = c.decoder
+    @inline implicit def implicitJsonCodecToEncoder[A](implicit c: JsonCodec[A]): Encoder[A] = c.encoder
   }
 }
