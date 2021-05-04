@@ -25,27 +25,29 @@ val WebappUtilVer = "<version>"
     * `ErrorMsg` - typed error message, with some util and predefined cases
     * `EscapeUtil` - functions for escaping strings
     * `Protocol` - abstract definitions of protocols
-    * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure (JS)
+    * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure *(JS only)*
     * `Url` - types for URLs
 
   * `japgolly.webapputil.protocol.ajax`
-    * `AjaxProtocol` - protocol for an AJAX endpoint (JVM & JS)
-    * `AjaxClient` - means for a client to perform AJAX calls (JS)
+    * `AjaxProtocol` - protocol for an AJAX endpoint
+    * `AjaxClient` - means for a client to perform AJAX calls *(JS only)*
 
   * `japgolly.webapputil.protocol.binary`
     * `BinaryData` - immutable representation of BinaryData
-    * `BinaryJs` - functions for conversion between various JS binary data types
+    * `BinaryJs` - functions for conversion between various JS binary data types *(JS only)*
 
   * `japgolly.webapputil.protocol.entrypoint`
-    * `EntrypointDef` - definition of a JS app entrypoint (JVM & JS)
-    * `Entrypoint` - abstract class for a JS app entrypoint (JS)
-    * `EntrypointInvoker` - generate JS to invoke an entrypoint (JVM)
-    * `LoadJs` - define a bundle of JS assets to be loaded via `loadjs` before entrypoint invocation (JVM)
+    * `EntrypointDef` - definition of a JS app entrypoint
+    * `Entrypoint` - abstract class for a JS app entrypoint *(JS only)*
+    * `EntrypointInvoker` - generate JS to invoke an entrypoint *(JVM only)*
+    * `Html` - HTML content *(JVM only)*
+    * `Js` - JavaScript code (and some utilities) *(JVM only)*
+    * `LoadJs` - define a bundle of JS assets to be loaded via `loadjs` before entrypoint invocation *(JVM only)*
 
 * The `protocol-test` module:
   * `japgolly.webapputil.protocol.test`
-    * `BinaryTestUtil` - utilities for testing binary data (JVM & JS)
-    * `TestAjaxClient` - an `AjaxClient` instance for use in tests (JS)
+    * `BinaryTestUtil` - utilities for testing binary data
+    * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
 
 * The `protocol-circe` module:
   * `japgolly.webapputil.protocol.circe`
