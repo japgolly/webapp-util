@@ -24,6 +24,7 @@ val WebappUtilVer = "<version>"
   * `japgolly.webapputil.protocol.general`
     * `ErrorMsg` - typed error message, with some util and predefined cases
     * `EscapeUtil` - functions for escaping strings
+    * `LazyVal` - A lightweight `lazy val` as a portable value
     * `Protocol` - abstract definitions of protocols
     * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure *(JS only)*
     * `Url` - types for URLs
@@ -44,10 +45,15 @@ val WebappUtilVer = "<version>"
     * `Js` - JavaScript code (and some utilities) *(JVM only)*
     * `LoadJs` - define a bundle of JS assets to be loaded via `loadjs` before entrypoint invocation *(JVM only)*
 
+  * `japgolly.webapputil.protocol.http`
+    * `HttpClient` - an abstract HTTP (invocation) client
+    * `UrlEncoder` - cross-platform URL encoding and decoding
+
 * The `protocol-test` module:
   * `japgolly.webapputil.protocol.test`
     * `BinaryTestUtil` - utilities for testing binary data
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
+    * `TestHttpClient` - a `HttpClient` instance for use in tests
 
 * The `protocol-circe` module:
   * `japgolly.webapputil.protocol.circe`
