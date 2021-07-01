@@ -62,7 +62,7 @@ object Build {
       releaseTagComment             := s"v${(ThisBuild / version).value}",
       releaseVcsSign                := true,
       scalacOptions                ++= scalacCommonFlags,
-      scalaVersion                  := Ver.scala213,
+      scalaVersion                  := Ver.scala2,
       Test / scalacOptions         --= Seq("-Ywarn-dead-code"),
       testFrameworks                := Nil,
       updateOptions                 := updateOptions.value.withCachedResolution(true),

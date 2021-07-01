@@ -8,16 +8,16 @@ object Dependencies {
 
     // Exported
     def boopickle    = "1.3.3"
-    def circe        = "0.13.0"
-    def microlibs    = "2.6-RC3"
-    def nyaya        = "0.10.0-RC2"
-    def scala213     = "2.13.5"
+    def circe        = "0.14.1"
+    def microlibs    = "2.6"
+    def nyaya        = "0.10.0"
+    def scala2       = "2.13.6"
     def scalaJsDom   = "1.1.0"
     def scalaJsReact = "1.7.7"
-    def univEq       = "1.4.0-RC3"
+    def univEq       = "1.4.0"
 
     // Internal
-    def utest        = "0.7.9"
+    def utest        = "0.7.10"
   }
 
 
