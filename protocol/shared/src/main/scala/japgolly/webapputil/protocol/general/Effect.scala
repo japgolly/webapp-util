@@ -12,6 +12,13 @@ object Effect {
 
     def flatten[A](ffa: F[F[A]]): F[A] =
       flatMap(ffa)(identity)
+
+    def timeoutMs[A](ms: Long)(fa: F[A]): F[Option[A]]
+
+    def timeoutMsOrThrow[A](ms: Long, err: => Throwable)(fa: F[A]): F[A] =
+      map(
+        timeoutMs(ms)(fa)
+      )(_.getOrElse(throw err))
   }
 
   trait Sync[F[_]] extends Monad[F] {

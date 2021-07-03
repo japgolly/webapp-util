@@ -34,6 +34,7 @@ object TestAjaxClient {
     val ajax      : AjaxProtocol[Codec]
     val input     : ajax.protocol.RequestType
     val onResponse: Either[Throwable, Response[ajax.protocol.ResponseType]] => Callback
+    val response  : TestAjaxClient.ResponseDsl[ajax.protocol.ResponseType, Callback]
 
     override def toString =
       "Req[%08X]:%s(%s)".format(##, ajax.url, input)
@@ -54,19 +55,21 @@ object TestAjaxClient {
         throw new java.lang.IllegalStateException("Request has already been responded to.")
   }
 
-  abstract class ResponseDsl[A] {
+  abstract class ResponseDsl[-A, +B] {
 
-    final def apply(value: A): Unit =
+    final def apply(value: A): B =
       withResponse(AjaxClient.Response.pass(value))
 
-    final def withResponse(r: AjaxClient.Response[A]): Unit =
+    final def withResponse(r: AjaxClient.Response[A]): B =
       withResponseAttempt(Right(r))
 
-    final def withException(err: Throwable = new RuntimeException("Dummy exception from TestAjaxClient")): Unit =
+    final def withException(err: Throwable = new RuntimeException("Dummy exception from TestAjaxClient")): B =
       withResponseAttempt(Left(err))
 
-    def withResponseAttempt(r: Either[Throwable, AjaxClient.Response[A]]): Unit
+    def withResponseAttempt(r: Either[Throwable, AjaxClient.Response[A]]): B
   }
+
+  var defaultTimeoutMs = 4000
 }
 
 class TestAjaxClient[F[_]](autoRespondInitially: Boolean) extends AjaxClient[F] {
@@ -103,6 +106,8 @@ class TestAjaxClient[F[_]](autoRespondInitially: Boolean) extends AjaxClient[F] 
     autoResponsePFs = Nil
     autoResponseFallback = defaultAutoResponseFallback
   }
+
+  var timeoutMs = -1L
 
   var autoRespond: Boolean =
     autoRespondInitially
@@ -165,7 +170,7 @@ class TestAjaxClient[F[_]](autoRespondInitially: Boolean) extends AjaxClient[F] 
     }
 
     def newReq(): Unit = {
-      val r = onReq(new TestAjaxClient.Req {
+      val r = onReq(new TestAjaxClient.Req { self =>
         override type Codec[A] = F[A]
         override val ajax: p.type = p
         override val input = req
@@ -173,21 +178,39 @@ class TestAjaxClient[F[_]](autoRespondInitially: Boolean) extends AjaxClient[F] 
           result = i.fold(Failure(_), Success(_))
           reactNow()
         }
+        override val response =
+          new TestAjaxClient.ResponseDsl[p.protocol.ResponseType, Callback] {
+            override def withResponseAttempt(r: Either[Throwable,AjaxClient.Response[p.protocol.ResponseType]]) =
+              self.onResponse(r)
+          }
       })
       reqs :+= r
       if (autoRespond)
         autoRespondToLast()
     }
 
-    AsyncCallback[Resp](f =>
-      Callback {
-        callbacks ::= f
-        newReq()
-      })
+    val main =
+      AsyncCallback[Resp](f =>
+        Callback {
+          callbacks ::= f
+          newReq()
+        }
+      )
+
+    var timeoutMs = this.timeoutMs
+    if (timeoutMs < 0)
+      timeoutMs = TestAjaxClient.defaultTimeoutMs
+
+    if (timeoutMs <= 0)
+      main
+    else
+      main
+        .timeoutMs(timeoutMs.toDouble)
+        .map(_.getOrElse(throw new RuntimeException("TestAjaxClient response timed out.")))
   }
 
-  def respondToLast(p: AjaxProtocol[F]): TestAjaxClient.ResponseDsl[p.protocol.ResponseType] =
-    new TestAjaxClient.ResponseDsl[p.protocol.ResponseType] {
+  def respondToLast(p: AjaxProtocol[F]): TestAjaxClient.ResponseDsl[p.protocol.ResponseType, Unit] =
+    new TestAjaxClient.ResponseDsl[p.protocol.ResponseType, Unit] {
       override def withResponseAttempt(r: Either[Throwable,AjaxClient.Response[p.protocol.ResponseType]]): Unit = {
         val req = last().asResponseTo(p)
         req.markAsResponded()

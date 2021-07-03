@@ -1,8 +1,16 @@
 package japgolly.webapputil.protocol.general
 
+import japgolly.univeq.UnivEq
+
 trait LazyVal[+A] {
   def value: A
   def valueThreadSafe: A
+
+  override def equals(x: Any) =
+    x match {
+      case l: LazyVal[Any] => valueThreadSafe == l.valueThreadSafe
+      case _               => false
+    }
 }
 
 object LazyVal {
@@ -43,4 +51,5 @@ object LazyVal {
     override def valueThreadSafe = value
   }
 
+  implicit def univEq[A]: UnivEq[LazyVal[A]] = UnivEq.force
 }

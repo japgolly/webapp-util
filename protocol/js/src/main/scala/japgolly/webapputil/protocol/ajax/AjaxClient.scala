@@ -24,7 +24,7 @@ object AjaxClient {
         ServerSideProcInvoker.const(AsyncCallback.never[Either[ErrorMsg, p.protocol.ResponseType]])
     }
 
-  trait Response[A] {
+  trait Response[+A] {
     def shouldRetry: Boolean
     def result: Either[ErrorMsg, A]
   }

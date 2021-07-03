@@ -1,7 +1,7 @@
 package japgolly.webapputil.protocol.circe
 
-import japgolly.webapputil.protocol.test.TestAjaxClient
 import japgolly.webapputil.protocol.circe.JsonCodec
+import japgolly.webapputil.protocol.test.TestAjaxClient
 
 package object test {
 

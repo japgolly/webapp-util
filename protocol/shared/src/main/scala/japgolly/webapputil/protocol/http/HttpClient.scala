@@ -1,11 +1,11 @@
 package japgolly.webapputil.protocol.http
 
+import japgolly.univeq.UnivEq
 import japgolly.webapputil.protocol.general.LazyVal
 
 object HttpClient { outer =>
 
-  trait Module[F[_]] {
-
+  trait LibraryTypes {
     final type Body = outer.Body
     final val  Body = outer.Body
 
@@ -21,6 +21,9 @@ object HttpClient { outer =>
     final type Response = outer.Response
     final val  Response = outer.Response
 
+    final type ResponseBody = outer.ResponseBody
+    final val  ResponseBody = outer.ResponseBody
+
     final type Status = outer.Status
     final val  Status = outer.Status
 
@@ -29,9 +32,16 @@ object HttpClient { outer =>
 
     final type UriParams = outer.UriParams
     final val  UriParams = outer.UriParams
+  }
 
-    final type HttpClient = Request => F[Response]
-    val        HttpClient: HttpClient
+  type WithEffect[F[_]] = Request => F[Response]
+
+  trait HttpClientType[F[_]] {
+    final type HttpClient = WithEffect[F]
+  }
+
+  trait Module[F[_]] extends HttpClientType[F] with LibraryTypes {
+    val HttpClient: HttpClient
   }
 
   object Module {
@@ -85,6 +95,7 @@ object HttpClient { outer =>
 
     def withContentType(value: String) = add("Content-Type", value)
     def withContentTypeBinary          = withContentType(Headers.ContentType.Binary)
+    def withContentTypeForm            = withContentType(Headers.ContentType.Form)
     def withContentTypeJson            = withContentType(Headers.ContentType.Json)
     def withContentTypeJsonUtf8        = withContentType(Headers.ContentType.JsonUtf8)
   }
@@ -98,6 +109,16 @@ object HttpClient { outer =>
       final val Json     = "application/json"
       final val JsonUtf8 = "application/json;charset=UTF-8"
       final val Form     = "application/x-www-form-urlencoded"
+
+      def is(contentType: String): String => Boolean = {
+        val len = contentType.length
+        c => c.startsWith(contentType) && (
+          c.length == len  // exact match
+          || c(len) == ';' // prefix
+        )
+      }
+
+      val isJson = is(Json)
     }
   }
 
@@ -188,17 +209,10 @@ object HttpClient { outer =>
             Form.empty
           else
             Form(UriParams.parse(body))
-        case null =>
-          if (body == null)
-            Empty
-          else
-            Str(body, None)
         case _ =>
           val s = if (body == null) "" else body
-          Str(s, Some(contentType))
+          Str(s, Option(contentType))
       }
-
-    case object Empty extends Body
 
     final case class Form(params: UriParams) extends Body {
       def add   (key: String, value: String) = Form(params.add(key, value))
@@ -207,15 +221,23 @@ object HttpClient { outer =>
     }
 
     object Form extends StringMapLikeHelpers[Form] {
-    override def fromSeq(s: Seq[(String, String)]): Form =
-      new Form(UriParams(s.toVector))
+      override def fromSeq(s: Seq[(String, String)]): Form =
+        new Form(UriParams(s.toVector))
     }
 
     final case class Str(content: String, contentType: Option[String]) extends Body {
+      def isEmpty: Boolean =
+        content.isEmpty && contentType.isEmpty
+
+      def isContentTypeJson        = contentType.exists(Headers.ContentType.isJson)
+      def isContentTypeJsonOrEmpty = contentType.forall(Headers.ContentType.isJson)
     }
 
-    val emptyLazy: LazyVal[Body] =
-      LazyVal.pure(Empty)
+    val empty: Str =
+      Str("", None)
+
+    val emptyLazy: LazyVal[Str] =
+      LazyVal.pure(empty)
   }
 
   final case class Request(method   : Method,
@@ -230,20 +252,20 @@ object HttpClient { outer =>
               uri      : String,
               uriParams: UriParams = UriParams.empty,
               headers  : Headers   = Headers.empty,
-              body     : Body      = Body.Empty,
+              body     : Body      = Body.empty,
              ): A
 
     @inline final def get(uri      : String,
                           uriParams: UriParams = UriParams.empty,
                           headers  : Headers   = Headers.empty,
-                          body     : Body      = Body.Empty,
+                          body     : Body      = Body.empty,
                          ): A =
       apply(Method.GET, uri, uriParams, headers, body)
 
     @inline final def post(uri      : String,
                            uriParams: UriParams = UriParams.empty,
                            headers  : Headers   = Headers.empty,
-                           body     : Body      = Body.Empty,
+                           body     : Body      = Body.empty,
                           ): A =
       apply(Method.POST, uri, uriParams, headers, body)
   }
@@ -253,7 +275,7 @@ object HttpClient { outer =>
               uri      : String,
               uriParams: UriParams = UriParams.empty,
               headers  : Headers   = Headers.empty,
-              body     : Body      = Body.Empty,
+              body     : Body      = Body.empty,
              ): Request =
       new Request(method, uri, uriParams, headers, body)
   }
@@ -268,7 +290,29 @@ object HttpClient { outer =>
   }
 
   final case class Response(status : Status,
-                            body   : LazyVal[Body] = Body.emptyLazy,
-                            headers: Headers       = Headers.empty,
+                            body   : LazyVal[ResponseBody] = ResponseBody.emptyLazy,
+                            headers: Headers               = Headers.empty,
                            )
+
+  type ResponseBody = Body.Str
+
+  object ResponseBody {
+    def apply(content: String, contentType: Option[String]): ResponseBody =
+      Body.Str(content, contentType)
+
+    def empty    : ResponseBody          = Body.empty
+    def emptyLazy: LazyVal[ResponseBody] = Body.emptyLazy
+  }
+
+
+  implicit def univeqBody     : UnivEq[Body     ] = UnivEq.derive
+  implicit def univeqBodyStr  : UnivEq[Body.Str ] = UnivEq.derive
+  implicit def univeqHeaders  : UnivEq[Headers  ] = UnivEq.derive
+  implicit def univeqMethod   : UnivEq[Method   ] = UnivEq.force
+  implicit def univeqRequest  : UnivEq[Request  ] = UnivEq.derive
+  implicit def univeqResponse : UnivEq[Response ] = UnivEq.derive
+  implicit def univeqStatus   : UnivEq[Status   ] = UnivEq.derive
+  implicit def univeqStringMap: UnivEq[StringMap] = UnivEq.derive
+  implicit def univeqUriParams: UnivEq[UriParams] = UnivEq.derive
+
 }
