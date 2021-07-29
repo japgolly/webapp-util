@@ -13,9 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - java: 8
+          - java: 11
             scala: 2.13.6
-          - java: 14
+          - java: 16
             scala: 2.13.6
 
     steps:
