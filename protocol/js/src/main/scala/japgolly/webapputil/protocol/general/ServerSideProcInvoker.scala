@@ -82,7 +82,7 @@ object ServerSideProcInvoker {
     Reusability((a, b) => a.run eq b.run)
 
   implicit def variance[I, E, O, II <: I, EE >: E, OO >: O](a: ServerSideProcInvoker[I, E, O]): ServerSideProcInvoker[II, EE, OO] =
-    new ServerSideProcInvoker(a.run.andThen(_.widen))
+    new ServerSideProcInvoker(a.run)
 
   def throwableToErrorMsg(t: Throwable): ErrorMsg =
     t match {

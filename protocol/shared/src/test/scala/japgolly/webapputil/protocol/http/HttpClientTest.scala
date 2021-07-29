@@ -12,7 +12,7 @@ object HttpClientTest extends TestSuite {
     val genKey = char.string(1 to 4)
     val genStr = char.string(0 to 8)
     val genVal = Gen.chooseGen(genStr, genStr, genStr, Gen.pure[String](null))
-    (genKey *** genVal).list(0 to 8).map(UriParams.fromSeq)
+    (genKey & genVal).list(0 to 8).map(UriParams.fromSeq)
   }
 
   override def tests = Tests {

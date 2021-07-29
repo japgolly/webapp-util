@@ -1,5 +1,7 @@
 package japgolly.webapputil.protocol.circe
 
+import cats.Traverse
+import cats.instances.all._
 import io.circe._
 import japgolly.microlibs.adt_macros.AdtMacros
 import japgolly.microlibs.recursion._
@@ -56,13 +58,11 @@ object JsonCodec {
                 decoderV: Decoder[V]): JsonCodec[Map[K, V]] =
     apply(Encoder.encodeMap, Decoder.decodeMap)
 
-  def fix[F[_]: scalaz.Traverse](enc: FAlgebra[F, Json],
-                                 dec: FCoalgebraM[Decoder.Result, F, ACursor]): JsonCodec[Fix[F]] = {
-    import scalaz.std.either._
+  def fix[F[_]: Traverse](enc: FAlgebra[F, Json],
+                          dec: FCoalgebraM[Decoder.Result, F, ACursor]): JsonCodec[Fix[F]] =
     JsonCodec(
       Encoder.instance[Fix[F]](Recursion.cata(enc)(_)),
       Decoder.instance[Fix[F]](Recursion.anaM(dec)(_)))
-  }
 
   lazy val str: JsonCodec[String] =
     summon

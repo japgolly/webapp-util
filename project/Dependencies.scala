@@ -7,14 +7,14 @@ object Dependencies {
   object Ver {
 
     // Exported
-    def boopickle    = "1.3.3"
+    def boopickle    = "1.4.0"
     def circe        = "0.14.1"
-    def microlibs    = "2.6"
-    def nyaya        = "0.10.0"
+    def microlibs    = "3.0"
+    def nyaya        = "0.11.0"
     def scala2       = "2.13.6"
     def scalaJsDom   = "1.1.0"
-    def scalaJsReact = "1.7.7"
-    def univEq       = "1.4.0"
+    def scalaJsReact = "2.0.0-RC2"
+    def univEq       = "1.5.0"
 
     // Internal
     def utest        = "0.7.10"
@@ -27,11 +27,7 @@ object Dependencies {
     val circeParser         = Def.setting("io.circe"                          %%% "circe-parser"  % Ver.circe)
     val circeTesting        = Def.setting("io.circe"                          %%% "circe-testing" % Ver.circe)
     val microlibsAdtMacros  = Def.setting("com.github.japgolly.microlibs"     %%% "adt-macros"    % Ver.microlibs)
-    val microlibsMacroUtils = Def.setting("com.github.japgolly.microlibs"     %%% "macro-utils"   % Ver.microlibs)
-    val microlibsNonempty   = Def.setting("com.github.japgolly.microlibs"     %%% "nonempty"      % Ver.microlibs)
     val microlibsRecursion  = Def.setting("com.github.japgolly.microlibs"     %%% "recursion"     % Ver.microlibs)
-    val microlibsScalazExt  = Def.setting("com.github.japgolly.microlibs"     %%% "scalaz-ext"    % Ver.microlibs)
-    val microlibsStdlibExt  = Def.setting("com.github.japgolly.microlibs"     %%% "stdlib-ext"    % Ver.microlibs)
     val microlibsTestUtil   = Def.setting("com.github.japgolly.microlibs"     %%% "test-util"     % Ver.microlibs)
     val microlibsUtils      = Def.setting("com.github.japgolly.microlibs"     %%% "utils"         % Ver.microlibs)
     val nyayaGen            = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-gen"     % Ver.nyaya)
