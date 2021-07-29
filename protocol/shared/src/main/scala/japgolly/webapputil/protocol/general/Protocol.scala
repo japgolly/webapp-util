@@ -87,8 +87,8 @@ object Protocol {
 
       def apply[F[_], Req, Res](req: Req, res: Protocol.Of[F, Res]): Of[F, Req, Res] =
         new PreparedSend[F, Req] {
-          override val request  = req
-          override val response = res
+          override val request = req
+          override val response: Protocol.Of[F, Res] = res
         }
     }
   }

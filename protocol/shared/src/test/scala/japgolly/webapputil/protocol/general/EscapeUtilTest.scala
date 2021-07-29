@@ -44,7 +44,7 @@ object EscapeUtilTest extends TestSuite {
           val chars = (127 to 255).map(_.toChar).toVector
           test(Gen.shuffle(chars).sample().mkString)
         }
-        "unicode" - test(Gen.unicode.map(c => (if (c < 256) c + 1000 else c).toChar).string(128).sample())
+        "unicode" - test(Gen.unicode.map(c => (if (c < 256) (c + 1000).toChar else c)).string(128).sample())
       }
     }
 
