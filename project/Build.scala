@@ -23,8 +23,11 @@ object Build {
     "-language:higherKinds",
     "-language:implicitConversions",
     "-language:postfixOps",
-    "-target:11",
     "-unchecked",                                    // Enable additional warnings where generated code depends on assumptions.
+  )
+
+  def scalac2Flags = Seq(
+    "-target:11",
     "-Wconf:msg=may.not.be.exhaustive:e",            // Make non-exhaustive matches errors instead of warnings
     "-Wdead-code",                                   // Warn when dead code is identified.
     "-Wunused:explicits",                            // Warn if an explicit parameter is unused.
@@ -57,16 +60,24 @@ object Build {
     "-Ypatmat-exhaust-depth", "off"
   )
 
+  def scalac3Flags = Seq(
+    "-source:3.0-migration",
+    "-Ykind-projector",
+  )
+
   val commonSettings = ConfigureBoth(
     _.settings(
-      releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-      releaseTagComment             := s"v${(ThisBuild / version).value}",
-      releaseVcsSign                := true,
-      scalacOptions                ++= scalacCommonFlags,
       scalaVersion                  := Ver.scala2,
+      crossScalaVersions            := Seq(Ver.scala2, Ver.scala3),
+      scalacOptions                ++= scalacCommonFlags,
+      scalacOptions                ++= scalac2Flags.filter(_ => scalaVersion.value.startsWith("2")),
+      scalacOptions                ++= scalac3Flags.filter(_ => scalaVersion.value.startsWith("3")),
       Test / scalacOptions         --= Seq("-Ywarn-dead-code"),
       testFrameworks                := Nil,
       updateOptions                 := updateOptions.value.withCachedResolution(true),
+      releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+      releaseTagComment             := s"v${(ThisBuild / version).value}",
+      releaseVcsSign                := true,
     ))
 
   def testSettings = ConfigureBoth(

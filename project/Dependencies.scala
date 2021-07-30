@@ -12,6 +12,7 @@ object Dependencies {
     def microlibs    = "3.0"
     def nyaya        = "0.11.0"
     def scala2       = "2.13.6"
+    def scala3       = "3.0.1"
     def scalaJsDom   = "1.1.0"
     def scalaJsReact = "2.0.0-RC2"
     def univEq       = "1.5.0"
@@ -33,7 +34,7 @@ object Dependencies {
     val nyayaGen            = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-gen"     % Ver.nyaya)
     val nyayaProp           = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-prop"    % Ver.nyaya)
     val nyayaTest           = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-test"    % Ver.nyaya)
-    val scalaJsDom          = Def.setting("org.scala-js"                      %%% "scalajs-dom"   % Ver.scalaJsDom)
+    val scalaJsDom          = Def.setting("org.scala-js"                      %%% "scalajs-dom"   % Ver.scalaJsDom cross CrossVersion.for3Use2_13)
     val scalaJsReactCore    = Def.setting("com.github.japgolly.scalajs-react" %%% "core"          % Ver.scalaJsReact)
     val scalaJsReactExtra   = Def.setting("com.github.japgolly.scalajs-react" %%% "extra"         % Ver.scalaJsReact)
     val scalaJsReactTest    = Def.setting("com.github.japgolly.scalajs-react" %%% "test"          % Ver.scalaJsReact)

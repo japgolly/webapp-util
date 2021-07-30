@@ -8,8 +8,8 @@ object AjaxProtocol {
                                             res: Protocol.Of[F, _Res]) extends AjaxProtocol[F] {
     type Req = _Req
     type Res = _Res
-    override val protocol = Protocol.RequestResponse.simple[F, Req, Res](res)
-    override val prepReq  = req
+    override val protocol: Protocol.RequestResponse.Simple[F, Req, Res] = Protocol.RequestResponse.simple(res)
+    override val prepReq = req
     override def responseProtocol(req: Req) = res
   }
 }
