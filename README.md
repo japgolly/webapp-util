@@ -71,6 +71,7 @@ val WebappUtilVer = "<version>"
 # TODO:
 
 * Add ScalaDoc and proper doc
+* AbstractLocation
 * Port websocket stuff
 * Port webstorage stuff
 * Port SafePickler and related
