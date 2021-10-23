@@ -189,6 +189,22 @@ object HttpClient { outer =>
         case t: UriParams => normalised.asVector == t.normalised.asVector
         case _            => false
       }
+
+    def filterKeys(retain: String => Boolean): UriParams = {
+      val vec2 = asVector.filter(kv => retain(kv._1))
+      if (vec2.length == asVector.length) this else UriParams(vec2)
+    }
+
+    def whitelistKeys(whitelist: Set[String]): UriParams =
+      if (whitelist.isEmpty)
+        UriParams.empty
+      else
+        filterKeys(whitelist.contains)
+
+    def whitelistKeys(subset: UriParams): UriParams = {
+      val keys = subset.asVector.iterator.map(_._1).toSet
+      whitelistKeys(keys)
+    }
   }
 
   object UriParams extends StringMapLikeHelpers[UriParams] {
