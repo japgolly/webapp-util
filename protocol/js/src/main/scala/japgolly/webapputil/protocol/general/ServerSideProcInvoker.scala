@@ -1,8 +1,8 @@
 package japgolly.webapputil.protocol.general
 
 import japgolly.scalajs.react._
+import japgolly.webapputil.protocol.ajax.AjaxException
 import japgolly.webapputil.protocol.general.CallbackHelpers._
-import org.scalajs.dom.ext.AjaxException
 
 final class ServerSideProcInvoker[-I, E, O](private[ServerSideProcInvoker] val run: I => AsyncCallback[Either[E, O]]) {
 
