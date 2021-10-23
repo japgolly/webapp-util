@@ -197,17 +197,17 @@ object HttpClient { outer =>
       }
   }
 
-  class Method(final val asString: String) extends AnyVal
+  final case class Method(asString: String)
   object Method {
-    def CONNECT = new Method("CONNECT")
-    def DELETE  = new Method("DELETE")
-    def GET     = new Method("GET")
-    def HEAD    = new Method("HEAD")
-    def OPTIONS = new Method("OPTIONS")
-    def PATCH   = new Method("PATCH")
-    def POST    = new Method("POST")
-    def PUT     = new Method("PUT")
-    def TRACE   = new Method("TRACE")
+    val CONNECT = apply("CONNECT")
+    val DELETE  = apply("DELETE")
+    val GET     = apply("GET")
+    val HEAD    = apply("HEAD")
+    val OPTIONS = apply("OPTIONS")
+    val PATCH   = apply("PATCH")
+    val POST    = apply("POST")
+    val PUT     = apply("PUT")
+    val TRACE   = apply("TRACE")
   }
 
   sealed trait Body
