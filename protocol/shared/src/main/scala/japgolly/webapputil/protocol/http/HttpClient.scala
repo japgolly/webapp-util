@@ -2,6 +2,7 @@ package japgolly.webapputil.protocol.http
 
 import japgolly.univeq.UnivEq
 import japgolly.webapputil.protocol.general.LazyVal
+import scala.collection.mutable.TreeMap
 import scala.jdk.CollectionConverters._
 
 object HttpClient { outer =>
@@ -134,12 +135,12 @@ object HttpClient { outer =>
     }
   }
 
-  final case class UriParams(val asVector: Vector[(String, String)]) extends AnyVal {
+  final class UriParams(val asVector: Vector[(String, String)], isNormalised: Boolean) {
     def isEmpty                            = asVector.isEmpty
     def nonEmpty                           = asVector.nonEmpty
     def stringMap                          = new StringMap(asVector)
-    def add   (key: String, value: String) = new UriParams(stringMap.add(key, value).asVector)
-    def delete(key: String)                = new UriParams(stringMap.delete(key).asVector)
+    def add   (key: String, value: String) = UriParams(stringMap.add(key, value).asVector)
+    def delete(key: String)                = UriParams(stringMap.delete(key).asVector)
     def get   (key: String)                = stringMap.get(key)
 
     def asString: String =
@@ -162,11 +163,48 @@ object HttpClient { outer =>
         }
         sb.toString
       }
+
+    def normalised: UriParams =
+      if (isNormalised)
+        this
+      else
+        reNormalised
+
+    private lazy val reNormalised: UriParams = {
+      val m = TreeMap.empty[String, Vector[String]]
+      val z = Vector.empty[String]
+      for (kv <- asVector) {
+        import kv.{_1 => k, _2 => v}
+        val vs = m.get(k).fold(z :+ v)(_ :+ v)
+        m.update(k, vs)
+      }
+      val result = m.iterator.flatMap { case (k, vs) => vs.iterator.map((k, _)) }.toVector
+      new UriParams(result, isNormalised = true)
+    }
+
+    override def toString =
+      asVector
+        .iterator
+        .map(x => s"${x._1} -> ${x._2}")
+        .mkString("UriParams(", ", ", ")")
+
+    override def hashCode =
+      normalised.asVector.hashCode
+
+    override def equals(that: Any) =
+      that match {
+        case t: UriParams => normalised.asVector == t.normalised.asVector
+        case _            => false
+      }
   }
 
   object UriParams extends StringMapLikeHelpers[UriParams] {
+
+    def apply(asVector: Vector[(String, String)]): UriParams =
+      new UriParams(asVector, isNormalised = false)
+
     override def fromSeq(s: Seq[(String, String)]): UriParams =
-      new UriParams(s.toVector)
+      apply(s.toVector)
 
     def parse(body: String): UriParams =
       if ((body == null) || body.isEmpty)
@@ -325,6 +363,6 @@ object HttpClient { outer =>
   implicit def univeqResponse : UnivEq[Response ] = UnivEq.derive
   implicit def univeqStatus   : UnivEq[Status   ] = UnivEq.derive
   implicit def univeqStringMap: UnivEq[StringMap] = UnivEq.derive
-  implicit def univeqUriParams: UnivEq[UriParams] = UnivEq.derive
+  implicit def univeqUriParams: UnivEq[UriParams] = UnivEq.force
 
 }
