@@ -14,3 +14,4 @@ val protocolCirceJS      = Build.protocolCirceJS
 val protocolCirceJVM     = Build.protocolCirceJVM
 val protocolCirceTestJS  = Build.protocolCirceTestJS
 val protocolCirceTestJVM = Build.protocolCirceTestJVM
+val protocolOkHttp4      = Build.protocolOkHttp4

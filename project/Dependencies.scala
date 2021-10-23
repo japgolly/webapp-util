@@ -11,6 +11,7 @@ object Dependencies {
     def circe        = "0.14.1"
     def microlibs    = "4.0.0"
     def nyaya        = "1.0.0"
+    def okHttp4      = "4.9.2"
     def scala2       = "2.13.6"
     def scala3       = "3.0.1"
     def scalaJsDom   = "2.0.0"
@@ -34,6 +35,7 @@ object Dependencies {
     val nyayaGen            = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-gen"     % Ver.nyaya)
     val nyayaProp           = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-prop"    % Ver.nyaya)
     val nyayaTest           = Def.setting("com.github.japgolly.nyaya"         %%% "nyaya-test"    % Ver.nyaya)
+    val okHttp4             = Def.setting("com.squareup.okhttp3"                % "okhttp"        % Ver.okHttp4)
     val scalaJsDom          = Def.setting("org.scala-js"                      %%% "scalajs-dom"   % Ver.scalaJsDom)
     val scalaJsReactCore    = Def.setting("com.github.japgolly.scalajs-react" %%% "core"          % Ver.scalaJsReact)
     val scalaJsReactExtra   = Def.setting("com.github.japgolly.scalajs-react" %%% "extra"         % Ver.scalaJsReact)

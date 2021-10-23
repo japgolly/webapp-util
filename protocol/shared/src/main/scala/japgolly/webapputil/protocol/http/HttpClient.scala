@@ -2,6 +2,7 @@ package japgolly.webapputil.protocol.http
 
 import japgolly.univeq.UnivEq
 import japgolly.webapputil.protocol.general.LazyVal
+import scala.jdk.CollectionConverters._
 
 object HttpClient { outer =>
 
@@ -83,6 +84,17 @@ object HttpClient { outer =>
 
     final val empty: A =
       fromSeq(Vector.empty)
+
+    final def fromJavaMultimap[C <: java.util.Collection[String]](multimap: java.util.Map[String, C]): A =
+      fromSeq(
+        multimap
+          .entrySet()
+          .stream()
+          .iterator()
+          .asScala
+          .flatMap(e => e.getValue.iterator().asScala.map(e.getKey -> _))
+          .toVector,
+      )
   }
 
   final case class Headers(val asVector: Vector[(String, String)]) extends AnyVal {

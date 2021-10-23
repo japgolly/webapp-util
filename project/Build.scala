@@ -103,6 +103,7 @@ object Build {
       protocolTestJVM, protocolTestJS,
       protocolCirceJVM, protocolCirceJS,
       protocolCirceTestJVM, protocolCirceTestJS,
+      protocolOkHttp4,
     )
 
   lazy val protocolJVM = protocol.jvm
@@ -154,5 +155,13 @@ object Build {
     .settings(
       moduleName := "protocol-circe-test",
       libraryDependencies += Dep.nyayaGen.value,
+    )
+
+  lazy val protocolOkHttp4 = project
+    .configure(commonSettings.jvm, publicationSettings.jvm)
+    .dependsOn(protocolJVM)
+    .settings(
+      moduleName := "protocol-okhttp4",
+      libraryDependencies += Dep.okHttp4.value,
     )
 }

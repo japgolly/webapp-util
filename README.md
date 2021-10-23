@@ -14,6 +14,7 @@ val WebappUtilVer = "<version>"
 "com.github.japgolly.webapp-util" %%% "protocol-test"       % WebappUtilVer % Test
 "com.github.japgolly.webapp-util" %%% "protocol-circe"      % WebappUtilVer
 "com.github.japgolly.webapp-util" %%% "protocol-circe-test" % WebappUtilVer % Test
+"com.github.japgolly.webapp-util" %%  "protocol-okhttp4"    % WebappUtilVer
 ```
 
 
@@ -66,6 +67,10 @@ val WebappUtilVer = "<version>"
   * `japgolly.webapputil.protocol.circe.test`
     * `JsonTestUtil` - utilities to test JSON codecs
     * `TestJsonAjaxClient` - implementation of `TestAjaxClient` that uses JSON and `JsonCodec` *(JS only)*
+
+* The `protocol-okhttp4` module:
+  * `japgolly.webapputil.protocol.http`
+    * `OkHttp4Client` - an implementation of `HttpClient` using okhttp4
 
 
 # TODO:
