@@ -2,7 +2,6 @@ package japgolly.webapputil.protocol.http
 
 import japgolly.univeq.UnivEq
 import japgolly.webapputil.protocol.general.LazyVal
-import scala.collection.mutable.TreeMap
 import scala.jdk.CollectionConverters._
 
 object HttpClient { outer =>
@@ -171,14 +170,8 @@ object HttpClient { outer =>
         reNormalised
 
     private lazy val reNormalised: UriParams = {
-      val m = TreeMap.empty[String, Vector[String]]
-      val z = Vector.empty[String]
-      for (kv <- asVector) {
-        import kv.{_1 => k, _2 => v}
-        val vs = m.get(k).fold(z :+ v)(_ :+ v)
-        m.update(k, vs)
-      }
-      val result = m.iterator.flatMap { case (k, vs) => vs.iterator.map((k, _)) }.toVector
+      // According to the Scala doc, this is a stable sort
+      val result = asVector.sortBy(_._1)
       new UriParams(result, isNormalised = true)
     }
 
