@@ -1,8 +1,7 @@
 package japgolly.webapputil.protocol.http
 
 import japgolly.univeq.UnivEq
-import japgolly.webapputil.protocol.general.LazyVal
-import scala.jdk.CollectionConverters._
+import japgolly.webapputil.protocol.general.{AbstractMultiStringMap, LazyVal}
 
 object HttpClient { outer =>
 
@@ -28,9 +27,6 @@ object HttpClient { outer =>
     final type Status = outer.Status
     final val  Status = outer.Status
 
-    final type StringMap = outer.StringMap
-    final val  StringMap = outer.StringMap
-
     final type UriParams = outer.UriParams
     final val  UriParams = outer.UriParams
   }
@@ -54,56 +50,11 @@ object HttpClient { outer =>
 
   // ===================================================================================================================
 
-  final case class StringMap(asVector: Vector[(String, String)]) extends AnyVal {
-    def isEmpty  = asVector.isEmpty
-    def nonEmpty = asVector.nonEmpty
+  final class Headers(asVector: Vector[(String, String)], isNormalised: Boolean)
+      extends AbstractMultiStringMap[Headers](asVector, isNormalised) {
 
-    def add(key: String, value: String): StringMap =
-      new StringMap(asVector :+ ((key, value)))
-
-    def delete(key: String): StringMap =
-      new StringMap(asVector.filter(_._1 != key))
-
-    def get(key: String): Vector[String] =
-      asVector.iterator.filter(_._1 == key).map(_._2).toVector
-  }
-
-  object StringMap extends StringMapLikeHelpers[StringMap] {
-    override def fromSeq(s: Seq[(String, String)]): StringMap =
-      new StringMap(s.toVector)
-  }
-
-  trait StringMapLikeHelpers[+A] {
-    def fromSeq(s: Seq[(String, String)]): A
-
-    final def fromMap(m: Map[String, String]): A =
-      fromSeq(m.toVector)
-
-    final def apply(kvs: (String, String)*): A =
-      fromSeq(kvs.toVector)
-
-    final val empty: A =
-      fromSeq(Vector.empty)
-
-    final def fromJavaMultimap[C <: java.util.Collection[String]](multimap: java.util.Map[String, C]): A =
-      fromSeq(
-        multimap
-          .entrySet()
-          .stream()
-          .iterator()
-          .asScala
-          .flatMap(e => e.getValue.iterator().asScala.map(e.getKey -> _))
-          .toVector,
-      )
-  }
-
-  final case class Headers(val asVector: Vector[(String, String)]) extends AnyVal {
-    def isEmpty                            = asVector.isEmpty
-    def nonEmpty                           = asVector.nonEmpty
-    def stringMap                          = new StringMap(asVector)
-    def add   (key: String, value: String) = new Headers(stringMap.add(key, value).asVector)
-    def delete(key: String)                = new Headers(stringMap.delete(key).asVector)
-    def get   (key: String)                = stringMap.get(key)
+    override protected def create(asVector: Vector[(String, String)], isNormalised: Boolean = false) =
+      new Headers(asVector, isNormalised)
 
     def withContentType(value: String) = add("Content-Type", value)
     def withContentTypeBinary          = withContentType(Headers.ContentType.Binary)
@@ -112,9 +63,10 @@ object HttpClient { outer =>
     def withContentTypeJsonUtf8        = withContentType(Headers.ContentType.JsonUtf8)
   }
 
-  object Headers extends StringMapLikeHelpers[Headers] {
-    override def fromSeq(s: Seq[(String, String)]): Headers =
-      new Headers(s.toVector)
+  object Headers extends AbstractMultiStringMap.Module[Headers] {
+
+    override def fromVector(v: Vector[(String, String)]): Headers =
+      new Headers(v, isNormalised = false)
 
     object ContentType {
       final val Binary   = "application/octet-stream"
@@ -134,13 +86,11 @@ object HttpClient { outer =>
     }
   }
 
-  final class UriParams(val asVector: Vector[(String, String)], isNormalised: Boolean) {
-    def isEmpty                            = asVector.isEmpty
-    def nonEmpty                           = asVector.nonEmpty
-    def stringMap                          = new StringMap(asVector)
-    def add   (key: String, value: String) = UriParams(stringMap.add(key, value).asVector)
-    def delete(key: String)                = UriParams(stringMap.delete(key).asVector)
-    def get   (key: String)                = stringMap.get(key)
+  final class UriParams(asVector: Vector[(String, String)], isNormalised: Boolean)
+      extends AbstractMultiStringMap[UriParams](asVector, isNormalised) {
+
+    override protected def create(asVector: Vector[(String, String)], isNormalised: Boolean = false) =
+      new UriParams(asVector, isNormalised)
 
     def asString: String =
       if (isEmpty)
@@ -162,58 +112,12 @@ object HttpClient { outer =>
         }
         sb.toString
       }
-
-    def normalised: UriParams =
-      if (isNormalised)
-        this
-      else
-        reNormalised
-
-    private lazy val reNormalised: UriParams = {
-      // According to the Scala doc, this is a stable sort
-      val result = asVector.sortBy(_._1)
-      new UriParams(result, isNormalised = true)
-    }
-
-    override def toString =
-      asVector
-        .iterator
-        .map(x => s"${x._1} -> ${x._2}")
-        .mkString("UriParams(", ", ", ")")
-
-    override def hashCode =
-      normalised.asVector.hashCode
-
-    override def equals(that: Any) =
-      that match {
-        case t: UriParams => normalised.asVector == t.normalised.asVector
-        case _            => false
-      }
-
-    def filterKeys(retain: String => Boolean): UriParams = {
-      val vec2 = asVector.filter(kv => retain(kv._1))
-      if (vec2.length == asVector.length) this else UriParams(vec2)
-    }
-
-    def whitelistKeys(whitelist: Set[String]): UriParams =
-      if (whitelist.isEmpty)
-        UriParams.empty
-      else
-        filterKeys(whitelist.contains)
-
-    def whitelistKeys(subset: UriParams): UriParams = {
-      val keys = subset.asVector.iterator.map(_._1).toSet
-      whitelistKeys(keys)
-    }
   }
 
-  object UriParams extends StringMapLikeHelpers[UriParams] {
+  object UriParams extends AbstractMultiStringMap.Module[UriParams] {
 
-    def apply(asVector: Vector[(String, String)]): UriParams =
-      new UriParams(asVector, isNormalised = false)
-
-    override def fromSeq(s: Seq[(String, String)]): UriParams =
-      apply(s.toVector)
+    override def fromVector(v: Vector[(String, String)]): UriParams =
+      new UriParams(v, isNormalised = false)
 
     def parse(body: String): UriParams =
       if ((body == null) || body.isEmpty)
@@ -257,7 +161,9 @@ object HttpClient { outer =>
     val TRACE   = apply("TRACE")
   }
 
-  sealed trait Body
+  sealed trait Body {
+    def normalised: Body = this
+  }
 
   object Body {
 
@@ -277,11 +183,14 @@ object HttpClient { outer =>
       def add   (key: String, value: String) = Form(params.add(key, value))
       def delete(key: String)                = Form(params.delete(key))
       def get   (key: String)                = params.get(key)
+
+      override def normalised: Form =
+        Form(params.normalised)
     }
 
-    object Form extends StringMapLikeHelpers[Form] {
-      override def fromSeq(s: Seq[(String, String)]): Form =
-        new Form(UriParams(s.toVector))
+    object Form extends AbstractMultiStringMap.Module[Form] {
+      override def fromVector(v: Vector[(String, String)]): Form =
+        new Form(UriParams.fromVector(v))
     }
 
     final case class Str(content: String, contentType: Option[String]) extends Body {
@@ -304,7 +213,14 @@ object HttpClient { outer =>
                            uriParams: UriParams,
                            headers  : Headers,
                            body     : Body,
-                          )
+                          ) {
+    def normalised: Request =
+      copy(
+        uriParams = uriParams.normalised,
+        headers   = headers  .normalised,
+        body      = body     .normalised,
+      )
+  }
 
   trait RequestCtors[+A] {
     def apply(method   : Method,
@@ -364,14 +280,10 @@ object HttpClient { outer =>
   }
 
 
-  implicit def univeqBody     : UnivEq[Body     ] = UnivEq.derive
-  implicit def univeqBodyStr  : UnivEq[Body.Str ] = UnivEq.derive
-  implicit def univeqHeaders  : UnivEq[Headers  ] = UnivEq.derive
-  implicit def univeqMethod   : UnivEq[Method   ] = UnivEq.force
-  implicit def univeqRequest  : UnivEq[Request  ] = UnivEq.derive
-  implicit def univeqResponse : UnivEq[Response ] = UnivEq.derive
-  implicit def univeqStatus   : UnivEq[Status   ] = UnivEq.derive
-  implicit def univeqStringMap: UnivEq[StringMap] = UnivEq.derive
-  implicit def univeqUriParams: UnivEq[UriParams] = UnivEq.force
-
+  implicit def univeqBody    : UnivEq[Body     ] = UnivEq.derive
+  implicit def univeqBodyStr : UnivEq[Body.Str ] = UnivEq.derive
+  implicit def univeqMethod  : UnivEq[Method   ] = UnivEq.force
+  implicit def univeqRequest : UnivEq[Request  ] = UnivEq.derive
+  implicit def univeqResponse: UnivEq[Response ] = UnivEq.derive
+  implicit def univeqStatus  : UnivEq[Status   ] = UnivEq.derive
 }
