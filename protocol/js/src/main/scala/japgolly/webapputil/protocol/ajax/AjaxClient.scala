@@ -4,8 +4,7 @@ import japgolly.scalajs.react.extra.Ajax
 import japgolly.scalajs.react.{AsyncCallback, CallbackTo}
 import japgolly.webapputil.protocol.binary.BinaryData
 import japgolly.webapputil.protocol.general._
-import org.scalajs.dom.ext.AjaxException
-import org.scalajs.dom.raw.XMLHttpRequest
+import org.scalajs.dom.XMLHttpRequest
 import scala.scalajs.js.typedarray.ArrayBuffer
 
 trait AjaxClient[P[_]] {
