@@ -27,7 +27,7 @@ val WebappUtilVer = "<version>"
 
 * The `core` module:
 
-  * `japgolly.webapputil.protocol.general`
+  * `japgolly.webapputil.general`
     * `ErrorMsg` - typed error message, with some util and predefined cases
     * `EscapeUtil` - functions for escaping strings
     * `LazyVal` - A lightweight `lazy val` as a portable value
@@ -35,15 +35,15 @@ val WebappUtilVer = "<version>"
     * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure *(JS only)*
     * `Url` - types for URLs
 
-  * `japgolly.webapputil.protocol.ajax`
+  * `japgolly.webapputil.ajax`
     * `AjaxProtocol` - protocol for an AJAX endpoint
     * `AjaxClient` - means for a client to perform AJAX calls *(JS only)*
 
-  * `japgolly.webapputil.protocol.binary`
+  * `japgolly.webapputil.binary`
     * `BinaryData` - immutable representation of BinaryData
     * `BinaryJs` - functions for conversion between various JS binary data types *(JS only)*
 
-  * `japgolly.webapputil.protocol.entrypoint`
+  * `japgolly.webapputil.entrypoint`
     * `EntrypointDef` - definition of a JS app entrypoint
     * `Entrypoint` - abstract class for a JS app entrypoint *(JS only)*
     * `EntrypointInvoker` - generate JS to invoke an entrypoint *(JVM only)*
@@ -51,33 +51,33 @@ val WebappUtilVer = "<version>"
     * `Js` - JavaScript code (and some utilities) *(JVM only)*
     * `LoadJs` - define a bundle of JS assets to be loaded via `loadjs` before entrypoint invocation *(JVM only)*
 
-  * `japgolly.webapputil.protocol.http`
+  * `japgolly.webapputil.http`
     * `HttpClient` - an abstract HTTP (invocation) client
     * `UrlEncoder` - cross-platform URL encoding and decoding
 
 * The `test` module:
-  * `japgolly.webapputil.protocol.test`
+  * `japgolly.webapputil.test`
     * `BinaryTestUtil` - utilities for testing binary data
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
     * `TestHttpClient` - a `HttpClient` instance for use in tests
 
 * The `core-circe` module:
-  * `japgolly.webapputil.protocol.circe`
+  * `japgolly.webapputil.circe`
     * `JsonAjaxClient` - implementation of `AjaxClient` that uses JSON and `JsonCodec` *(JS only)*
     * `JsonCodec` - composition of Circe's `Encoder` and `Decoder` into a single typeclass
     * `JsonEntrypointCodec` - creates instances of `EntrypointDef.Codec` using Circe codecs
     * `JsonUtil` - utilities to supplement Circe
-    * Extension methods available via `import japgolly.webapputil.protocol.circe._`
+    * Extension methods available via `import japgolly.webapputil.circe._`
       * `HttpClient.Body.json` to create response bodies as JSON
       * `HttpClient.Body#parseJsonBody` to parse request bodies as JSON
 
 * The `test-circe` module:
-  * `japgolly.webapputil.protocol.circe.test`
+  * `japgolly.webapputil.circe.test`
     * `JsonTestUtil` - utilities to test JSON codecs
     * `TestJsonAjaxClient` - implementation of `TestAjaxClient` that uses JSON and `JsonCodec` *(JS only)*
 
 * The `core-okhttp4` module:
-  * `japgolly.webapputil.protocol.http`
+  * `japgolly.webapputil.okhttp4`
     * `OkHttp4Client` - an implementation of `HttpClient` using okhttp4
 
 
