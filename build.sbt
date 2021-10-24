@@ -5,13 +5,15 @@ ThisBuild / shellPrompt   := ((s: State) => Project.extract(s).currentRef.projec
 ThisBuild / startYear     := Some(2021)
 ThisBuild / versionScheme := Some("early-semver")
 
-val root                 = Build.root
-val protocolJS           = Build.protocolJS
-val protocolJVM          = Build.protocolJVM
-val protocolTestJS       = Build.protocolTestJS
-val protocolTestJVM      = Build.protocolTestJVM
-val protocolCirceJS      = Build.protocolCirceJS
-val protocolCirceJVM     = Build.protocolCirceJVM
-val protocolCirceTestJS  = Build.protocolCirceTestJS
-val protocolCirceTestJVM = Build.protocolCirceTestJVM
-val protocolOkHttp4      = Build.protocolOkHttp4
+val root         = Build.root
+
+val coreJS       = Build.coreJS
+val coreJVM      = Build.coreJVM
+val coreCirceJS  = Build.coreCirceJS
+val coreCirceJVM = Build.coreCirceJVM
+val coreOkHttp4  = Build.coreOkHttp4
+
+val testCoreJS   = Build.testCoreJS
+val testCoreJVM  = Build.testCoreJVM
+val testCirceJS  = Build.testCirceJS
+val testCirceJVM = Build.testCirceJVM
