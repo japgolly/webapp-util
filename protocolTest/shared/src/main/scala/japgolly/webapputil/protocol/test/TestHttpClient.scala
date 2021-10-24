@@ -31,7 +31,7 @@ object TestHttpClient {
       "Req[%08X]:%s(%s)".format(
         ##,
         request.uri,
-        if (request.uriParams.nonEmpty) request.uriParams.asVector.toString else request.body.toString
+        if (request.uriParams.nonEmpty) request.uriParams.toString else request.body.toString
       )
 
     private var _pendingResponse = true

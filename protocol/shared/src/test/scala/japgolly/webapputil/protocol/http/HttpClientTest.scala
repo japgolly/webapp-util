@@ -43,6 +43,16 @@ object HttpClientTest extends TestSuite {
           assertSeq(str, ps2.asVector, src.asVector)
         }
       }
+
+      "normalisation" - {
+        val src = UriParams("b" -> "2", "z" -> "1", "b" -> "0", "a" -> "6")
+        val tgt = UriParams("a" -> "6", "b" -> "2", "b" -> "0", "z" -> "1")
+        val bad = UriParams("b" -> "0", "z" -> "1", "b" -> "2", "a" -> "6")
+        assertEq(src.normalised.asVector, tgt.asVector)
+        assertEq(src, tgt)
+        assertNotEq(src, bad)
+        assertNotEq(tgt, bad)
+      }
     }
   }
 }
