@@ -162,6 +162,7 @@ object HttpClient { outer =>
   }
 
   sealed trait Body {
+    def isNormalised: Boolean = true
     def normalised: Body = this
   }
 
@@ -184,8 +185,11 @@ object HttpClient { outer =>
       def delete(key: String)                = Form(params.delete(key))
       def get   (key: String)                = params.get(key)
 
+      override def isNormalised =
+        params.isNormalised
+
       override def normalised: Form =
-        Form(params.normalised)
+        if (isNormalised) this else Form(params.normalised)
     }
 
     object Form extends AbstractMultiStringMap.Module[Form] {
@@ -214,12 +218,48 @@ object HttpClient { outer =>
                            headers  : Headers,
                            body     : Body,
                           ) {
+
+    def isNormalised: Boolean = (
+      uriParams.isNormalised &&
+      headers  .isNormalised &&
+      body     .isNormalised
+    )
+
     def normalised: Request =
+      if (isNormalised) this else normalise
+
+    private lazy val normalise: Request =
       copy(
         uriParams = uriParams.normalised,
         headers   = headers  .normalised,
         body      = body     .normalised,
       )
+
+    override def hashCode = {
+      val n = normalised
+      (
+        n.method,
+        n.uri,
+        n.uriParams,
+        n.headers,
+        n.body,
+      ).hashCode
+    }
+
+    override def equals(a: Any) =
+      a match {
+        case b: Request =>
+          val x = normalised
+          val y = b.normalised
+          (
+            x.method    == y.method    &&
+            x.uri       == y.uri       &&
+            x.uriParams == y.uriParams &&
+            x.headers   == y.headers   &&
+            x.body      == y.body
+          )
+        case _ => false
+      }
   }
 
   trait RequestCtors[+A] {

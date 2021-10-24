@@ -7,7 +7,7 @@ import scala.jdk.CollectionConverters._
   *
   * This is abstract for easy newtype creation.
   */
-abstract class AbstractMultiStringMap[Self](final val asVector: Vector[(String, String)], isNormalised: Boolean) { self: Self =>
+abstract class AbstractMultiStringMap[Self](final val asVector: Vector[(String, String)], final val isNormalised: Boolean) { self: Self =>
 
   final type Self2 = Self with AbstractMultiStringMap[Self]
 
@@ -32,9 +32,9 @@ abstract class AbstractMultiStringMap[Self](final val asVector: Vector[(String, 
     if (isNormalised || asVector.isEmpty)
       this
     else
-      reNormalised
+      normalise
 
-  private lazy val reNormalised: Self2 = {
+  private lazy val normalise: Self2 = {
     // According to the Scala doc, this is a stable sort
     val result = asVector.sortBy(_._1)
     create(result, isNormalised = true)
