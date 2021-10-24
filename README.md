@@ -62,6 +62,9 @@ val WebappUtilVer = "<version>"
     * `JsonCodec` - composition of Circe's `Encoder` and `Decoder` into a single typeclass
     * `JsonEntrypointCodec` - creates instances of `EntrypointDef.Codec` using Circe codecs
     * `JsonUtil` - utilities to supplement Circe
+    * Extension methods available via `import japgolly.webapputil.protocol.circe._`
+      * `HttpClient.Body.json` to create response bodies as JSON
+      * `HttpClient.Body#parseJsonBody` to parse request bodies as JSON
 
 * The `protocol-circe-test` module:
   * `japgolly.webapputil.protocol.circe.test`

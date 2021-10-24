@@ -181,6 +181,7 @@ object HttpClient { outer =>
       }
 
     final case class Form(params: UriParams) extends Body {
+      def contentType                        = Headers.ContentType.Form
       def add   (key: String, value: String) = Form(params.add(key, value))
       def delete(key: String)                = Form(params.delete(key))
       def get   (key: String)                = params.get(key)
