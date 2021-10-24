@@ -17,7 +17,6 @@ trait JsonHttpClientExt {
 }
 
 object JsonHttpClientExt {
-  import Headers.ContentType
 
   final class BodyObjExt(private val self: Body.type) extends AnyVal {
 
