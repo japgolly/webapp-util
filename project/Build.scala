@@ -99,16 +99,20 @@ object Build {
     .in(file("."))
     .configure(commonSettings.jvm, preventPublication)
     .aggregate(
-      protocolJVM, protocolJS,
-      protocolTestJVM, protocolTestJS,
-      protocolCirceJVM, protocolCirceJS,
-      protocolCirceTestJVM, protocolCirceTestJS,
-      protocolOkHttp4,
+      coreJS,
+      coreJVM,
+      coreCirceJS,
+      coreCirceJVM,
+      coreOkHttp4,
+      testCoreJS,
+      testCoreJVM,
+      testCirceJS,
+      testCirceJVM,
     )
 
-  lazy val protocolJVM = protocol.jvm
-  lazy val protocolJS  = protocol.js
-  lazy val protocol = crossProject(JSPlatform, JVMPlatform)
+  lazy val coreJVM = core.jvm
+  lazy val coreJS  = core.js
+  lazy val core = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
     .settings(
       libraryDependencies += Dep.univEq.value,
@@ -121,23 +125,23 @@ object Build {
       ),
     )
 
-  lazy val protocolTestJVM = protocolTest.jvm
-  lazy val protocolTestJS  = protocolTest.js
-  lazy val protocolTest = crossProject(JSPlatform, JVMPlatform)
+  lazy val testCoreJVM = testCore.jvm
+  lazy val testCoreJS  = testCore.js
+  lazy val testCore = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
-    .dependsOn(protocol)
+    .dependsOn(core)
     .settings(
-      moduleName := "protocol-test",
+      moduleName := "test",
       libraryDependencies += Dep.microlibsTestUtil.value,
     )
 
-  lazy val protocolCirceJVM = protocolCirce.jvm
-  lazy val protocolCirceJS  = protocolCirce.js
-  lazy val protocolCirce = crossProject(JSPlatform, JVMPlatform)
+  lazy val coreCirceJVM = coreCirce.jvm
+  lazy val coreCirceJS  = coreCirce.js
+  lazy val coreCirce = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
-    .dependsOn(protocol)
+    .dependsOn(core)
     .settings(
-      moduleName := "protocol-circe",
+      moduleName := "core-circe",
       libraryDependencies ++= Seq(
         Dep.circeCore.value,
         Dep.circeParser.value,
@@ -147,21 +151,21 @@ object Build {
       ),
     )
 
-  lazy val protocolCirceTestJVM = protocolCirceTest.jvm
-  lazy val protocolCirceTestJS  = protocolCirceTest.js
-  lazy val protocolCirceTest = crossProject(JSPlatform, JVMPlatform)
+  lazy val testCirceJVM = testCirce.jvm
+  lazy val testCirceJS  = testCirce.js
+  lazy val testCirce = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
-    .dependsOn(protocolCirce, protocolTest)
+    .dependsOn(coreCirce, testCore)
     .settings(
-      moduleName := "protocol-circe-test",
+      moduleName := "test-circe",
       libraryDependencies += Dep.nyayaGen.value,
     )
 
-  lazy val protocolOkHttp4 = project
+  lazy val coreOkHttp4 = project
     .configure(commonSettings.jvm, publicationSettings.jvm)
-    .dependsOn(protocolJVM)
+    .dependsOn(coreJVM)
     .settings(
-      moduleName := "protocol-okhttp4",
+      moduleName := "core-okhttp4",
       libraryDependencies += Dep.okHttp4.value,
     )
 }

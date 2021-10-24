@@ -10,17 +10,22 @@ the low commit count is not an indication of immaturity.
 ```scala
 val WebappUtilVer = "<version>"
 
-"com.github.japgolly.webapp-util" %%% "protocol"            % WebappUtilVer
-"com.github.japgolly.webapp-util" %%% "protocol-test"       % WebappUtilVer % Test
-"com.github.japgolly.webapp-util" %%% "protocol-circe"      % WebappUtilVer
-"com.github.japgolly.webapp-util" %%% "protocol-circe-test" % WebappUtilVer % Test
-"com.github.japgolly.webapp-util" %%  "protocol-okhttp4"    % WebappUtilVer
+// Minimal
+"com.github.japgolly.webapp-util" %%% "core"         % WebappUtilVer
+"com.github.japgolly.webapp-util" %%% "test"         % WebappUtilVer % Test
+
+// Circe JSON support
+"com.github.japgolly.webapp-util" %%% "core-circe"   % WebappUtilVer
+"com.github.japgolly.webapp-util" %%% "test-circe"   % WebappUtilVer % Test
+
+// HttpClient implementation using okhttp4
+"com.github.japgolly.webapp-util" %%  "core-okhttp4" % WebappUtilVer
 ```
 
 
 # Included
 
-* The `protocol` module:
+* The `core` module:
 
   * `japgolly.webapputil.protocol.general`
     * `ErrorMsg` - typed error message, with some util and predefined cases
@@ -50,13 +55,13 @@ val WebappUtilVer = "<version>"
     * `HttpClient` - an abstract HTTP (invocation) client
     * `UrlEncoder` - cross-platform URL encoding and decoding
 
-* The `protocol-test` module:
+* The `test` module:
   * `japgolly.webapputil.protocol.test`
     * `BinaryTestUtil` - utilities for testing binary data
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
     * `TestHttpClient` - a `HttpClient` instance for use in tests
 
-* The `protocol-circe` module:
+* The `core-circe` module:
   * `japgolly.webapputil.protocol.circe`
     * `JsonAjaxClient` - implementation of `AjaxClient` that uses JSON and `JsonCodec` *(JS only)*
     * `JsonCodec` - composition of Circe's `Encoder` and `Decoder` into a single typeclass
@@ -66,12 +71,12 @@ val WebappUtilVer = "<version>"
       * `HttpClient.Body.json` to create response bodies as JSON
       * `HttpClient.Body#parseJsonBody` to parse request bodies as JSON
 
-* The `protocol-circe-test` module:
+* The `test-circe` module:
   * `japgolly.webapputil.protocol.circe.test`
     * `JsonTestUtil` - utilities to test JSON codecs
     * `TestJsonAjaxClient` - implementation of `TestAjaxClient` that uses JSON and `JsonCodec` *(JS only)*
 
-* The `protocol-okhttp4` module:
+* The `core-okhttp4` module:
   * `japgolly.webapputil.protocol.http`
     * `OkHttp4Client` - an implementation of `HttpClient` using okhttp4
 
