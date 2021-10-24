@@ -9,6 +9,8 @@ object HttpClient { outer =>
     final type Body = outer.Body
     final val  Body = outer.Body
 
+    final val  ContentType = outer.ContentType
+
     final type Headers = outer.Headers
     final val  Headers = outer.Headers
 
@@ -50,6 +52,23 @@ object HttpClient { outer =>
 
   // ===================================================================================================================
 
+  object ContentType {
+    final val Binary   = "application/octet-stream"
+    final val Json     = "application/json"
+    final val JsonUtf8 = "application/json;charset=UTF-8"
+    final val Form     = "application/x-www-form-urlencoded"
+
+    def is(contentType: String): String => Boolean = {
+      val len = contentType.length
+      c => c.startsWith(contentType) && (
+        c.length == len  // exact match
+        || c(len) == ';' // prefix
+      )
+    }
+
+    val isJson = is(Json)
+  }
+
   final class Headers(asVector: Vector[(String, String)], isNormalised: Boolean)
       extends AbstractMultiStringMap[Headers](asVector, isNormalised) {
 
@@ -57,33 +76,16 @@ object HttpClient { outer =>
       new Headers(asVector, isNormalised)
 
     def withContentType(value: String) = add("Content-Type", value)
-    def withContentTypeBinary          = withContentType(Headers.ContentType.Binary)
-    def withContentTypeForm            = withContentType(Headers.ContentType.Form)
-    def withContentTypeJson            = withContentType(Headers.ContentType.Json)
-    def withContentTypeJsonUtf8        = withContentType(Headers.ContentType.JsonUtf8)
+    def withContentTypeBinary          = withContentType(ContentType.Binary)
+    def withContentTypeForm            = withContentType(ContentType.Form)
+    def withContentTypeJson            = withContentType(ContentType.Json)
+    def withContentTypeJsonUtf8        = withContentType(ContentType.JsonUtf8)
   }
 
   object Headers extends AbstractMultiStringMap.Module[Headers] {
 
     override def fromVector(v: Vector[(String, String)]): Headers =
       new Headers(v, isNormalised = false)
-
-    object ContentType {
-      final val Binary   = "application/octet-stream"
-      final val Json     = "application/json"
-      final val JsonUtf8 = "application/json;charset=UTF-8"
-      final val Form     = "application/x-www-form-urlencoded"
-
-      def is(contentType: String): String => Boolean = {
-        val len = contentType.length
-        c => c.startsWith(contentType) && (
-          c.length == len  // exact match
-          || c(len) == ';' // prefix
-        )
-      }
-
-      val isJson = is(Json)
-    }
   }
 
   final class UriParams(asVector: Vector[(String, String)], isNormalised: Boolean)
@@ -170,7 +172,7 @@ object HttpClient { outer =>
 
     def apply(body: String, contentType: String = null): Body =
       contentType match {
-        case Headers.ContentType.Form =>
+        case ContentType.Form =>
           if (body == null)
             Form.empty
           else
@@ -181,6 +183,7 @@ object HttpClient { outer =>
       }
 
     final case class Form(params: UriParams) extends Body {
+      def contentType                        = ContentType.Form
       def add   (key: String, value: String) = Form(params.add(key, value))
       def delete(key: String)                = Form(params.delete(key))
       def get   (key: String)                = params.get(key)
@@ -201,8 +204,8 @@ object HttpClient { outer =>
       def isEmpty: Boolean =
         content.isEmpty && contentType.isEmpty
 
-      def isContentTypeJson        = contentType.exists(Headers.ContentType.isJson)
-      def isContentTypeJsonOrEmpty = contentType.forall(Headers.ContentType.isJson)
+      def isContentTypeJson        = contentType.exists(ContentType.isJson)
+      def isContentTypeJsonOrEmpty = contentType.forall(ContentType.isJson)
     }
 
     val empty: Str =
