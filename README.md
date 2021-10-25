@@ -11,15 +11,19 @@ the low commit count is not an indication of immaturity.
 val WebappUtilVer = "<version>"
 
 // Minimal
-"com.github.japgolly.webapp-util" %%% "core"         % WebappUtilVer
-"com.github.japgolly.webapp-util" %%% "test"         % WebappUtilVer % Test
+"com.github.japgolly.webapp-util" %%% "core"             % WebappUtilVer
+"com.github.japgolly.webapp-util" %%% "test"             % WebappUtilVer % Test
+
+// Cats Effect support
+"com.github.japgolly.webapp-util" %%% "core-cats-effect" % WebappUtilVer
+"com.github.japgolly.webapp-util" %%% "test-cats-effect" % WebappUtilVer % Test
 
 // Circe JSON support
-"com.github.japgolly.webapp-util" %%% "core-circe"   % WebappUtilVer
-"com.github.japgolly.webapp-util" %%% "test-circe"   % WebappUtilVer % Test
+"com.github.japgolly.webapp-util" %%% "core-circe"       % WebappUtilVer
+"com.github.japgolly.webapp-util" %%% "test-circe"       % WebappUtilVer % Test
 
 // HttpClient implementation using okhttp4
-"com.github.japgolly.webapp-util" %%  "core-okhttp4" % WebappUtilVer
+"com.github.japgolly.webapp-util" %%  "core-okhttp4"     % WebappUtilVer
 ```
 
 
@@ -60,6 +64,16 @@ val WebappUtilVer = "<version>"
     * `BinaryTestUtil` - utilities for testing binary data
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
     * `TestHttpClient` - a `HttpClient` instance for use in tests
+
+* The `core-cats-effect` module:
+  * `japgolly.webapputil.cats.effect`
+    * Implicits so that `IO` is recognised as an effect type usable by the rest of the this library.
+      * `Effect.Async[IO]`
+      * `Effect.Sync[IO]` *(JVM only)*
+
+* The `test-cats-effect` module:
+  * `japgolly.webapputil.cats.effect.test`
+    * `TestHttpClientIO` *(JVM only)*
 
 * The `core-circe` module:
   * `japgolly.webapputil.circe`

@@ -7,13 +7,17 @@ ThisBuild / versionScheme := Some("early-semver")
 
 val root         = Build.root
 
-val coreJS       = Build.coreJS
-val coreJVM      = Build.coreJVM
-val coreCirceJS  = Build.coreCirceJS
-val coreCirceJVM = Build.coreCirceJVM
-val coreOkHttp4  = Build.coreOkHttp4
+val coreJS            = Build.coreJS
+val coreJVM           = Build.coreJVM
+val coreCatsEffectJS  = Build.coreCatsEffectJS
+val coreCatsEffectJVM = Build.coreCatsEffectJVM
+val coreCirceJS       = Build.coreCirceJS
+val coreCirceJVM      = Build.coreCirceJVM
+val coreOkHttp4       = Build.coreOkHttp4
 
-val testCoreJS   = Build.testCoreJS
-val testCoreJVM  = Build.testCoreJVM
-val testCirceJS  = Build.testCirceJS
-val testCirceJVM = Build.testCirceJVM
+val testCoreJS        = Build.testCoreJS
+val testCoreJVM       = Build.testCoreJVM
+val testCatsEffectJS  = Build.testCatsEffectJS
+val testCatsEffectJVM = Build.testCatsEffectJVM
+val testCirceJS       = Build.testCirceJS
+val testCirceJVM      = Build.testCirceJVM
