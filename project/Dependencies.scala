@@ -14,7 +14,7 @@ object Dependencies {
     def nyaya        = "1.0.0"
     def okHttp4      = "4.9.2"
     def scala2       = "2.13.6"
-    def scala3       = "3.0.1"
+    def scala3       = "3.0.2"
     def scalaJsDom   = "2.0.0"
     def scalaJsReact = "2.0.0-RC4"
     def univEq       = "2.0.0"
