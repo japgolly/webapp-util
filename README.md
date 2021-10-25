@@ -59,6 +59,10 @@ val WebappUtilVer = "<version>"
     * `HttpClient` - an abstract HTTP (invocation) client
     * `UrlEncoder` - cross-platform URL encoding and decoding
 
+  * `japgolly.webapputil.locks`
+    * `LockUtils` - helpers around Java locks
+    * `SharedLock` - a lock that can be safely shared between threads
+
 * The `test` module:
   * `japgolly.webapputil.test`
     * `BinaryTestUtil` - utilities for testing binary data

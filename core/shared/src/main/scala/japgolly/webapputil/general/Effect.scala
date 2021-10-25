@@ -2,6 +2,10 @@ package japgolly.webapputil.general
 
 import scala.util.Try
 
+trait Effect[F[_]] extends Effect.Monad[F] {
+  def bracket[A, B](fa: F[A])(use: A => F[B])(release: A => F[Unit]): F[B]
+}
+
 object Effect {
 
   trait Monad[F[_]] {
@@ -21,11 +25,11 @@ object Effect {
       )(_.getOrElse(throw err))
   }
 
-  trait Sync[F[_]] extends Monad[F] {
+  trait Sync[F[_]] extends Effect[F] {
     def runSync[A](fa: F[A]): A
   }
 
-  trait Async[F[_]] extends Monad[F] {
+  trait Async[F[_]] extends Effect[F] {
     def async[A](f: (Try[A] => Unit) => Unit): F[A]
   }
 

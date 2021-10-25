@@ -22,6 +22,9 @@ trait WebappUtilEffectAsyncIO extends Effect.Async[IO] {
   override def flatMap[A, B](fa: IO[A])(f: A => IO[B]): IO[B] =
     fa.flatMap(f)
 
+  override def bracket[A, B](fa: IO[A])(use: A => IO[B])(release: A => IO[Unit]): IO[B] =
+    fa.bracket(use = use)(release = release)
+
   override def async[A](f: (Try[A] => Unit) => Unit): IO[A] = {
     val f2: (Either[Throwable, A] => Unit) => Unit = g => f(tryA => g(tryA.toEither))
     IO.async_[A](f2)
