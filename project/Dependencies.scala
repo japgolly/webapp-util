@@ -8,12 +8,13 @@ object Dependencies {
 
     // Exported
     def boopickle    = "1.4.0"
+    def catsEffect   = "3.2.9"
     def circe        = "0.14.1"
     def microlibs    = "4.0.0"
     def nyaya        = "1.0.0"
     def okHttp4      = "4.9.2"
     def scala2       = "2.13.6"
-    def scala3       = "3.0.1"
+    def scala3       = "3.0.2"
     def scalaJsDom   = "2.0.0"
     def scalaJsReact = "2.0.0-RC4"
     def univEq       = "2.0.0"
@@ -25,6 +26,7 @@ object Dependencies {
 
   object Dep {
     val boopickle           = Def.setting("io.suzaku"                         %%% "boopickle"     % Ver.boopickle)
+    val catsEffect          = Def.setting("org.typelevel"                     %%% "cats-effect"   % Ver.catsEffect)
     val circeCore           = Def.setting("io.circe"                          %%% "circe-core"    % Ver.circe)
     val circeParser         = Def.setting("io.circe"                          %%% "circe-parser"  % Ver.circe)
     val circeTesting        = Def.setting("io.circe"                          %%% "circe-testing" % Ver.circe)

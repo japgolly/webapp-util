@@ -101,11 +101,15 @@ object Build {
     .aggregate(
       coreJS,
       coreJVM,
+      coreCatsEffectJS,
+      coreCatsEffectJVM,
       coreCirceJS,
       coreCirceJVM,
       coreOkHttp4,
       testCoreJS,
       testCoreJVM,
+      testCatsEffectJS,
+      testCatsEffectJVM,
       testCirceJS,
       testCirceJVM,
     )
@@ -159,6 +163,25 @@ object Build {
     .settings(
       moduleName := "test-circe",
       libraryDependencies += Dep.nyayaGen.value,
+    )
+
+  lazy val coreCatsEffectJVM = coreCatsEffect.jvm
+  lazy val coreCatsEffectJS  = coreCatsEffect.js
+  lazy val coreCatsEffect = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, publicationSettings, testSettings)
+    .dependsOn(core)
+    .settings(
+      moduleName := "core-cats-effect",
+      libraryDependencies += Dep.catsEffect.value,
+    )
+
+  lazy val testCatsEffectJVM = testCatsEffect.jvm
+  lazy val testCatsEffectJS  = testCatsEffect.js
+  lazy val testCatsEffect = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, publicationSettings, testSettings)
+    .dependsOn(coreCatsEffect, testCore)
+    .settings(
+      moduleName := "test-cats-effect",
     )
 
   lazy val coreOkHttp4 = project
