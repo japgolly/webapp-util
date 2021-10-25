@@ -52,8 +52,8 @@ object JsonHttpClientExt {
             Left(HttpJsonParseFailure.NonJsonContentType(body.contentType.getOrElse("")))
           else
             for {
-              json <- parse(body.content).leftMap(HttpJsonParseFailure.JsonParseError)
-              a    <- json.as[A].leftMap(HttpJsonParseFailure.JsonDecodeError)
+              json <- parse(body.content).leftMap(HttpJsonParseFailure.JsonParseError.apply)
+              a    <- json.as[A].leftMap(HttpJsonParseFailure.JsonDecodeError.apply)
             } yield a
         case f: Body.Form =>
           Left(HttpJsonParseFailure.NonJsonContentType(f.contentType))
