@@ -41,6 +41,7 @@ val WebappUtilVer = "<version>"
     * `LazyVal` - A lightweight `lazy val` as a portable value
     * `Protocol` - abstract definitions of protocols
     * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure *(JS only)*
+    * `ThreadUtils` - thread groups, thread pools, `ExecutionContext` util, shutdown hooks  *(JVM only)*
     * `Url` - types for URLs
 
   * `japgolly.webapputil.ajax`
@@ -78,6 +79,7 @@ val WebappUtilVer = "<version>"
     * Implicits so that `IO` is recognised as an effect type usable by the rest of the this library.
       * `Effect.Async[IO]`
       * `Effect.Sync[IO]` *(JVM only)*
+    * `ThreadUtilsIO` - thread pools, scheduling, shutdown hooks, `IO` runtimes *(JVM only)*
 
 * The `test-cats-effect` module:
   * `japgolly.webapputil.cats.effect.test`

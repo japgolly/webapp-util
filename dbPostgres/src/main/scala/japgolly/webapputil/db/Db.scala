@@ -82,7 +82,7 @@ object Db {
         cfg         = cfg,
         dsMain      = dataSrc,
         dsMigration = dataSrc,
-        connectEC   = ThreadUtilsIO.resThreadPool("HikariCP", logger)(_.withThreads(poolSize)),
+        connectEC   = ThreadUtilsIO.threadPool("HikariCP", logger)(_.withThreads(poolSize)),
       )
     }.flatten
 

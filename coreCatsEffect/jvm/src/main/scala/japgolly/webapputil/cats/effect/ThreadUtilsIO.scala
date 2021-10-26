@@ -34,7 +34,7 @@ object ThreadUtilsIO {
 
   // ===================================================================================================================
 
-  def resThreadPool(threadGroupName: String, logger: Logger)(f: ThreadPool => ThreadPool2): Resource[IO, ExecutionContext] =
+  def threadPool(threadGroupName: String, logger: Logger)(f: ThreadPool => ThreadPool2): Resource[IO, ExecutionContext] =
     Resource.make[IO, ThreadPool2](
       IO(f(newThreadPool(threadGroupName, logger)))
     )(

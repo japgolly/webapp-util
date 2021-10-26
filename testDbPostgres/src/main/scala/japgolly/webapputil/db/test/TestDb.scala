@@ -43,7 +43,7 @@ object TestDb {
       if (sync)
         Resource.pure[IO, ExecutionContext](ExecutionContexts.synchronous)
       else
-        ThreadUtilsIO.resThreadPool("DB", logger)(_.withThreads(poolSize))
+        ThreadUtilsIO.threadPool("DB", logger)(_.withThreads(poolSize))
 
     val create =
       Db.generic(
