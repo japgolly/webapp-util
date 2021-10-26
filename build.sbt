@@ -5,7 +5,7 @@ ThisBuild / shellPrompt   := ((s: State) => Project.extract(s).currentRef.projec
 ThisBuild / startYear     := Some(2021)
 ThisBuild / versionScheme := Some("early-semver")
 
-val root         = Build.root
+val root              = Build.root
 
 val coreJS            = Build.coreJS
 val coreJVM           = Build.coreJVM
@@ -14,6 +14,7 @@ val coreCatsEffectJVM = Build.coreCatsEffectJVM
 val coreCirceJS       = Build.coreCirceJS
 val coreCirceJVM      = Build.coreCirceJVM
 val coreOkHttp4       = Build.coreOkHttp4
+val dbPostgres        = Build.dbPostgres
 
 val testCoreJS        = Build.testCoreJS
 val testCoreJVM       = Build.testCoreJVM
@@ -21,3 +22,4 @@ val testCatsEffectJS  = Build.testCatsEffectJS
 val testCatsEffectJVM = Build.testCatsEffectJVM
 val testCirceJS       = Build.testCirceJS
 val testCirceJVM      = Build.testCirceJVM
+val testDbPostgres    = Build.testDbPostgres

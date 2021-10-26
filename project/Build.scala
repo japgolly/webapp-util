@@ -106,12 +106,14 @@ object Build {
       coreCirceJS,
       coreCirceJVM,
       coreOkHttp4,
+      dbPostgres,
       testCoreJS,
       testCoreJVM,
       testCatsEffectJS,
       testCatsEffectJVM,
       testCirceJS,
       testCirceJVM,
+      testDbPostgres,
     )
 
   lazy val coreJVM = core.jvm
@@ -120,6 +122,9 @@ object Build {
     .configureCross(commonSettings, publicationSettings, testSettings)
     .settings(
       libraryDependencies += Dep.univEq.value,
+    )
+    .jvmSettings(
+      libraryDependencies += Dep.scalaLogging.value,
     )
     .jsSettings(
       libraryDependencies ++= Seq(
@@ -190,5 +195,36 @@ object Build {
     .settings(
       moduleName := "core-okhttp4",
       libraryDependencies += Dep.okHttp4.value,
+    )
+
+  lazy val dbPostgres = project
+    .configure(commonSettings.jvm, publicationSettings.jvm)
+    .dependsOn(coreCatsEffectJVM)
+    .settings(
+      moduleName := "db-postgres",
+      libraryDependencies ++= Seq(
+        Dep.catsRetry          .value,
+        Dep.clearConfig        .value,
+        Dep.doobieCore         .value,
+        Dep.doobieHikari       .value,
+        Dep.doobiePostgres     .value,
+        Dep.doobiePostgresCirce.value,
+        Dep.flyway             .value,
+        Dep.hikariCP           .value,
+        Dep.postgresql         .value,
+        Dep.scalaLogging       .value,
+      ),
+    )
+
+  lazy val testDbPostgres = project
+    .configure(commonSettings.jvm, publicationSettings.jvm)
+    .dependsOn(dbPostgres)
+    .settings(
+      moduleName := "test-db-postgres",
+      libraryDependencies ++= Seq(
+        Dep.izumiReflect     .value,
+        Dep.microlibsTestUtil.value,
+        Dep.univEq           .value,
+      ),
     )
 }
