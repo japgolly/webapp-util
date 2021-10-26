@@ -222,8 +222,9 @@ object Build {
     .settings(
       moduleName := "test-db-postgres",
       libraryDependencies ++= Seq(
+        Dep.izumiReflect     .value,
         Dep.microlibsTestUtil.value,
-        Dep.univEq.value
+        Dep.univEq           .value,
       ),
     )
 }

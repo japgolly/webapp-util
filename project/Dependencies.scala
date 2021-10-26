@@ -15,6 +15,7 @@ object Dependencies {
     def doobie       = "1.0.0-RC1"
     def flyway       = "8.0.2"
     def hikariCP     = "4.0.3"
+    def izumiReflect = "2.0.0"
     def microlibs    = "4.0.0"
     def nyaya        = "1.0.0"
     def okHttp4      = "4.9.2"
@@ -44,6 +45,7 @@ object Dependencies {
     val doobiePostgresCirce = Def.setting("org.tpolecat"                      %%% "doobie-postgres-circe" % Ver.doobie)
     val flyway              = Def.setting("org.flywaydb"                        % "flyway-core"           % Ver.flyway)
     val hikariCP            = Def.setting("com.zaxxer"                          % "HikariCP"              % Ver.hikariCP)
+    val izumiReflect        = Def.setting("dev.zio"                            %% "izumi-reflect"         % Ver.izumiReflect)
     val microlibsAdtMacros  = Def.setting("com.github.japgolly.microlibs"     %%% "adt-macros"            % Ver.microlibs)
     val microlibsRecursion  = Def.setting("com.github.japgolly.microlibs"     %%% "recursion"             % Ver.microlibs)
     val microlibsTestUtil   = Def.setting("com.github.japgolly.microlibs"     %%% "test-util"             % Ver.microlibs)

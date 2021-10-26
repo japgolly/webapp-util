@@ -16,8 +16,8 @@ import japgolly.webapputil.db.test.TestDbHelpers._
 import japgolly.webapputil.locks.SharedLock
 import java.sql.Connection
 import scala.concurrent.ExecutionContext
-import scala.reflect.runtime.universe.{TypeTag, WeakTypeTag}
 import sourcecode.Line
+import izumi.reflect.Tag
 
 object TestDb {
 
@@ -179,13 +179,13 @@ object TestDb {
   // Copied from Doobie
   private val packagePrefix = "\\b[a-z]+\\.".r
 
-  private def typeName[A](implicit tag: WeakTypeTag[A]): String =
-    packagePrefix.replaceAllIn(tag.tpe.toString, "")
+  private def typeName[A](implicit tag: Tag[A]): String =
+    packagePrefix.replaceAllIn(tag.tag.toString, "")
 
-  def checkOutput[A: TypeTag](q: Query0[A])(implicit l: Line): Unit =
+  def checkOutput[A: Tag](q: Query0[A])(implicit l: Line): Unit =
     checkImpl(AnalysisArgs(s"Query0[${typeName[A]}]", q.pos, q.sql, q.outputAnalysis))
 
-  def checkOutput[A: TypeTag, B: TypeTag](q: Query[A, B])(implicit l: Line): Unit =
+  def checkOutput[A: Tag, B: Tag](q: Query[A, B])(implicit l: Line): Unit =
     checkImpl(AnalysisArgs(s"Query[${typeName[A]}, ${typeName[B]}]", q.pos, q.sql, q.outputAnalysis))
 
   private def checkImpl(args: AnalysisArgs)(implicit l: Line): Unit =
