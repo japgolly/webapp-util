@@ -23,7 +23,11 @@ val WebappUtilVer = "<version>"
 "com.github.japgolly.webapp-util" %%% "test-circe"       % WebappUtilVer % Test
 
 // HttpClient implementation using okhttp4
-"com.github.japgolly.webapp-util" %%  "core-okhttp4"     % WebappUtilVer
+"com.github.japgolly.webapp-util"  %% "core-okhttp4"     % WebappUtilVer
+
+// Postgres support via Doobie and Cats Effect
+"com.github.japgolly.webapp-util"  %% "db-postgres"      % WebappUtilVer
+"com.github.japgolly.webapp-util"  %% "test-db-postgres" % WebappUtilVer % Test
 ```
 
 
@@ -94,10 +98,24 @@ val WebappUtilVer = "<version>"
     * `JsonTestUtil` - utilities to test JSON codecs
     * `TestJsonAjaxClient` - implementation of `TestAjaxClient` that uses JSON and `JsonCodec` *(JS only)*
 
-* The `core-okhttp4` module:
+* The `core-okhttp4` module: *(JVM only)*
   * `japgolly.webapputil.okhttp4`
     * `OkHttp4Client` - an implementation of `HttpClient` using okhttp4
 
+* The `db-postgres` module: *(JVM only)*
+  * `japgolly.webapputil.db`
+    * `Db` - connection to the database
+    * `DbConfig` - DB config definitions, i.e. to load DB details at runtime on app startup
+    * `DbMigration` - manages DB schema migrations (via [Flyway](https://flywaydb.org))
+    * `DoobieCodecs` - a few generic codecs for Doobie
+    * `DoobieHelpers` - helpers for Doobie
+    * `XA` - wrapper around `Transactor[IO]` (used to be more and may again)
+
+* The `test-db-postgres` module: *(JVM only)*
+  * `japgolly.webapputil.db.test`
+    * `DbTable` - utilities around DB tables and row counting
+    * `TestDb` - provides access to a test DB, manages things like migration, and utilities
+    * `TestXA` - a live connection to the DB, and utilities to make testing as easy as possible
 
 # TODO:
 

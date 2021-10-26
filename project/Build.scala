@@ -201,6 +201,7 @@ object Build {
     .configure(commonSettings.jvm, publicationSettings.jvm)
     .dependsOn(coreCatsEffectJVM)
     .settings(
+      moduleName := "db-postgres",
       libraryDependencies ++= Seq(
         Dep.catsRetry          .value,
         Dep.clearConfig        .value,
@@ -219,6 +220,7 @@ object Build {
     .configure(commonSettings.jvm, publicationSettings.jvm)
     .dependsOn(dbPostgres)
     .settings(
+      moduleName := "test-db-postgres",
       libraryDependencies ++= Seq(
         Dep.microlibsTestUtil.value,
         Dep.univEq.value
