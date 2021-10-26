@@ -103,6 +103,8 @@ val WebappUtilVer = "<version>"
 
 * Add ScalaDoc and proper doc
 * AbstractLocation
+* Port IDB stuff
+* Port crypto stuff
 * Port websocket stuff
 * Port webstorage stuff
 * Port SafePickler and related
