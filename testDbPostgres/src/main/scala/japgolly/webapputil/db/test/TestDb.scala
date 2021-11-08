@@ -9,6 +9,7 @@ import doobie.implicits._
 import doobie.util.Colors
 import doobie.util.testing._
 import doobie.util.transactor.Strategy
+import izumi.reflect.Tag
 import japgolly.microlibs.testutil.TestUtil._
 import japgolly.webapputil.cats.effect._
 import japgolly.webapputil.db._
@@ -17,7 +18,6 @@ import japgolly.webapputil.locks.SharedLock
 import java.sql.Connection
 import scala.concurrent.ExecutionContext
 import sourcecode.Line
-import izumi.reflect.Tag
 
 object TestDb {
 

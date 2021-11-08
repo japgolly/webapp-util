@@ -65,7 +65,7 @@ val WebappUtilVer = "<version>"
     * `UrlEncoder` - cross-platform URL encoding and decoding
 
   * `japgolly.webapputil.locks`
-    * `LockUtils` - helpers around Java locks
+    * `LockUtils` - helpers around Java locks *(JVM only)*
     * `SharedLock` - a lock that can be safely shared between threads
 
 * The `test` module:
