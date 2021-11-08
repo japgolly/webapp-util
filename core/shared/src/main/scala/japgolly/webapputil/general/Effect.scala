@@ -6,7 +6,7 @@ trait Effect[F[_]] extends Effect.Monad[F] {
   def bracket[A, B](fa: F[A])(use: A => F[B])(release: A => F[Unit]): F[B]
 }
 
-object Effect {
+object Effect extends Effect_PlatformSpecific {
 
   trait Monad[F[_]] {
     def delay  [A]   (a: => A)               : F[A]
@@ -17,12 +17,8 @@ object Effect {
     def flatten[A](ffa: F[F[A]]): F[A] =
       flatMap(ffa)(identity)
 
-    def timeoutMs[A](ms: Long)(fa: F[A]): F[Option[A]]
-
-    def timeoutMsOrThrow[A](ms: Long, err: => Throwable)(fa: F[A]): F[A] =
-      map(
-        timeoutMs(ms)(fa)
-      )(_.getOrElse(throw err))
+    def suspend[A](fa: => F[A]): F[A] =
+      flatMap(delay(fa))(identity)
   }
 
   trait Sync[F[_]] extends Effect[F] {
@@ -31,6 +27,13 @@ object Effect {
 
   trait Async[F[_]] extends Effect[F] {
     def async[A](f: (Try[A] => Unit) => Unit): F[A]
+
+    def timeoutMs[A](ms: Long)(fa: F[A]): F[Option[A]]
+
+    def timeoutMsOrThrow[A](ms: Long, err: => Throwable)(fa: F[A]): F[A] =
+      map(
+        timeoutMs(ms)(fa)
+      )(_.getOrElse(throw err))
   }
 
 }

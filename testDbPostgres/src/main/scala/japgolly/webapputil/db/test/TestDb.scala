@@ -9,6 +9,7 @@ import doobie.implicits._
 import doobie.util.Colors
 import doobie.util.testing._
 import doobie.util.transactor.Strategy
+import izumi.reflect.Tag
 import japgolly.microlibs.testutil.TestUtil._
 import japgolly.webapputil.cats.effect._
 import japgolly.webapputil.db._
@@ -17,7 +18,6 @@ import japgolly.webapputil.locks.SharedLock
 import java.sql.Connection
 import scala.concurrent.ExecutionContext
 import sourcecode.Line
-import izumi.reflect.Tag
 
 object TestDb {
 
@@ -123,7 +123,7 @@ object TestDb {
   /** Drops all objects (tables, views, procedures, triggers, ...) in the configured schemas. */
   def dropSchema(): Unit = {
     init()
-    rwlock.writeLock.inMutex {
+    rwlock.writeLock {
       val db = this.db()
       val allowed = "poetryhub_test"
       val dbName  = db.databaseName
@@ -140,7 +140,7 @@ object TestDb {
   private def useXa[A](mutex: Boolean)(f: TestXA => IO[A]): IO[A] = {
     init()
     val lock = if (mutex) rwlock.writeLock else rwlock.readLock
-    lock.inMutexF(xaWithoutLockingIO.flatMap(xa => f(new TestXA(xa, lazyTables))))
+    lock.applyF(xaWithoutLockingIO.flatMap(xa => f(new TestXA(xa, lazyTables))))
   }
 
   private def impureUseXa[A](mutex: Boolean)(f: TestXA => A): A =
@@ -165,7 +165,7 @@ object TestDb {
 
   def truncateAll(): Unit = {
     init()
-    rwlock.writeLock.inMutex {
+    rwlock.writeLock {
       truncateAllWithoutLocking()
     }
   }
