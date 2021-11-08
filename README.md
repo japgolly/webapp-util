@@ -66,7 +66,8 @@ val WebappUtilVer = "<version>"
 
   * `japgolly.webapputil.locks`
     * `LockUtils` - helpers around Java locks *(JVM only)*
-    * `SharedLock` - a lock that can be safely shared between threads
+    * `SharedLock` - a lock that can be safely shared between threads *(different API between JVM & JS)*
+    * `SharedLock.ReadWrite` - a read/write lock that can be safely shared between threads *(different API between JVM & JS)*
 
 * The `test` module:
   * `japgolly.webapputil.test`
