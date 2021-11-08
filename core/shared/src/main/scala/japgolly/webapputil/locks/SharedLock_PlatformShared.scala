@@ -10,11 +10,15 @@ object SharedLock_PlatformShared {
 
     trait Generic[F[_], L, T] {
       protected def F: Effect[F]
+      protected def unlock(lock: L): F[Unit]
 
       val lock: F[L]
       val lockInterruptibly: F[L]
       val tryLock: F[T]
       def tryLock(time: Long, unit: TimeUnit): F[T]
+
+      def apply[A](fa: F[A]): F[A] =
+        F.bracket(lockInterruptibly)(use = _ => fa)(release = unlock)
     }
 
     object Generic {
@@ -51,18 +55,27 @@ object SharedLock_PlatformShared {
   }
 
   trait Safe[F[_]] extends ObjectSafe.Generic[F, ObjectSafe.DefaultOnLock[F], ObjectSafe.DefaultOnTryLock[F]] {
-    def inMutex[A](fa: F[A]): F[A] =
-      F.bracket(lockInterruptibly)(use = _ => fa)(release = _.unlock)
+    override protected def unlock(lock: ObjectSafe.DefaultOnLock[F]): F[Unit] =
+      lock.unlock
   }
 
   // ===================================================================================================================
   object ObjectUnsafe {
 
     trait Generic[L, T] { self =>
+      protected def unlock(lock: L): Unit
       def lock(): L
       def lockInterruptibly(): L
       def tryLock(): T
       def tryLock(time: Long, unit: TimeUnit): T
+
+      def apply[A](a: => A): A = {
+        val l = lockInterruptibly()
+        try a finally unlock(l)
+      }
+
+      def applyF[F[_], A](fa: F[A])(implicit F: Effect[F]): F[A] =
+        F.bracket(F.delay(lockInterruptibly()))(use = _ => fa)(release = l => F.delay(unlock(l)))
 
       def withEffectGeneric[F[_]](implicit E: Effect[F]): ObjectSafe.Generic[F, L, T] =
         new ObjectSafe.Generic[F, L, T] {
@@ -70,7 +83,8 @@ object SharedLock_PlatformShared {
           override val lock                                = E.delay(self.lock())
           override val lockInterruptibly                   = E.delay(self.lockInterruptibly())
           override val tryLock                             = E.delay(self.tryLock())
-          override def tryLock(time: Long, unit: TimeUnit) = E.delay(self.tryLock(time , unit))
+          override def tryLock(time: Long, unit: TimeUnit) = E.delay(self.tryLock(time, unit))
+          override protected def unlock(lock: L)           = E.delay(self.unlock(lock))
         }
     }
 
@@ -104,23 +118,22 @@ object SharedLock_PlatformShared {
   }
 
   trait Unsafe extends ObjectUnsafe.Generic[ObjectUnsafe.DefaultOnLock, ObjectUnsafe.DefaultOnTryLock] { self =>
+    import ObjectUnsafe.{DefaultOnLock => L}
 
-    def inMutex[A](a: => A): A =  {
-      val l = lockInterruptibly()
-      try a finally l.unlock()
-    }
+    override protected def unlock(lock: L): Unit =
+      lock.unlock()
 
-    def inMutexF[F[_], A](fa: F[A])(implicit F: Effect[F]): F[A] =
-      F.bracket(F.delay(lockInterruptibly()))(use = _ => fa)(release = _.unlockF[F])
-
-    def withEffect[F[_]](implicit E: Effect[F]): Safe[F] =
+    def withEffect[F[_]](implicit E: Effect[F]): Safe[F] = {
+      type L = ObjectSafe.DefaultOnLock[F]
       new Safe[F] {
         override protected def F                         = E
         override val lock                                = E.delay(self.lock().withEffect[F])
         override val lockInterruptibly                   = E.delay(self.lockInterruptibly().withEffect[F])
         override val tryLock                             = E.delay(self.tryLock().map(_.withEffect[F]))
         override def tryLock(time: Long, unit: TimeUnit) = E.delay(self.tryLock(time , unit).map(_.withEffect[F]))
+        override protected def unlock(lock: L)           = lock.unlock
       }
+    }
 
   }
 }

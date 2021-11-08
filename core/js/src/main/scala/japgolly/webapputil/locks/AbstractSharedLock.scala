@@ -68,6 +68,6 @@ trait AbstractSharedLock extends SharedLock_PlatformShared.Safe[AsyncCallback] {
     }
 
   /** not re-entrant */
-  override def inMutex[A](fa: AsyncCallback[A]): AsyncCallback[A] =
+  override def apply[A](fa: AsyncCallback[A]): AsyncCallback[A] =
     F.flatMap(lock)(l => fa.finallyRun(l.unlock))
 }
