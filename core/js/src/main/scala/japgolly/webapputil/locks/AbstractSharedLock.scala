@@ -5,19 +5,19 @@ import japgolly.webapputil.general.Effect
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 
-trait AbstractSharedLock extends SharedLock_PlatformShared.Safe[AsyncCallback] {
+trait AbstractSharedLock extends GenericSharedLock.Safe.Default[AsyncCallback] {
   protected def unsafeRelease(): Unit
   /** @return await if already locked */
   protected def unsafeTryAcquire(): Option[AsyncCallback[Unit]]
 
   protected final type Locked =
-    SharedLock_PlatformShared.ObjectSafe.Locked[AsyncCallback]
+    GenericSharedLock.Safe.Locked[AsyncCallback]
 
   override final protected def F: Effect[AsyncCallback] =
     implicitly
 
   private val locked: Locked =
-    SharedLock_PlatformShared.ObjectSafe.Locked(F.delay {
+    GenericSharedLock.Safe.Locked(F.delay {
       unsafeRelease()
     })
 

@@ -30,7 +30,7 @@ final class SharedLock private() extends AbstractSharedLock {
 
 // =====================================================================================================================
 
-object SharedLock extends SharedLock_PlatformShared.ObjectSafeF[AsyncCallback] {
+object SharedLock extends GenericSharedLock.Safe.ExportObjectF[AsyncCallback] {
 
   def apply(): SharedLock =
     new SharedLock

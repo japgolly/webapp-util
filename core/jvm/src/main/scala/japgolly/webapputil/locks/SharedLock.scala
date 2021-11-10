@@ -3,9 +3,9 @@ package japgolly.webapputil.locks
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.StampedLock
 
-trait SharedLock extends SharedLock_PlatformShared.Unsafe
+trait SharedLock extends GenericSharedLock.Unsafe.Default
 
-object SharedLock extends SharedLock_PlatformShared.ObjectUnsafe {
+object SharedLock extends GenericSharedLock.Unsafe.ExportObject {
 
   def apply(): SharedLock =
     Stamped.write()

@@ -66,6 +66,8 @@ val WebappUtilVer = "<version>"
 
   * `japgolly.webapputil.locks`
     * `LockUtils` - helpers around Java locks *(JVM only)*
+    * `GenericSharedLock.Safe` - shared lock APIs that are FP-safe (consistent between JVM and JS)
+    * `GenericSharedLock.Unsafe` - shared lock APIs that are FP-unsafe, in that not effect type is used (consistent between JVM and JS)
     * `SharedLock` - a lock that can be safely shared between threads *(different API between JVM & JS)*
     * `SharedLock.ReadWrite` - a read/write lock that can be safely shared between threads *(different API between JVM & JS)*
 
