@@ -65,6 +65,7 @@ val WebappUtilVer = "<version>"
     * `UrlEncoder` - cross-platform URL encoding and decoding
 
   * `japgolly.webapputil.locks`
+    * `LockMechanism` - means of implicitly specifying how to acquire locks *(JVM only)*
     * `LockUtils` - helpers around Java locks *(JVM only)*
     * `GenericSharedLock.Safe` - shared lock APIs that are FP-safe (consistent between JVM and JS)
     * `GenericSharedLock.Unsafe` - shared lock APIs that are FP-unsafe, in that not effect type is used (consistent between JVM and JS)
