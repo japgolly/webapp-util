@@ -3,12 +3,6 @@ name: CI
 on:
   pull_request:
   push:
-    paths-ignore:
-      - '.gitignore'
-      - '**.md'
-      - 'LICENCE'
-    tags-ignore:
-      - v*.*.*
 
 jobs:
   ci:
