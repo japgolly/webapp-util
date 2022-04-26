@@ -99,22 +99,24 @@ object Build {
     .in(file("."))
     .configure(commonSettings.jvm, preventPublication)
     .aggregate(
-      coreJS,
-      coreJVM,
       coreCatsEffectJS,
       coreCatsEffectJVM,
       coreCirceJS,
       coreCirceJVM,
+      coreJS,
+      coreJVM,
       coreOkHttp4,
       dbPostgres,
-      testCoreJS,
-      testCoreJVM,
       testCatsEffectJS,
       testCatsEffectJVM,
       testCirceJS,
       testCirceJVM,
+      testCoreJS,
+      testCoreJVM,
       testDbPostgres,
     )
+
+  // ===================================================================================================================
 
   lazy val coreJVM = core.jvm
   lazy val coreJS  = core.js
@@ -146,6 +148,28 @@ object Build {
         Dep.testStateCore.value,
       ),
     )
+  // ===================================================================================================================
+
+  lazy val coreCatsEffectJVM = coreCatsEffect.jvm
+  lazy val coreCatsEffectJS  = coreCatsEffect.js
+  lazy val coreCatsEffect = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, publicationSettings, testSettings)
+    .dependsOn(core)
+    .settings(
+      moduleName := "core-cats-effect",
+      libraryDependencies += Dep.catsEffect.value,
+    )
+
+  lazy val testCatsEffectJVM = testCatsEffect.jvm
+  lazy val testCatsEffectJS  = testCatsEffect.js
+  lazy val testCatsEffect = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, publicationSettings, testSettings)
+    .dependsOn(coreCatsEffect, testCore)
+    .settings(
+      moduleName := "test-cats-effect",
+    )
+
+  // ===================================================================================================================
 
   lazy val coreCirceJVM = coreCirce.jvm
   lazy val coreCirceJS  = coreCirce.js
@@ -173,24 +197,7 @@ object Build {
       libraryDependencies += Dep.nyayaGen.value,
     )
 
-  lazy val coreCatsEffectJVM = coreCatsEffect.jvm
-  lazy val coreCatsEffectJS  = coreCatsEffect.js
-  lazy val coreCatsEffect = crossProject(JSPlatform, JVMPlatform)
-    .configureCross(commonSettings, publicationSettings, testSettings)
-    .dependsOn(core)
-    .settings(
-      moduleName := "core-cats-effect",
-      libraryDependencies += Dep.catsEffect.value,
-    )
-
-  lazy val testCatsEffectJVM = testCatsEffect.jvm
-  lazy val testCatsEffectJS  = testCatsEffect.js
-  lazy val testCatsEffect = crossProject(JSPlatform, JVMPlatform)
-    .configureCross(commonSettings, publicationSettings, testSettings)
-    .dependsOn(coreCatsEffect, testCore)
-    .settings(
-      moduleName := "test-cats-effect",
-    )
+  // ===================================================================================================================
 
   lazy val coreOkHttp4 = project
     .configure(commonSettings.jvm, publicationSettings.jvm)
@@ -199,6 +206,8 @@ object Build {
       moduleName := "core-okhttp4",
       libraryDependencies += Dep.okHttp4.value,
     )
+
+  // ===================================================================================================================
 
   lazy val dbPostgres = project
     .configure(commonSettings.jvm, publicationSettings.jvm)

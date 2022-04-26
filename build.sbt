@@ -9,17 +9,20 @@ val root              = Build.root
 
 val coreJS            = Build.coreJS
 val coreJVM           = Build.coreJVM
-val coreCatsEffectJS  = Build.coreCatsEffectJS
-val coreCatsEffectJVM = Build.coreCatsEffectJVM
-val coreCirceJS       = Build.coreCirceJS
-val coreCirceJVM      = Build.coreCirceJVM
-val coreOkHttp4       = Build.coreOkHttp4
-val dbPostgres        = Build.dbPostgres
-
 val testCoreJS        = Build.testCoreJS
 val testCoreJVM       = Build.testCoreJVM
+
+val coreCatsEffectJS  = Build.coreCatsEffectJS
+val coreCatsEffectJVM = Build.coreCatsEffectJVM
 val testCatsEffectJS  = Build.testCatsEffectJS
 val testCatsEffectJVM = Build.testCatsEffectJVM
+
+val coreCirceJS       = Build.coreCirceJS
+val coreCirceJVM      = Build.coreCirceJVM
 val testCirceJS       = Build.testCirceJS
 val testCirceJVM      = Build.testCirceJVM
+
+val coreOkHttp4       = Build.coreOkHttp4
+
+val dbPostgres        = Build.dbPostgres
 val testDbPostgres    = Build.testDbPostgres
