@@ -48,6 +48,9 @@ val WebappUtilVer = "<version>"
     * `AjaxProtocol` - protocol for an AJAX endpoint
     * `AjaxClient` - means for a client to perform AJAX calls *(JS only)*
 
+  * `japgolly.webapputil.browser`
+    * `WindowPrompt` - Abstraction over `window.prompt` *(JS only)*
+
   * `japgolly.webapputil.binary`
     * `BinaryData` - immutable representation of BinaryData
     * `BinaryJs` - functions for conversion between various JS binary data types *(JS only)*
@@ -77,6 +80,7 @@ val WebappUtilVer = "<version>"
     * `BinaryTestUtil` - utilities for testing binary data
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
     * `TestHttpClient` - a `HttpClient` instance for use in tests
+    * `TestWindowPrompt` - a `WindowPrompt` instance for use in tests *(JS only)*
 
 * The `core-cats-effect` module:
   * `japgolly.webapputil.cats.effect`
