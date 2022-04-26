@@ -99,6 +99,8 @@ object Build {
     .in(file("."))
     .configure(commonSettings.jvm, preventPublication)
     .aggregate(
+      coreBoopickleJS,
+      coreBoopickleJVM,
       coreCatsEffectJS,
       coreCatsEffectJVM,
       coreCirceJS,
@@ -107,6 +109,8 @@ object Build {
       coreJVM,
       coreOkHttp4,
       dbPostgres,
+      testBoopickleJS,
+      testBoopickleJVM,
       testCatsEffectJS,
       testCatsEffectJVM,
       testCirceJS,
@@ -148,6 +152,30 @@ object Build {
         Dep.testStateCore.value,
       ),
     )
+
+  // ===================================================================================================================
+
+  lazy val coreBoopickleJVM = coreBoopickle.jvm
+  lazy val coreBoopickleJS  = coreBoopickle.js
+  lazy val coreBoopickle = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, publicationSettings, testSettings)
+    .dependsOn(core)
+    .settings(
+      moduleName := "core-boopickle",
+      libraryDependencies ++= Seq(
+        Dep.boopickle.value,
+      ),
+    )
+
+  lazy val testBoopickleJVM = testBoopickle.jvm
+  lazy val testBoopickleJS  = testBoopickle.js
+  lazy val testBoopickle = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, publicationSettings, testSettings)
+    .dependsOn(coreBoopickle, testCore)
+    .settings(
+      moduleName := "test-boopickle",
+    )
+
   // ===================================================================================================================
 
   lazy val coreCatsEffectJVM = coreCatsEffect.jvm

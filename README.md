@@ -14,6 +14,10 @@ val WebappUtilVer = "<version>"
 "com.github.japgolly.webapp-util" %%% "core"             % WebappUtilVer
 "com.github.japgolly.webapp-util" %%% "test"             % WebappUtilVer % Test
 
+// Requiring Boopickle
+"com.github.japgolly.webapp-util" %%% "core-boopickle"   % WebappUtilVer
+"com.github.japgolly.webapp-util" %%% "test-boopickle"   % WebappUtilVer % Test
+
 // Cats Effect support
 "com.github.japgolly.webapp-util" %%% "core-cats-effect" % WebappUtilVer
 "com.github.japgolly.webapp-util" %%% "test-cats-effect" % WebappUtilVer % Test
