@@ -10,7 +10,7 @@ trait WindowConfirm {
 object WindowConfirm {
 
   val real: WindowConfirm =
-    CallbackTo.confirm
+    CallbackTo.confirm(_)
 
   def const(b: Boolean): WindowConfirm =
     const(CallbackTo.pure(b))

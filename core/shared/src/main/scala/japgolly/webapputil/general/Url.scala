@@ -128,7 +128,7 @@ object Url {
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  final case class Absolute private[Absolute](absoluteUrl: String) extends AnyVal {
+  final case class Absolute(absoluteUrl: String) extends AnyVal {
     def base: Absolute.Base =
       Absolute.Base(absoluteUrl.dropRight(relativeUrl.relativeUrl.length - 1))
 
@@ -169,7 +169,9 @@ object Url {
 
     /** Represents `https://blah.com/prefix/<A>`; the param is always last */
     final case class Param1[-A](prefix: Absolute, suffix: A => String) {
+
       private val pre = prefix.absoluteUrl + "/"
+
       def apply(a: A): Absolute =
         Absolute(pre + suffix(a))
     }

@@ -220,7 +220,7 @@ object ManagedWebWorker {
               case _ =>
                 Callback.suspend {
                   val msg = data.asInstanceOf[MessageWithId[protocol.Encoded]]
-                  val req = protocol.decode[Req[_]](msg.body)
+                  val req = protocol.decode[Req[_]](msg.body).asInstanceOf[Req[Any]]
                   respond(client, msg.id, req).toCallback
                 }
             }

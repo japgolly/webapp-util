@@ -48,7 +48,7 @@ object AbstractWebWorker {
 
         override def send(msg: js.Any, transferList: TransferList): Callback =
           Callback {
-            port.postMessage(msg, transferList)
+            port.postMessage(msg, transferList.asInstanceOf[js.Any])
           }
       }
   }
