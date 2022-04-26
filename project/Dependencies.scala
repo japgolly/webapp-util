@@ -25,6 +25,7 @@ object Dependencies {
     def scalaJsDom   = "2.1.0"
     def scalaJsReact = "2.1.0"
     def scalaLogging = "3.9.4"
+    def testState    = "3.0.0"
     def univEq       = "2.0.0"
 
     // Internal
@@ -60,6 +61,7 @@ object Dependencies {
     val scalaJsReactExtra   = Def.setting("com.github.japgolly.scalajs-react" %%% "extra"                 % Ver.scalaJsReact)
     val scalaJsReactTest    = Def.setting("com.github.japgolly.scalajs-react" %%% "test"                  % Ver.scalaJsReact)
     val scalaLogging        = Def.setting("com.typesafe.scala-logging"         %% "scala-logging"         % Ver.scalaLogging)
+    val testStateCore       = Def.setting("com.github.japgolly.test-state"    %%% "core"                  % Ver.testState)
     val univEq              = Def.setting("com.github.japgolly.univeq"        %%% "univeq"                % Ver.univEq)
     val utest               = Def.setting("com.lihaoyi"                       %%% "utest"                 % Ver.utest)
   }

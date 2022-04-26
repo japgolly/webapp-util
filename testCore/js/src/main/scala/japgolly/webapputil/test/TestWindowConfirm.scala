@@ -17,21 +17,21 @@ final case class TestWindowConfirm() extends WindowConfirm {
 }
 
 object TestWindowConfirm {
-  // import shipreq.webapp.base.test.TestState._
+  import TestState._
 
-  // final class Obs(t: TestWindowConfirm) {
-  //   val calls = t.calls()
-  // }
+  class Obs(t: TestWindowConfirm) {
+    val calls = t.calls()
+  }
 
-  // final class TestDsl[R, O, S](val * : Dsl[Id, R, O, S, String])
-  //                             (getRef: R => TestWindowConfirm,
-  //                              getObs: O => Obs) {
-  //   private implicit def autoRef(r: R): TestWindowConfirm = getRef(r)
-  //   private implicit def autoObs(o: O): Obs = getObs(o)
+  final class TestDsl[R, O, S](val * : Dsl[Id, R, O, S, String])
+                              (getRef: R => TestWindowConfirm,
+                               getObs: O => Obs) {
+    private implicit def autoRef(r: R): TestWindowConfirm = getRef(r)
+    private implicit def autoObs(o: O): Obs = getObs(o)
 
-  //   val calls = *.focus("WindowConfirm calls").value(_.obs.calls)
+    val calls = *.focus("window.confirm calls").value(_.obs.calls)
 
-  //   def setNextResponse(r: Boolean): *.Actions =
-  //     *.action("Set next WindowConfirm response to " + r)(_.ref.nextResponse = r)
-  // }
+    def setNextResponse(r: Boolean): *.Actions =
+      *.action("Set next WindowConfirm response to " + r)(_.ref.nextResponse = r)
+  }
 }

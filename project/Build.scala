@@ -141,7 +141,10 @@ object Build {
     .dependsOn(core)
     .settings(
       moduleName := "test",
-      libraryDependencies += Dep.microlibsTestUtil.value,
+      libraryDependencies ++= Seq(
+        Dep.microlibsTestUtil.value,
+        Dep.testStateCore.value,
+      ),
     )
 
   lazy val coreCirceJVM = coreCirce.jvm
