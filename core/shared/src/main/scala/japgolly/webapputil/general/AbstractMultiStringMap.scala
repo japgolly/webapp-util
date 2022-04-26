@@ -51,8 +51,8 @@ abstract class AbstractMultiStringMap[Self](final val asVector: Vector[(String, 
 
   override def equals(that: Any) =
     that match {
-      case t: Self2 => normalised.asVector == t.normalised.asVector
-      case _        => false
+      case t: AbstractMultiStringMap[_] => normalised.asVector == t.normalised.asVector
+      case _                            => false
     }
 
   def filterKeys(retain: String => Boolean): Self = {

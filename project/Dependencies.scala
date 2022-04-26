@@ -8,27 +8,27 @@ object Dependencies {
 
     // Exported
     def boopickle    = "1.4.0"
-    def catsEffect   = "3.2.9"
+    def catsEffect   = "3.3.11"
     def catsRetry    = "3.1.0"
     def circe        = "0.14.1"
     def clearConfig  = "3.0.0"
-    def doobie       = "1.0.0-RC1"
-    def flyway       = "8.0.2"
+    def doobie       = "1.0.0-RC2"
+    def flyway       = "8.0.5"
     def hikariCP     = "4.0.3"
-    def izumiReflect = "2.0.0"
+    def izumiReflect = "2.1.0"
     def microlibs    = "4.0.0"
     def nyaya        = "1.0.0"
-    def okHttp4      = "4.9.2"
-    def postgresql   = "42.3.0"
-    def scala2       = "2.13.6"
-    def scala3       = "3.0.2"
-    def scalaJsDom   = "2.0.0"
-    def scalaJsReact = "2.0.0-RC4"
+    def okHttp4      = "4.9.3"
+    def postgresql   = "42.3.4"
+    def scala2       = "2.13.8"
+    def scala3       = "3.1.0"
+    def scalaJsDom   = "2.1.0"
+    def scalaJsReact = "2.1.0"
     def scalaLogging = "3.9.4"
     def univEq       = "2.0.0"
 
     // Internal
-    def utest        = "0.7.10"
+    def utest        = "0.7.11"
   }
 
   object Dep {
