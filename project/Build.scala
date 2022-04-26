@@ -127,7 +127,10 @@ object Build {
   lazy val core = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
     .settings(
-      libraryDependencies += Dep.univEq.value,
+      libraryDependencies ++= Seq(
+        Dep.microlibsStdlibExt.value,
+        Dep.univEq.value,
+      ),
     )
     .jvmSettings(
       libraryDependencies += Dep.scalaLogging.value,

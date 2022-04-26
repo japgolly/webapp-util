@@ -43,6 +43,7 @@ val WebappUtilVer = "<version>"
     * `ErrorMsg` - typed error message, with some util and predefined cases
     * `EscapeUtil` - functions for escaping strings
     * `LazyVal` - A lightweight `lazy val` as a portable value
+    * `LoggerJs` - A simple logger *(JS only)*
     * `Protocol` - abstract definitions of protocols
     * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure *(JS only)*
     * `ThreadUtils` - thread groups, thread pools, `ExecutionContext` util, shutdown hooks  *(JVM only)*
@@ -81,14 +82,28 @@ val WebappUtilVer = "<version>"
     * `SharedLock` - a lock that can be safely shared between threads *(different API between JVM & JS)*
     * `SharedLock.ReadWrite` - a read/write lock that can be safely shared between threads *(different API between JVM & JS)*
 
+  * `japgolly.webapputil.webworker`
+    * `AbstractWebWorker` - web worker client & server API *(JS only)*
+    * `ManagedWebWorker` - web worker client & server implementations that handle all the low-level work *(JS only)*
+    * `OnError` - web worker error handler *(JS only)*
+    * `WebWorkerProtocol` - protocol API for communication between web worker client and server *(JS only)*
+
 * The `test` module:
   * `japgolly.webapputil.test`
     * `BinaryTestUtil` - utilities for testing binary data
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
     * `TestHttpClient` - a `HttpClient` instance for use in tests
+    * `TestWebWorker` - in-memory instances of `AbstractWebWorker` client and server API for use in tests *(JS only)*
     * `TestWindowConfirm` - a `WindowConfirm` instance for use in tests *(JS only)*
     * `TestWindowLocation` - a `WindowLocation` instance for use in tests *(JS only)*
     * `TestWindowPrompt` - a `WindowPrompt` instance for use in tests *(JS only)*
+
+* The `core-boopickle` module:
+  * `japgolly.webapputil.boopickle.webworker`
+    * `BinaryWebWorkerProtocol` - implementation of `WebWorkerProtocol` that uses boopickle for message encoding *(JS only)*
+
+* The `test-boopickle` module:
+  * nothing yet
 
 * The `core-cats-effect` module:
   * `japgolly.webapputil.cats.effect`
