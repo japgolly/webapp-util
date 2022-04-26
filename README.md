@@ -50,6 +50,7 @@ val WebappUtilVer = "<version>"
 
   * `japgolly.webapputil.browser`
     * `WindowConfirm` - Abstraction over `window.confirm` *(JS only)*
+    * `WindowLocation` - Abstraction over `window.location` *(JS only)*
     * `WindowPrompt` - Abstraction over `window.prompt` *(JS only)*
 
   * `japgolly.webapputil.binary`
@@ -82,6 +83,7 @@ val WebappUtilVer = "<version>"
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
     * `TestHttpClient` - a `HttpClient` instance for use in tests
     * `TestWindowConfirm` - a `WindowConfirm` instance for use in tests *(JS only)*
+    * `TestWindowLocation` - a `WindowLocation` instance for use in tests *(JS only)*
     * `TestWindowPrompt` - a `WindowPrompt` instance for use in tests *(JS only)*
 
 * The `core-cats-effect` module:
@@ -132,7 +134,6 @@ val WebappUtilVer = "<version>"
 # TODO:
 
 * Add ScalaDoc and proper doc
-* AbstractLocation
 * Port IDB stuff
 * Port crypto stuff
 * Port websocket stuff
