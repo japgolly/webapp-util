@@ -49,6 +49,7 @@ val WebappUtilVer = "<version>"
     * `AjaxClient` - means for a client to perform AJAX calls *(JS only)*
 
   * `japgolly.webapputil.browser`
+    * `WindowConfirm` - Abstraction over `window.confirm` *(JS only)*
     * `WindowPrompt` - Abstraction over `window.prompt` *(JS only)*
 
   * `japgolly.webapputil.binary`
@@ -80,6 +81,7 @@ val WebappUtilVer = "<version>"
     * `BinaryTestUtil` - utilities for testing binary data
     * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
     * `TestHttpClient` - a `HttpClient` instance for use in tests
+    * `TestWindowConfirm` - a `WindowConfirm` instance for use in tests *(JS only)*
     * `TestWindowPrompt` - a `WindowPrompt` instance for use in tests *(JS only)*
 
 * The `core-cats-effect` module:
