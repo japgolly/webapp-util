@@ -16,6 +16,7 @@ import japgolly.webapputil.db._
 import japgolly.webapputil.db.test.TestDbHelpers._
 import japgolly.webapputil.locks.SharedLock
 import java.sql.Connection
+import java.util.concurrent.atomic.AtomicReference
 import scala.concurrent.ExecutionContext
 import sourcecode.Line
 
@@ -120,15 +121,25 @@ object TestDb {
 
   private[this] val rwlock = SharedLock.ReadWrite()
 
+  /** Called when the DB schema is about to be dropped. */
+  val onDropSchemaAttempt: AtomicReference[Db => Unit] =
+    new AtomicReference(_ => ())
+
+  def onlyAllowDropSchemaWhenDatabaseNameIs(expected: String): Unit =
+    onDropSchemaAttempt.updateAndGet { prevHandler => db =>
+      val dbName = db.databaseName
+      if (dbName != expected)
+        sys.error(s"You're trying to wipe $dbName. Only $expected is allowed to be dropped.")
+      prevHandler(db)
+    }
+
   /** Drops all objects (tables, views, procedures, triggers, ...) in the configured schemas. */
   def dropSchema(): Unit = {
     init()
     rwlock.writeLock {
       val db = this.db()
-      val allowed = "poetryhub_test"
-      val dbName  = db.databaseName
-      if (dbName != allowed)
-        sys.error(s"You're trying to wipe $dbName. Only $allowed is allowed to be wiped.")
+      val dbName = db.databaseName
+      onDropSchemaAttempt.get()(db)
       logger.info(s"Dropping schema in: $dbName")
       db.migration.drop.unsafeRun()
     }
