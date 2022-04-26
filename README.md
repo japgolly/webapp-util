@@ -48,14 +48,14 @@ val WebappUtilVer = "<version>"
     * `AjaxProtocol` - protocol for an AJAX endpoint
     * `AjaxClient` - means for a client to perform AJAX calls *(JS only)*
 
+  * `japgolly.webapputil.binary`
+    * `BinaryData` - immutable representation of BinaryData
+    * `BinaryJs` - functions for conversion between various JS binary data types *(JS only)*
+
   * `japgolly.webapputil.browser`
     * `WindowConfirm` - Abstraction over `window.confirm` *(JS only)*
     * `WindowLocation` - Abstraction over `window.location` *(JS only)*
     * `WindowPrompt` - Abstraction over `window.prompt` *(JS only)*
-
-  * `japgolly.webapputil.binary`
-    * `BinaryData` - immutable representation of BinaryData
-    * `BinaryJs` - functions for conversion between various JS binary data types *(JS only)*
 
   * `japgolly.webapputil.entrypoint`
     * `EntrypointDef` - definition of a JS app entrypoint
