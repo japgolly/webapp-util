@@ -137,6 +137,10 @@ object Build {
   lazy val coreJS  = core.js
   lazy val core = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
+    .jsConfigure(_
+      .enablePlugins(JSDependenciesPlugin)
+      .dependsOn(testNode % "test->compile")
+    )
     .settings(
       libraryDependencies ++= Seq(
         Dep.microlibsStdlibExt.value,
@@ -152,6 +156,9 @@ object Build {
         Dep.scalaJsDom.value,
         Dep.scalaJsReactCore.value,
         Dep.scalaJsReactExtra.value,
+      ),
+      jsDependencies ++= Seq(
+        Dep.base32768(Test).value,
       ),
     )
 

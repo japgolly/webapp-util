@@ -92,6 +92,12 @@ val WebappUtilVer = "<version>"
     * `SharedLock` - a lock that can be safely shared between threads *(different API between JVM & JS)*
     * `SharedLock.ReadWrite` - a read/write lock that can be safely shared between threads *(different API between JVM & JS)*
 
+  * `japgolly.webapputil.webstorage`
+    * `AbstractWebStorage` - API over WebStorage with some impls *(JS only)*
+    * `KeyCodec` - codec between an arbitrary type and a webstorage key *(JS only)*
+    * `ValueCodec` - codec between an arbitrary type and a webstorage value *(JS only)*
+    * `WebStorageKey` - a high-level interface to data in webstorage *(JS only)*
+
   * `japgolly.webapputil.webworker`
     * `AbstractWebWorker` - web worker client & server API *(JS only)*
     * `ManagedWebWorker` - web worker client & server implementations that handle all the low-level work *(JS only)*
@@ -175,7 +181,6 @@ val WebappUtilVer = "<version>"
 * Add ScalaDoc and proper doc
 * Port IDB stuff
 * Port websocket stuff
-* Port webstorage stuff
 
 
 # Support
