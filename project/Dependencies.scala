@@ -1,6 +1,8 @@
 import sbt._
 import sbt.Keys._
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin
+import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport._
 
 object Dependencies {
 
@@ -29,6 +31,8 @@ object Dependencies {
     def univEq       = "2.0.0"
 
     // Internal
+    def base32768    = "2.0.2"
+    def pako         = "2.0.4"
     def utest        = "0.7.11"
   }
 
@@ -66,5 +70,8 @@ object Dependencies {
     val testStateCore       = Def.setting("com.github.japgolly.test-state"    %%% "core"                  % Ver.testState)
     val univEq              = Def.setting("com.github.japgolly.univeq"        %%% "univeq"                % Ver.univEq)
     val utest               = Def.setting("com.lihaoyi"                       %%% "utest"                 % Ver.utest)
+
+    def base32768(c: Configuration) = Def.setting("org.webjars.npm" % "base32768" % Ver.base32768 % c / "dist/iife/base32768.js" commonJSName "base32768")
+    def pako     (c: Configuration) = Def.setting("org.webjars.npm" % "pako"      % Ver.pako      % c / "dist/pako.min.js"       commonJSName "pako")
   }
 }

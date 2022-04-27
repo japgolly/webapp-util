@@ -12,6 +12,8 @@ val coreJVM           = Build.coreJVM
 val testCoreJS        = Build.testCoreJS
 val testCoreJVM       = Build.testCoreJVM
 
+val testNode          = Build.testNode
+
 val coreBoopickleJS   = Build.coreBoopickleJS
 val coreBoopickleJVM  = Build.coreBoopickleJVM
 val testBoopickleJS   = Build.testBoopickleJS

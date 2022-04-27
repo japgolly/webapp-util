@@ -14,6 +14,9 @@ val WebappUtilVer = "<version>"
 "com.github.japgolly.webapp-util" %%% "core"             % WebappUtilVer
 "com.github.japgolly.webapp-util" %%% "test"             % WebappUtilVer % Test
 
+// Node-specific additional testing support
+"com.github.japgolly.webapp-util" %%% "test-node"        % WebappUtilVer % Test
+
 // Requiring Boopickle
 "com.github.japgolly.webapp-util" %%% "core-boopickle"   % WebappUtilVer
 "com.github.japgolly.webapp-util" %%% "test-boopickle"   % WebappUtilVer % Test
@@ -104,6 +107,10 @@ val WebappUtilVer = "<version>"
     * `TestWindowConfirm` - a `WindowConfirm` instance for use in tests *(JS only)*
     * `TestWindowLocation` - a `WindowLocation` instance for use in tests *(JS only)*
     * `TestWindowPrompt` - a `WindowPrompt` instance for use in tests *(JS only)*
+
+* The `test-node` module:
+  * `japgolly.webapputil.test.node`
+    * `TestNode` - utilities for testing using Node *(JS only)*
 
 * The `core-boopickle` module:
   * `japgolly.webapputil.boopickle.webworker`

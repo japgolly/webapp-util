@@ -2,7 +2,10 @@ import sbt._
 import sbt.Keys._
 import com.jsuereth.sbtpgp.PgpKeys
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin
+import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport._
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
+import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbtcrossproject.CrossPlugin.autoImport._
 import sbtrelease.ReleasePlugin.autoImport._
@@ -28,7 +31,9 @@ object Build {
 
   def scalac2Flags = Seq(
     "-target:11",
+    "-Wconf:msg=copyArrayToImmutableIndexedSeq:s",   // utest noise
     "-Wconf:msg=may.not.be.exhaustive:e",            // Make non-exhaustive matches errors instead of warnings
+    "-Wconf:msg=Reference.to.uninitialized.value:e", // Make uninitialised value calls errors instead of warnings
     "-Wdead-code",                                   // Warn when dead code is identified.
     "-Wunused:explicits",                            // Warn if an explicit parameter is unused.
     "-Wunused:implicits",                            // Warn if an implicit parameter is unused.
@@ -92,7 +97,12 @@ object Build {
       ),
     ))
     .jsConfigure(_.settings(
-      Test / jsEnv := new JSDOMNodeJSEnv,
+      Test / jsEnv := new AdvancedNodeJSEnv(
+        AdvancedNodeJSEnv.Config().withEnv(Map(
+          "CI"       -> (if (inCI) "1" else "0"),
+          "SBT_ROOT" -> (ThisBuild / baseDirectory).value.getAbsolutePath,
+        ))
+      ),
     ))
 
   lazy val root = project
@@ -118,6 +128,7 @@ object Build {
       testCoreJS,
       testCoreJVM,
       testDbPostgres,
+      testNode,
     )
 
   // ===================================================================================================================
@@ -164,6 +175,10 @@ object Build {
   lazy val coreBoopickle = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
     .dependsOn(core)
+    .jsConfigure(_
+      .enablePlugins(JSDependenciesPlugin)
+      .dependsOn(testNode % "test->compile")
+    )
     .settings(
       moduleName := "core-boopickle",
       libraryDependencies ++= Seq(
@@ -172,12 +187,19 @@ object Build {
         Dep.microlibsRecursion.value,
       ),
     )
+    .jsSettings(
+      jsDependencies ++= Seq(
+        Dep.base32768(Test).value,
+        Dep.pako(Test).value,
+      ),
+    )
 
   lazy val testBoopickleJVM = testBoopickle.jvm
   lazy val testBoopickleJS  = testBoopickle.js
   lazy val testBoopickle = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
     .dependsOn(coreBoopickle, testCore)
+    .jsConfigure(_.dependsOn(testNode))
     .settings(
       moduleName := "test-boopickle",
     )
@@ -272,4 +294,19 @@ object Build {
         Dep.univEq           .value,
       ),
     )
+
+  // ===================================================================================================================
+
+  lazy val testNode = project
+    .enablePlugins(ScalaJSPlugin)
+    .configure(commonSettings.js, publicationSettings.js)
+    .settings(
+      moduleName := "test-node",
+      libraryDependencies ++= Seq(
+        Dep.scalaJsDom.value,
+        Dep.scalaJsReactCore.value,
+        Dep.microlibsTestUtil.value,
+      ),
+    )
+
 }
