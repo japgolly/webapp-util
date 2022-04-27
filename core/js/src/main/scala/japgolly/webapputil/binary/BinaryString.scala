@@ -28,6 +28,9 @@ object BinaryString {
 
   object Base32768 {
 
+    def global: Encoder =
+      apply(js.Dynamic.global.base32768)
+
     def apply(jsInstance: Any): Encoder = {
       assert(js.typeOf(jsInstance) == "object", "JS object expected. Got: " + jsInstance)
       val d = jsInstance.asInstanceOf[js.Dynamic]
@@ -43,8 +46,5 @@ object BinaryString {
         override def encode(bin: Uint8Array): String = d.encode(bin).asInstanceOf[String]
       }
     }
-
-    def global: Encoder =
-      apply(js.Dynamic.global.base32768)
   }
 }

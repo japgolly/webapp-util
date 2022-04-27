@@ -42,6 +42,7 @@ val WebappUtilVer = "<version>"
   * `japgolly.webapputil.general`
     * `ErrorMsg` - typed error message, with some util and predefined cases
     * `EscapeUtil` - functions for escaping strings
+    * `JsExt` - JS-only implicit extensions *(JS only)*
     * `LazyVal` - A lightweight `lazy val` as a portable value
     * `LoggerJs` - A simple logger *(JS only)*
     * `Protocol` - abstract definitions of protocols
@@ -56,8 +57,12 @@ val WebappUtilVer = "<version>"
 
   * `japgolly.webapputil.binary`
     * `BinaryData` - immutable representation of BinaryData
+    * `BinaryFormat` - converts a type to a binary format and back *(JS only)*
     * `BinaryJs` - functions for conversion between various JS binary data types *(JS only)*
-    * `BinaryString` - Binary data efficiently encoded as a UTF-16 string *(JS only)*
+    * `BinaryString` - binary data efficiently encoded as a UTF-16 string *(JS only)*
+    * `Compression` - binary compression and decompression *(JS only)*
+    * `Encryption` - binary encryption and decryption *(JS only)*
+    * `Pako` - facade for the JS `pako` library with provides zlib compression & decompression *(JS only)*
 
   * `japgolly.webapputil.browser`
     * `WindowConfirm` - Abstraction over `window.confirm` *(JS only)*
@@ -102,7 +107,9 @@ val WebappUtilVer = "<version>"
 
 * The `core-boopickle` module:
   * `japgolly.webapputil.boopickle.webworker`
+    * `BinaryFormatExt` - additional functionality around `BinaryFormat` *(JS only)*
     * `BinaryWebWorkerProtocol` - implementation of `WebWorkerProtocol` that uses boopickle for message encoding *(JS only)*
+    * `EncryptionEngine` - implementation of `Encryption.Engine` *(JS only)*
     * `PicklerUtil` - Lots of utilities around, and implementations of, Boopickle `Pickler`s
     * `SafePickler` - Safer version of a Boopickle `Pickler` with versioning support
     * `SafePicklerUtil` - Utilities for working with `SafePickler` versions during (de)serialisation
@@ -159,7 +166,6 @@ val WebappUtilVer = "<version>"
 
 * Add ScalaDoc and proper doc
 * Port IDB stuff
-* Port crypto stuff
 * Port websocket stuff
 * Port webstorage stuff
 
