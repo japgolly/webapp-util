@@ -48,6 +48,7 @@ object Dependencies {
     val hikariCP            = Def.setting("com.zaxxer"                          % "HikariCP"              % Ver.hikariCP)
     val izumiReflect        = Def.setting("dev.zio"                            %% "izumi-reflect"         % Ver.izumiReflect)
     val microlibsAdtMacros  = Def.setting("com.github.japgolly.microlibs"     %%% "adt-macros"            % Ver.microlibs)
+    val microlibsNonEmpty   = Def.setting("com.github.japgolly.microlibs"     %%% "nonempty"              % Ver.microlibs)
     val microlibsRecursion  = Def.setting("com.github.japgolly.microlibs"     %%% "recursion"             % Ver.microlibs)
     val microlibsStdlibExt  = Def.setting("com.github.japgolly.microlibs"     %%% "stdlib-ext"            % Ver.microlibs)
     val microlibsTestUtil   = Def.setting("com.github.japgolly.microlibs"     %%% "test-util"             % Ver.microlibs)

@@ -129,6 +129,7 @@ object Build {
     .settings(
       libraryDependencies ++= Seq(
         Dep.microlibsStdlibExt.value,
+        Dep.microlibsUtils.value,
         Dep.univEq.value,
       ),
     )
@@ -167,6 +168,8 @@ object Build {
       moduleName := "core-boopickle",
       libraryDependencies ++= Seq(
         Dep.boopickle.value,
+        Dep.microlibsNonEmpty.value,
+        Dep.microlibsRecursion.value,
       ),
     )
 
@@ -214,7 +217,6 @@ object Build {
         Dep.circeParser.value,
         Dep.microlibsAdtMacros.value,
         Dep.microlibsRecursion.value,
-        Dep.microlibsUtils.value,
       ),
     )
 

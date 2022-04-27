@@ -48,6 +48,7 @@ val WebappUtilVer = "<version>"
     * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure *(JS only)*
     * `ThreadUtils` - thread groups, thread pools, `ExecutionContext` util, shutdown hooks  *(JVM only)*
     * `Url` - types for URLs
+    * `Version` - types for a version with a major and minor component
 
   * `japgolly.webapputil.ajax`
     * `AjaxProtocol` - protocol for an AJAX endpoint
@@ -101,6 +102,9 @@ val WebappUtilVer = "<version>"
 * The `core-boopickle` module:
   * `japgolly.webapputil.boopickle.webworker`
     * `BinaryWebWorkerProtocol` - implementation of `WebWorkerProtocol` that uses boopickle for message encoding *(JS only)*
+    * `PicklerUtil` - Lots of utilities around, and implementations of, Boopickle `Pickler`s
+    * `SafePickler` - Safer version of a Boopickle `Pickler` with versioning support
+    * `SafePicklerUtil` - Utilities for working with `SafePickler` versions during (de)serialisation
 
 * The `test-boopickle` module:
   * nothing yet
@@ -157,7 +161,6 @@ val WebappUtilVer = "<version>"
 * Port crypto stuff
 * Port websocket stuff
 * Port webstorage stuff
-* Port SafePickler and related
 
 
 # Support
