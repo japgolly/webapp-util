@@ -57,6 +57,7 @@ val WebappUtilVer = "<version>"
   * `japgolly.webapputil.binary`
     * `BinaryData` - immutable representation of BinaryData
     * `BinaryJs` - functions for conversion between various JS binary data types *(JS only)*
+    * `BinaryString` - Binary data efficiently encoded as a UTF-16 string *(JS only)*
 
   * `japgolly.webapputil.browser`
     * `WindowConfirm` - Abstraction over `window.confirm` *(JS only)*
