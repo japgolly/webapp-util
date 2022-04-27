@@ -122,7 +122,8 @@ val WebappUtilVer = "<version>"
     * `SafePicklerUtil` - Utilities for working with `SafePickler` versions during (de)serialisation
 
 * The `test-boopickle` module:
-  * nothing yet
+  * `japgolly.webapputil.boopickle.test`
+    * `TestEncryption` - bit of util for testing encryption *(JS only)*
 
 * The `core-cats-effect` module:
   * `japgolly.webapputil.cats.effect`
