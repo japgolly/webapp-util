@@ -95,6 +95,7 @@ object Build {
         Dep.nyayaTest.value % Test,
         Dep.utest.value % Test,
       ),
+      parallelExecution := false,
     ))
     .jsConfigure(_.settings(
       Test / jsEnv := new AdvancedNodeJSEnv(
@@ -206,9 +207,15 @@ object Build {
   lazy val testBoopickle = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
     .dependsOn(coreBoopickle, testCore)
-    .jsConfigure(_.dependsOn(testNode))
+    .jsConfigure(_
+      .enablePlugins(JSDependenciesPlugin)
+      .dependsOn(testNode)
+    )
     .settings(
       moduleName := "test-boopickle",
+    )
+    .jsSettings(
+      jsDependencies += Dep.pako(Test).value,
     )
 
   // ===================================================================================================================

@@ -9,8 +9,8 @@ import scala.scalajs.js
 object BinaryFormatExt {
 
   object Implicits {
-    @inline implicit final class BinaryFormatBoopickleExt[A](private val self: BinaryFormat[A]) extends AnyVal {
 
+    @inline implicit final class BinaryFormatBoopickleExt[A](private val self: BinaryFormat[A]) extends AnyVal {
       type ThisIsBinary = BinaryFormat[A] =:= BinaryFormat[BinaryData]
 
       def pickle[B](implicit pickler: SafePickler[B], ev: ThisIsBinary): BinaryFormat[B] =
@@ -22,6 +22,11 @@ object BinaryFormatExt {
           .xmap[ByteBuffer](_.unsafeByteBuffer)(BinaryData.unsafeFromByteBuffer)
           .xmap(unpickle.fromBytes(_))(PickleImpl.intoBytes(_))
       }
+    }
+
+    @inline implicit final class BinaryFormatBoopickleStaticExt[A](private val self: BinaryFormat.type) extends AnyVal {
+      def pickleCompressEncrypt[A](c: Compression, e: Encryption)(implicit pickler: SafePickler[A]): BinaryFormat[A] =
+        BinaryFormatExt.pickleCompressEncrypt(c, e)
     }
   }
 

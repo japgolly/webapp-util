@@ -9,8 +9,8 @@ import scala.scalajs.js
 /** Node JS access provided by `project/AdvancedNodeJSEnv.scala`. */
 trait TestNode {
 
-  @inline private def window = js.Dynamic.global.window
-  @inline private def node = window.node
+  @inline def window = js.Dynamic.global.window
+  @inline def node = window.node
 
   def require(path: String): js.Dynamic =
     node.require(path).asInstanceOf[js.Dynamic]

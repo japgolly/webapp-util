@@ -84,6 +84,13 @@ val WebappUtilVer = "<version>"
     * `HttpClient` - an abstract HTTP (invocation) client
     * `UrlEncoder` - cross-platform URL encoding and decoding
 
+  * `japgolly.webapputil.indexeddb`
+    * `IndexedDb` - type-safe and monadic API over IndexedDb *(JS only)*
+    * `IndexedDbKey` - typed key for use in IndexedDb *(JS only)*
+    * `KeyCodec` - codec between an arbitrary type and a IndexedDb key *(JS only)*
+    * `ObjectStoreDef` - IndexedDb store and codecs *(JS only)*
+    * `ValueCodec` - codec between an arbitrary type and a IndexedDb value *(JS only)*
+
   * `japgolly.webapputil.locks`
     * `LockMechanism` - means of implicitly specifying how to acquire locks *(JVM only)*
     * `LockUtils` - helpers around Java locks *(JVM only)*
@@ -123,6 +130,7 @@ val WebappUtilVer = "<version>"
     * `BinaryFormatExt` - additional functionality around `BinaryFormat` *(JS only)*
     * `BinaryWebWorkerProtocol` - implementation of `WebWorkerProtocol` that uses boopickle for message encoding *(JS only)*
     * `EncryptionEngine` - implementation of `Encryption.Engine` *(JS only)*
+    * `IndexedDbExt` - additional functionality around IndexedDb *(JS only)*
     * `PicklerUtil` - Lots of utilities around, and implementations of, Boopickle `Pickler`s
     * `SafePickler` - Safer version of a Boopickle `Pickler` with versioning support
     * `SafePicklerUtil` - Utilities for working with `SafePickler` versions during (de)serialisation
@@ -130,6 +138,7 @@ val WebappUtilVer = "<version>"
 * The `test-boopickle` module:
   * `japgolly.webapputil.boopickle.test`
     * `TestEncryption` - bit of util for testing encryption *(JS only)*
+    * `TestIndexedDb` - util for testing IndexedDb code *(JS only)*
 
 * The `core-cats-effect` module:
   * `japgolly.webapputil.cats.effect`
@@ -178,8 +187,8 @@ val WebappUtilVer = "<version>"
 
 # TODO:
 
+* Add examples
 * Add ScalaDoc and proper doc
-* Port IDB stuff
 * Port websocket stuff
 
 
