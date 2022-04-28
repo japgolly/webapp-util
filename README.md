@@ -51,6 +51,7 @@ val WebappUtilVer = "<version>"
   * `Protocol` - abstract definitions of protocols
   * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure *(JS only)*
   * `ThreadUtils` - thread groups, thread pools, `ExecutionContext` util, shutdown hooks  *(JVM only)*
+  * `TimersJs` - API over JS timers *(JS only)*
   * `Url` - types for URLs
   * `Version` - types for a version with a major and minor component
 
@@ -117,6 +118,7 @@ val WebappUtilVer = "<version>"
   * `BinaryTestUtil` - utilities for testing binary data
   * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
   * `TestHttpClient` - a `HttpClient` instance for use in tests
+  * `TestTimersJs` - a `TimersJs` instance for use in tests *(JS only)*
   * `TestWebWorker` - in-memory instances of `AbstractWebWorker` client and server API for use in tests *(JS only)*
   * `TestWindowConfirm` - a `WindowConfirm` instance for use in tests *(JS only)*
   * `TestWindowLocation` - a `WindowLocation` instance for use in tests *(JS only)*
