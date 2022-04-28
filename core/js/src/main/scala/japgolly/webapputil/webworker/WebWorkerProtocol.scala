@@ -39,6 +39,4 @@ object WebWorkerProtocol {
     type Encoder[A] = Enc[A]
     type Decoder[A] = Dec[A]
   }
-
-  sealed trait Unspecified
 }

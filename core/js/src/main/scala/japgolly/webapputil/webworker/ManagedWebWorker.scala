@@ -4,7 +4,6 @@ import japgolly.microlibs.stdlib_ext.EscapeUtils
 import japgolly.scalajs.react._
 import japgolly.univeq._
 import japgolly.webapputil.general.{ErrorMsg, LoggerJs}
-import japgolly.webapputil.webworker.WebWorkerProtocol.Unspecified
 import scala.scalajs.js
 import scala.scalajs.js.isUndefined
 import scala.util.{Failure, Success, Try}
@@ -43,7 +42,7 @@ object ManagedWebWorker {
                             onPush             : Push => Callback,
                             onError            : OnError,
                             logger             : LoggerJs)
-                           (implicit reqEncoder: protocol.Encoder[Req[Unspecified]],
+                           (implicit reqEncoder: protocol.Encoder[Req[Any]],
                             pushDecoder        : protocol.Decoder[Push],
                            ): CallbackTo[Client[Req, Push, protocol.Decoder, protocol.Encoded]] = CallbackTo {
 
@@ -100,7 +99,7 @@ object ManagedWebWorker {
           Callback { _onPush = f(_onPush) }
 
         override def encode[A](req: Req[A]): Encoded =
-          protocol.encode(req.asInstanceOf[Req[Unspecified]])
+          protocol.encode(req.asInstanceOf[Req[Any]])
 
         override def postEnc[A](req: Req[A], enc: Encoded)(implicit readResult: Decoder[A]): AsyncCallback[A] =
           preSend >> AsyncCallback.promise[A].map { case (result, complete) =>
@@ -166,7 +165,7 @@ object ManagedWebWorker {
                             onError              : OnError,
                             logger               : LoggerJs,
                            )(implicit pushEncoder: protocol.Encoder[Push],
-                             readRequest         : protocol.Decoder[Req[Unspecified]]): Callback =
+                             readRequest         : protocol.Decoder[Req[Any]]): Callback =
       Callback {
         import worker.{Client => C}
 
@@ -221,7 +220,7 @@ object ManagedWebWorker {
               case _ =>
                 Callback.suspend {
                   val msg = data.asInstanceOf[MessageWithId[protocol.Encoded]]
-                  val req = protocol.decode[Req[Unspecified]](msg.body)
+                  val req = protocol.decode[Req[Any]](msg.body)
                   respond(client, msg.id, req).toCallback
                 }
             }
