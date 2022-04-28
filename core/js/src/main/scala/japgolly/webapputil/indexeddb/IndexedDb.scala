@@ -3,7 +3,6 @@ package japgolly.webapputil.indexeddb
 import japgolly.scalajs.react._
 import org.scalajs.dom._
 import scala.annotation.elidable
-import scala.collection.immutable.ArraySeq
 import scala.scalajs.js
 import scala.util.{Failure, Success, Try}
 
@@ -205,13 +204,13 @@ object IndexedDb {
     def get[K, V](store: ObjectStoreDef.Async[K, V])(key: K): AsyncCallback[Option[V]] =
       get(store.sync)(key).flatMap(AsyncCallback.traverseOption(_)(_.decode))
 
-    def getAllKeys[K, V](store: ObjectStoreDef[K, V]): AsyncCallback[ArraySeq[K]] =
+    def getAllKeys[K, V](store: ObjectStoreDef[K, V]): AsyncCallback[Vector[K]] =
       transactionRO(store)(_.objectStore(store.sync).flatMap(_.getAllKeys))
 
-    def getAllValues[K, V](store: ObjectStoreDef.Sync[K, V]): AsyncCallback[ArraySeq[V]] =
+    def getAllValues[K, V](store: ObjectStoreDef.Sync[K, V]): AsyncCallback[Vector[V]] =
       transactionRO(store)(_.objectStore(store).flatMap(_.getAllValues))
 
-    def getAllValues[K, V](store: ObjectStoreDef.Async[K, V]): AsyncCallback[ArraySeq[V]] =
+    def getAllValues[K, V](store: ObjectStoreDef.Async[K, V]): AsyncCallback[Vector[V]] =
       getAllValues(store.sync).flatMap(AsyncCallback.traverse(_)(_.decode))
 
     def delete[K, V](store: ObjectStoreDef[K, V])(key: K): AsyncCallback[Unit] =
@@ -248,10 +247,10 @@ object IndexedDb {
     def get(key: K): Txn[Option[V]] =
       Txn.StoreGet(this, keyCodec.encode(key))
 
-    def getAllKeys: Txn[ArraySeq[K]] =
+    def getAllKeys: Txn[Vector[K]] =
       Txn.StoreGetAllKeys(this)
 
-    def getAllValues: Txn[ArraySeq[V]] =
+    def getAllValues: Txn[Vector[V]] =
       Txn.StoreGetAllVals(this)
 
     def delete(key: K): Txn[Unit] =
@@ -331,8 +330,8 @@ object IndexedDb {
     final case class StoreAdd             (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends Txn[Unit]
     final case class StorePut             (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends Txn[Unit]
     final case class StoreGet       [K, V](store: ObjectStore[K, V], key: IndexedDbKey)                  extends Txn[Option[V]]
-    final case class StoreGetAllKeys[K, V](store: ObjectStore[K, V])                                     extends Txn[ArraySeq[K]]
-    final case class StoreGetAllVals[K, V](store: ObjectStore[K, V])                                     extends Txn[ArraySeq[V]]
+    final case class StoreGetAllKeys[K, V](store: ObjectStore[K, V])                                     extends Txn[Vector[K]]
+    final case class StoreGetAllVals[K, V](store: ObjectStore[K, V])                                     extends Txn[Vector[V]]
     final case class StoreDelete    [K, V](store: ObjectStore[K, V], key: IndexedDbKey)                  extends Txn[Unit]
     final case class StoreClear           (store: ObjectStore[_, _])                                     extends Txn[Unit]
 
@@ -388,36 +387,26 @@ object IndexedDb {
               }
 
             case StoreGetAllKeys(s) =>
-              import s.defn.{keyCodec, Key}
+              import s.defn.keyCodec
               getStore(s).flatMap { store =>
                 asyncRequest(store.getAllKeys()) { req =>
                   val rawKeys = req.result
-                  val keys = new Array[Key](rawKeys.length)
-                  var i = rawKeys.length
-                  while (i > 0) {
-                    i -= 1
+                  Vector.tabulate(rawKeys.length) { i =>
                     val rawKey = rawKeys(i)
-                    val k = keyCodec.decode(IndexedDbKey.fromJs(rawKey)).runNow() // safe in asyncRequest onSuccess
-                    keys(i) = k
+                    keyCodec.decode(IndexedDbKey.fromJs(rawKey)).runNow() // safe in asyncRequest onSuccess
                   }
-                  ArraySeq.unsafeWrapArray(keys)
                 }
               }
 
             case StoreGetAllVals(s) =>
-              import s.defn.{valueCodec, Value}
+              import s.defn.valueCodec
               getStore(s).flatMap { store =>
                 asyncRequest(store.getAll()) { req =>
                   val rawVals = req.result
-                  val vals = new Array[Value](rawVals.length)
-                  var i = rawVals.length
-                  while (i > 0) {
-                    i -= 1
+                  Vector.tabulate(rawVals.length) { i =>
                     val rawVal = rawVals(i)
-                    val v = valueCodec.decode(rawVal).runNow() // safe in asyncRequest onSuccess
-                    vals(i) = v
+                    valueCodec.decode(rawVal).runNow() // safe in asyncRequest onSuccess
                   }
-                  ArraySeq.unsafeWrapArray(vals)
                 }
               }
 

@@ -9,7 +9,7 @@ import utest.framework.TestPath
 
 object BinaryStringTest extends TestSuite {
 
-  private implicit val encoder =
+  private implicit val encoder: BinaryString.Encoder =
     BinaryString.Base32768.global
 
   private def assertRoundTrip(hex: String)(implicit l: Line): Any =

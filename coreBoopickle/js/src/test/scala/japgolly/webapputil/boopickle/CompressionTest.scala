@@ -8,7 +8,7 @@ import utest._
 
 object CompressionTest extends TestSuite {
 
-  private implicit val pako =
+  private implicit val pako: Pako =
     Pako.global
 
   private def assertRoundTrip(zip: Compression, dataSize: Int)(implicit l: Line): String = {
@@ -25,11 +25,11 @@ object CompressionTest extends TestSuite {
   }
 
   override def tests = Tests {
-    "9_raw_0"     - assertRoundTrip(Compression(9, false), 0)
-    "9_raw_41"    - assertRoundTrip(Compression(9, false), 41)
-    "9_raw_12345" - assertRoundTrip(Compression(9, false), 12345)
-    "3_raw_800"   - assertRoundTrip(Compression(3, false), 800)
-    "9_hdr_1771"  - assertRoundTrip(Compression(9, true), 1771)
-    "9_hdr_bin"   - assertRoundTrip(Compression(9, true), BinaryData.fromStringAsUtf8("321654" * 987))
+    "9_raw_0"     - assertRoundTrip(Compression.ViaPako(9, false), 0)
+    "9_raw_41"    - assertRoundTrip(Compression.ViaPako(9, false), 41)
+    "9_raw_12345" - assertRoundTrip(Compression.ViaPako(9, false), 12345)
+    "3_raw_800"   - assertRoundTrip(Compression.ViaPako(3, false), 800)
+    "9_hdr_1771"  - assertRoundTrip(Compression.ViaPako(9, true), 1771)
+    "9_hdr_bin"   - assertRoundTrip(Compression.ViaPako(9, true), BinaryData.fromStringAsUtf8("321654" * 987))
   }
 }

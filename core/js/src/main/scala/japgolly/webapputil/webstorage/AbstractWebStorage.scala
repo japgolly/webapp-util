@@ -138,7 +138,7 @@ object AbstractWebStorage {
       Callback {state = Map.empty}
 
     override def getItem(key: Key): CallbackTo[Option[Value]] =
-      CallbackTo(state.get(key.value).map(Value))
+      CallbackTo(state.get(key.value).map(Value.apply))
 
     override def removeItem(key: Key): Callback =
       Callback {state -= key.value}

@@ -13,8 +13,8 @@ import utest._
 
 object IndexedDbTest extends TestSuite {
 
-  private implicit def idb = FakeIndexedDb()
-  private implicit def pako = Pako.global
+  private implicit def idb: IndexedDb = FakeIndexedDb()
+  private implicit def pako: Pako = Pako.global
 
   private object SampleData {
 
@@ -122,8 +122,8 @@ object IndexedDbTest extends TestSuite {
       import TestEncryption.UnsafeTypes._
       import ValueCodec.Async.binary
 
-      val zip3 = Compression(3, addHeaders = false)
-      val zip9 = Compression(9, addHeaders = false)
+      val zip3 = Compression.ViaPako(3, addHeaders = false)
+      val zip9 = Compression.ViaPako(9, addHeaders = false)
 
       val dbName = "IndexedDbTest_stack"
       val storeName = "s"

@@ -5,7 +5,7 @@ import boopickle.DefaultBasic._
 import cats.Functor
 import cats.data.Ior
 import japgolly.microlibs.nonempty._
-import japgolly.microlibs.recursion.Fix
+import japgolly.microlibs.recursion._
 import japgolly.microlibs.stdlib_ext.StdlibExt._
 import japgolly.microlibs.utils.SafeBool
 import japgolly.univeq.UnivEq

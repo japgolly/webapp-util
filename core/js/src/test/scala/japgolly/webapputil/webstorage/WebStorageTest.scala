@@ -7,7 +7,7 @@ import utest._
 
 object WebStorageTest extends TestSuite {
 
-  private implicit val encoder =
+  private implicit val encoder: BinaryString.Encoder =
     BinaryString.Base32768.global
 
   override def tests = Tests {
