@@ -4,6 +4,7 @@ import japgolly.microlibs.stdlib_ext.EscapeUtils
 import japgolly.scalajs.react._
 import japgolly.univeq._
 import japgolly.webapputil.general.{ErrorMsg, LoggerJs}
+import japgolly.webapputil.webworker.WebWorkerProtocol.Unspecified
 import scala.scalajs.js
 import scala.scalajs.js.isUndefined
 import scala.util.{Failure, Success, Try}
@@ -23,7 +24,7 @@ object ManagedWebWorker {
     final def send[A](req: Req[A])(implicit readResult: R[A]): AsyncCallback[A] =
       postEnc(req, encode(req))
 
-    def encode(req: Req[_]): Enc
+    def encode[A](req: Req[A]): Enc
 
     def postEnc[A](req: Req[A], enc: Enc)(implicit readResult: R[A]): AsyncCallback[A]
 
@@ -42,7 +43,7 @@ object ManagedWebWorker {
                             onPush             : Push => Callback,
                             onError            : OnError,
                             logger             : LoggerJs)
-                           (implicit reqEncoder: protocol.Encoder[Req[_]],
+                           (implicit reqEncoder: protocol.Encoder[Req[Unspecified]],
                             pushDecoder        : protocol.Decoder[Push],
                            ): CallbackTo[Client[Req, Push, protocol.Decoder, protocol.Encoded]] = CallbackTo {
 
@@ -98,8 +99,8 @@ object ManagedWebWorker {
         override def modOnPush(f: (Push => Callback) => (Push => Callback)): Callback =
           Callback { _onPush = f(_onPush) }
 
-        override def encode(req: Req[_]): Encoded =
-          protocol.encode[Req[_]](req)
+        override def encode[A](req: Req[A]): Encoded =
+          protocol.encode(req.asInstanceOf[Req[Unspecified]])
 
         override def postEnc[A](req: Req[A], enc: Encoded)(implicit readResult: Decoder[A]): AsyncCallback[A] =
           preSend >> AsyncCallback.promise[A].map { case (result, complete) =>
@@ -165,7 +166,7 @@ object ManagedWebWorker {
                             onError              : OnError,
                             logger               : LoggerJs,
                            )(implicit pushEncoder: protocol.Encoder[Push],
-                             readRequest         : protocol.Decoder[Req[_]]): Callback =
+                             readRequest         : protocol.Decoder[Req[Unspecified]]): Callback =
       Callback {
         import worker.{Client => C}
 
@@ -220,7 +221,7 @@ object ManagedWebWorker {
               case _ =>
                 Callback.suspend {
                   val msg = data.asInstanceOf[MessageWithId[protocol.Encoded]]
-                  val req = protocol.decode[Req[_]](msg.body).asInstanceOf[Req[Any]]
+                  val req = protocol.decode[Req[Unspecified]](msg.body)
                   respond(client, msg.id, req).toCallback
                 }
             }
