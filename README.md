@@ -46,8 +46,8 @@ val WebappUtilVer = "<version>"
   * `ErrorMsg` - typed error message, with some util and predefined cases
   * `EscapeUtil` - functions for escaping strings
   * `JsExt` - JS-only implicit extensions *(JS only)*
-  * `LazyVal` - A lightweight `lazy val` as a portable value
-  * `LoggerJs` - A simple logger *(JS only)*
+  * `LazyVal` - lightweight `lazy val` as a portable value
+  * `LoggerJs` - simple logger *(JS only)*
   * `Permission` - type-safe union of `Allow | Deny`
   * `Protocol` - abstract definitions of protocols
   * `Retries` - immutable retry policy
@@ -55,7 +55,7 @@ val WebappUtilVer = "<version>"
   * `ThreadUtils` - thread groups, thread pools, `ExecutionContext` util, shutdown hooks  *(JVM only)*
   * `TimersJs` - API over JS timers *(JS only)*
   * `Url` - types for URLs
-  * `VarJs` - Immutable reference to a potentially abstract, potentially mutable variable *(JS only)*
+  * `VarJs` - immutable reference to a potentially abstract, potentially mutable variable *(JS only)*
   * `Version` - types for a version with a major and minor component
 
 * `japgolly.webapputil.ajax`
@@ -73,25 +73,25 @@ val WebappUtilVer = "<version>"
   * `Pako` - facade for the JS `pako` library with provides zlib compression & decompression *(JS only)*
 
 * `japgolly.webapputil.browser`
-  * `WindowConfirm` - Abstraction over `window.confirm` *(JS only)*
-  * `WindowLocation` - Abstraction over `window.location` *(JS only)*
-  * `WindowPrompt` - Abstraction over `window.prompt` *(JS only)*
+  * `WindowConfirm` - abstraction over `window.confirm` *(JS only)*
+  * `WindowLocation` - abstraction over `window.location` *(JS only)*
+  * `WindowPrompt` - abstraction over `window.prompt` *(JS only)*
 
 * `japgolly.webapputil.entrypoint`
   * `EntrypointDef` - definition of a JS app entrypoint
   * `Entrypoint` - abstract class for a JS app entrypoint *(JS only)*
   * `EntrypointInvoker` - generate JS to invoke an entrypoint *(JVM only)*
   * `Html` - HTML content *(JVM only)*
-  * `Js` - JavaScript code (and some utilities) *(JVM only)*
+  * `Js` - typed text representing JavaScript code (plus some util) *(JVM only)*
   * `LoadJs` - define a bundle of JS assets to be loaded via `loadjs` before entrypoint invocation *(JVM only)*
 
 * `japgolly.webapputil.http`
-  * `Cookie` - abstract HTTP cookie and associated utilities
-  * `HttpClient` - an abstract HTTP (invocation) client
+  * `Cookie` - abstract HTTP cookie and associated util
+  * `HttpClient` - abstract HTTP (invocation) client
   * `UrlEncoder` - cross-platform URL encoding and decoding
 
 * `japgolly.webapputil.indexeddb` *(JS only)*
-  * `IndexedDb` - type-safe and monadic API over IndexedDb *(JS only)*
+  * `IndexedDb` - monadic API over IndexedDb that enforces transaction rules at compile-time *(JS only)*
   * `IndexedDbKey` - typed key for use in IndexedDb *(JS only)*
   * `KeyCodec` - codec between an arbitrary type and a IndexedDb key *(JS only)*
   * `ObjectStoreDef` - IndexedDb store and codecs *(JS only)*
@@ -102,20 +102,20 @@ val WebappUtilVer = "<version>"
   * `LockUtils` - helpers around Java locks *(JVM only)*
   * `GenericSharedLock.Safe` - shared lock APIs that are FP-safe (consistent between JVM and JS)
   * `GenericSharedLock.Unsafe` - shared lock APIs that are FP-unsafe, in that not effect type is used (consistent between JVM and JS)
-  * `SharedLock` - a lock that can be safely shared between threads *(different API between JVM & JS)*
-  * `SharedLock.ReadWrite` - a read/write lock that can be safely shared between threads *(different API between JVM & JS)*
+  * `SharedLock` - lock that can be safely shared between threads *(different API between JVM & JS)*
+  * `SharedLock.ReadWrite` - read/write lock that can be safely shared between threads *(different API between JVM & JS)*
 
 * `japgolly.webapputil.websocket`
   * `WebSocket` - abstract API over a websocket connection *(JS only)*
-  * `WebSocketClient` - a high-level, managed websocket connection from client to server, supporting things like authorisation, auto-reconnection & retries, session expiry *(JS only)*
-  * `WebSocketServerUtil` - utilities for writing server-side websockets *(JVM only)*
-  * `WebSocketShared` - definitions and utilities shared between websocket client and server
+  * `WebSocketClient` - high-level, managed websocket connection from client to server, supporting things like authorisation, auto-reconnection, retries, session expiry *(JS only)*
+  * `WebSocketServerUtil` - util for writing server-side websockets *(JVM only)*
+  * `WebSocketShared` - definitions and util shared between websocket client and server
 
 * `japgolly.webapputil.webstorage` *(JS only)*
   * `AbstractWebStorage` - API over webstorage with some impls
   * `KeyCodec` - codec between an arbitrary type and a webstorage key
   * `ValueCodec` - codec between an arbitrary type and a webstorage value
-  * `WebStorageKey` - a high-level interface to data in webstorage
+  * `WebStorageKey` - high-level interface to data in webstorage
 
 * `japgolly.webapputil.webworker` *(JS only)*
   * `AbstractWebWorker` - web worker client & server API
@@ -126,20 +126,20 @@ val WebappUtilVer = "<version>"
 ## The `test` module:
 
 * `japgolly.webapputil.test`
-  * `BinaryTestUtil` - utilities for testing binary data
-  * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
-  * `TestHttpClient` - a `HttpClient` instance for use in tests
-  * `TestTimersJs` - a `TimersJs` instance for use in tests *(JS only)*
-  * `TestWebSocket` - a `WebSocket` instance for use in tests *(JS only)*
+  * `BinaryTestUtil` - util for testing binary data
+  * `TestAjaxClient` - `AjaxClient` instance for use in tests *(JS only)*
+  * `TestHttpClient` - `HttpClient` instance for use in tests
+  * `TestTimersJs` - `TimersJs` instance for use in tests *(JS only)*
+  * `TestWebSocket` - `WebSocket` instance for use in tests *(JS only)*
   * `TestWebWorker` - in-memory instances of `AbstractWebWorker` client and server API for use in tests *(JS only)*
-  * `TestWindowConfirm` - a `WindowConfirm` instance for use in tests *(JS only)*
-  * `TestWindowLocation` - a `WindowLocation` instance for use in tests *(JS only)*
-  * `TestWindowPrompt` - a `WindowPrompt` instance for use in tests *(JS only)*
+  * `TestWindowConfirm` - `WindowConfirm` instance for use in tests *(JS only)*
+  * `TestWindowLocation` - `WindowLocation` instance for use in tests *(JS only)*
+  * `TestWindowPrompt` - `WindowPrompt` instance for use in tests *(JS only)*
 
 ## The `test-node` module:
 
 * `japgolly.webapputil.test.node` *(JS only)*
-  * `TestNode` - utilities for testing using Node
+  * `TestNode` - util for testing using Node
 
 ## The `core-boopickle` module:
 
@@ -150,14 +150,14 @@ val WebappUtilVer = "<version>"
   * `BoopickleWebSocketClient` - implementation of `WebSocketClient` that uses boopickle for message encoding *(JS only)*
   * `EncryptionEngine` - implementation of `Encryption.Engine` *(JS only)*
   * `IndexedDbExt` - additional functionality around IndexedDb *(JS only)*
-  * `PicklerUtil` - Lots of utilities around, and implementations of, Boopickle `Pickler`s
-  * `SafePickler` - Safer version of a Boopickle `Pickler` with versioning support
-  * `SafePicklerUtil` - Utilities for working with `SafePickler` versions during (de)serialisation
+  * `PicklerUtil` - util around, and implementations of, Boopickle `Pickler`s
+  * `SafePickler` - safer version of a Boopickle `Pickler` with versioning support
+  * `SafePicklerUtil` - util for working with `SafePickler` versions during (de)serialisation
 
 ## The `test-boopickle` module:
 
 * `japgolly.webapputil.boopickle.test`
-  * `TestEncryption` - bit of util for testing encryption *(JS only)*
+  * `TestEncryption` - util for testing encryption *(JS only)*
   * `TestIndexedDb` - util for testing IndexedDb code *(JS only)*
   * `WebSocketTestUtil` - util for testing WebSocket code *(JS only)*
 
@@ -179,7 +179,7 @@ val WebappUtilVer = "<version>"
   * `JsonAjaxClient` - implementation of `AjaxClient` that uses JSON and `JsonCodec` *(JS only)*
   * `JsonCodec` - composition of Circe's `Encoder` and `Decoder` into a single typeclass
   * `JsonEntrypointCodec` - creates instances of `EntrypointDef.Codec` using Circe codecs
-  * `JsonUtil` - utilities to supplement Circe
+  * `JsonUtil` - util to supplement Circe
   * Extension methods available via `import japgolly.webapputil.circe._`
     * `HttpClient.Body.json` to create response bodies as JSON
     * `HttpClient.Body#parseJsonBody` to parse request bodies as JSON
@@ -187,13 +187,13 @@ val WebappUtilVer = "<version>"
 ## The `test-circe` module:
 
 * `japgolly.webapputil.circe.test`
-  * `JsonTestUtil` - utilities to test JSON codecs
+  * `JsonTestUtil` - util to test JSON codecs
   * `TestJsonAjaxClient` - implementation of `TestAjaxClient` that uses JSON and `JsonCodec` *(JS only)*
 
 ## The `core-okhttp4` module: *(JVM only)*
 
 * `japgolly.webapputil.okhttp4`
-  * `OkHttp4Client` - an implementation of `HttpClient` using okhttp4
+  * `OkHttp4Client` - implementation of `HttpClient` using okhttp4
 
 ## The `db-postgres` module: *(JVM only)*
 
@@ -208,9 +208,9 @@ val WebappUtilVer = "<version>"
 ## The `test-db-postgres` module: *(JVM only)*
 
 * `japgolly.webapputil.db.test`
-  * `DbTable` - utilities around DB tables and row counting
-  * `TestDb` - provides access to a test DB, manages things like migration, and utilities
-  * `TestXA` - a live connection to the DB, and utilities to make testing as easy as possible
+  * `DbTable` - util around DB tables and row counting
+  * `TestDb` - provides access to a test DB, manages things like migration, and util
+  * `TestXA` - a live connection to the DB, and util to make testing as easy as possible
 
 
 # TODO:
