@@ -19,7 +19,7 @@ object Dependencies {
     def hikariCP          = "4.0.3"
     def izumiReflect      = "2.1.0"
     def javaxWebsocketApi = "1.0"
-    def microlibs         = "4.0.0"
+    def microlibs         = "4.1.0"
     def nyaya             = "1.0.0"
     def okHttp4           = "4.9.3"
     def postgresql        = "42.3.4"
