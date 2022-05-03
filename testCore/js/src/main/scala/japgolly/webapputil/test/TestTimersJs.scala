@@ -24,7 +24,7 @@ final class TestTimersJs extends TimersJs {
     queue = queue.filter(_.id != id)
 
   override def setTimeout(interval: Double)(body: => Unit): SetTimeoutHandle =
-    submit(TimeoutId, interval, body).asInstanceOf[SetTimeoutHandle]
+    submit(TimeoutId.apply, interval, body).asInstanceOf[SetTimeoutHandle]
 
   override def clearTimeout(handle: SetTimeoutHandle): Unit =
     (handle: Any) match {
@@ -33,7 +33,7 @@ final class TestTimersJs extends TimersJs {
     }
 
   override def setInterval(interval: Double)(body: => Unit): SetIntervalHandle =
-    submit(IntervalId, interval, body).asInstanceOf[SetIntervalHandle]
+    submit(IntervalId.apply, interval, body).asInstanceOf[SetIntervalHandle]
 
   override def clearInterval(handle: SetIntervalHandle): Unit =
     (handle: Any) match {
