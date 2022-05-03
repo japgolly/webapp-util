@@ -48,12 +48,14 @@ val WebappUtilVer = "<version>"
   * `JsExt` - JS-only implicit extensions *(JS only)*
   * `LazyVal` - A lightweight `lazy val` as a portable value
   * `LoggerJs` - A simple logger *(JS only)*
+  * `Permission` - type-safe union of `Allow | Deny`
   * `Protocol` - abstract definitions of protocols
   * `Retries` - immutable retry policy
   * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure *(JS only)*
   * `ThreadUtils` - thread groups, thread pools, `ExecutionContext` util, shutdown hooks  *(JVM only)*
   * `TimersJs` - API over JS timers *(JS only)*
   * `Url` - types for URLs
+  * `VarJs` - Immutable reference to a potentially abstract, potentially mutable variable *(JS only)*
   * `Version` - types for a version with a major and minor component
 
 * `japgolly.webapputil.ajax`
@@ -65,6 +67,7 @@ val WebappUtilVer = "<version>"
   * `BinaryFormat` - converts a type to a binary format and back *(JS only)*
   * `BinaryJs` - functions for conversion between various JS binary data types *(JS only)*
   * `BinaryString` - binary data efficiently encoded as a UTF-16 string *(JS only)*
+  * `CodecEngine` - capability to encode and decode binary data given a codec typeclass
   * `Compression` - binary compression and decompression *(JS only)*
   * `Encryption` - binary encryption and decryption *(JS only)*
   * `Pako` - facade for the JS `pako` library with provides zlib compression & decompression *(JS only)*
@@ -83,6 +86,7 @@ val WebappUtilVer = "<version>"
   * `LoadJs` - define a bundle of JS assets to be loaded via `loadjs` before entrypoint invocation *(JVM only)*
 
 * `japgolly.webapputil.http`
+  * `Cookie` - abstract HTTP cookie and associated utilities
   * `HttpClient` - an abstract HTTP (invocation) client
   * `UrlEncoder` - cross-platform URL encoding and decoding
 
@@ -101,8 +105,14 @@ val WebappUtilVer = "<version>"
   * `SharedLock` - a lock that can be safely shared between threads *(different API between JVM & JS)*
   * `SharedLock.ReadWrite` - a read/write lock that can be safely shared between threads *(different API between JVM & JS)*
 
+* `japgolly.webapputil.websocket`
+  * `WebSocket` - abstract API over a websocket connection *(JS only)*
+  * `WebSocketClient` - a high-level, managed websocket connection from client to server, supporting things like authorisation, auto-reconnection & retries, session expiry *(JS only)*
+  * `WebSocketServerUtil` - utilities for writing server-side websockets *(JVM only)*
+  * `WebSocketShared` - definitions and utilities shared between websocket client and server
+
 * `japgolly.webapputil.webstorage` *(JS only)*
-  * `AbstractWebStorage` - API over WebStorage with some impls
+  * `AbstractWebStorage` - API over webstorage with some impls
   * `KeyCodec` - codec between an arbitrary type and a webstorage key
   * `ValueCodec` - codec between an arbitrary type and a webstorage value
   * `WebStorageKey` - a high-level interface to data in webstorage
@@ -120,6 +130,7 @@ val WebappUtilVer = "<version>"
   * `TestAjaxClient` - an `AjaxClient` instance for use in tests *(JS only)*
   * `TestHttpClient` - a `HttpClient` instance for use in tests
   * `TestTimersJs` - a `TimersJs` instance for use in tests *(JS only)*
+  * `TestWebSocket` - a `WebSocket` instance for use in tests *(JS only)*
   * `TestWebWorker` - in-memory instances of `AbstractWebWorker` client and server API for use in tests *(JS only)*
   * `TestWindowConfirm` - a `WindowConfirm` instance for use in tests *(JS only)*
   * `TestWindowLocation` - a `WindowLocation` instance for use in tests *(JS only)*
@@ -135,6 +146,8 @@ val WebappUtilVer = "<version>"
 * `japgolly.webapputil.boopickle`
   * `BinaryFormatExt` - additional functionality around `BinaryFormat` *(JS only)*
   * `BinaryWebWorkerProtocol` - implementation of `WebWorkerProtocol` that uses boopickle for message encoding *(JS only)*
+  * `BoopickleCodecEngine` - implementation of `CodecEngine` for boopickle
+  * `BoopickleWebSocketClient` - implementation of `WebSocketClient` that uses boopickle for message encoding *(JS only)*
   * `EncryptionEngine` - implementation of `Encryption.Engine` *(JS only)*
   * `IndexedDbExt` - additional functionality around IndexedDb *(JS only)*
   * `PicklerUtil` - Lots of utilities around, and implementations of, Boopickle `Pickler`s
@@ -146,6 +159,7 @@ val WebappUtilVer = "<version>"
 * `japgolly.webapputil.boopickle.test`
   * `TestEncryption` - bit of util for testing encryption *(JS only)*
   * `TestIndexedDb` - util for testing IndexedDb code *(JS only)*
+  * `WebSocketTestUtil` - util for testing WebSocket code *(JS only)*
 
 ## The `core-cats-effect` module:
 * `japgolly.webapputil.cats.effect`
@@ -203,7 +217,6 @@ val WebappUtilVer = "<version>"
 
 * Add examples
 * Add ScalaDoc and proper doc
-* Port websocket stuff
 
 
 # Support

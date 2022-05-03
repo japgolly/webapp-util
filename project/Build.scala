@@ -98,6 +98,7 @@ object Build {
       parallelExecution := false,
     ))
     .jsConfigure(_.settings(
+      libraryDependencies += Dep.scalajsJavaTime.value % Test,
       Test / jsEnv := new AdvancedNodeJSEnv(
         AdvancedNodeJSEnv.Config().withEnv(Map(
           "CI"       -> (if (inCI) "1" else "0"),
@@ -150,10 +151,14 @@ object Build {
       ),
     )
     .jvmSettings(
-      libraryDependencies += Dep.scalaLogging.value,
+      libraryDependencies ++= Seq(
+        Dep.javaxWebsocketApi.value,
+        Dep.scalaLogging.value,
+      ),
     )
     .jsSettings(
       libraryDependencies ++= Seq(
+        Dep.microlibsAdtMacros.value,
         Dep.scalaJsDom.value,
         Dep.scalaJsReactCore.value,
         Dep.scalaJsReactExtra.value,

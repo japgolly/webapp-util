@@ -9,31 +9,33 @@ object Dependencies {
   object Ver {
 
     // Exported
-    def boopickle    = "1.4.0"
-    def catsEffect   = "3.3.11"
-    def catsRetry    = "3.1.0"
-    def circe        = "0.14.1"
-    def clearConfig  = "3.0.0"
-    def doobie       = "1.0.0-RC2"
-    def flyway       = "8.0.5"
-    def hikariCP     = "4.0.3"
-    def izumiReflect = "2.1.0"
-    def microlibs    = "4.0.0"
-    def nyaya        = "1.0.0"
-    def okHttp4      = "4.9.3"
-    def postgresql   = "42.3.4"
-    def scala2       = "2.13.8"
-    def scala3       = "3.1.0"
-    def scalaJsDom   = "2.1.0"
-    def scalaJsReact = "2.1.0"
-    def scalaLogging = "3.9.4"
-    def testState    = "3.0.0"
-    def univEq       = "2.0.0"
+    def boopickle         = "1.4.0"
+    def catsEffect        = "3.3.11"
+    def catsRetry         = "3.1.0"
+    def circe             = "0.14.1"
+    def clearConfig       = "3.0.0"
+    def doobie            = "1.0.0-RC2"
+    def flyway            = "8.0.5"
+    def hikariCP          = "4.0.3"
+    def izumiReflect      = "2.1.0"
+    def javaxWebsocketApi = "1.0"
+    def microlibs         = "4.0.0"
+    def nyaya             = "1.0.0"
+    def okHttp4           = "4.9.3"
+    def postgresql        = "42.3.4"
+    def scala2            = "2.13.8"
+    def scala3            = "3.1.0"
+    def scalaJsDom        = "2.1.0"
+    def scalaJsReact      = "2.1.0"
+    def scalaLogging      = "3.9.4"
+    def testState         = "3.0.0"
+    def univEq            = "2.0.0"
 
     // Internal
-    def base32768    = "2.0.2"
-    def pako         = "2.0.4"
-    def utest        = "0.7.11"
+    def base32768         = "2.0.2"
+    def pako              = "2.0.4"
+    def scalajsJavaTime   = "1.0.0"
+    def utest             = "0.7.11"
   }
 
   object Dep {
@@ -51,6 +53,7 @@ object Dependencies {
     val flyway              = Def.setting("org.flywaydb"                        % "flyway-core"           % Ver.flyway)
     val hikariCP            = Def.setting("com.zaxxer"                          % "HikariCP"              % Ver.hikariCP)
     val izumiReflect        = Def.setting("dev.zio"                            %% "izumi-reflect"         % Ver.izumiReflect)
+    val javaxWebsocketApi   = Def.setting("javax.websocket"                     % "javax.websocket-api"   % Ver.javaxWebsocketApi)
     val microlibsAdtMacros  = Def.setting("com.github.japgolly.microlibs"     %%% "adt-macros"            % Ver.microlibs)
     val microlibsNonEmpty   = Def.setting("com.github.japgolly.microlibs"     %%% "nonempty"              % Ver.microlibs)
     val microlibsRecursion  = Def.setting("com.github.japgolly.microlibs"     %%% "recursion"             % Ver.microlibs)
@@ -63,6 +66,7 @@ object Dependencies {
     val okHttp4             = Def.setting("com.squareup.okhttp3"                % "okhttp"                % Ver.okHttp4)
     val postgresql          = Def.setting("org.postgresql"                      % "postgresql"            % Ver.postgresql)
     val scalaJsDom          = Def.setting("org.scala-js"                      %%% "scalajs-dom"           % Ver.scalaJsDom)
+    val scalajsJavaTime     = Def.setting("org.scala-js"                      %%% "scalajs-java-time"     % Ver.scalajsJavaTime cross CrossVersion.for3Use2_13)
     val scalaJsReactCore    = Def.setting("com.github.japgolly.scalajs-react" %%% "core"                  % Ver.scalaJsReact)
     val scalaJsReactExtra   = Def.setting("com.github.japgolly.scalajs-react" %%% "extra"                 % Ver.scalaJsReact)
     val scalaJsReactTest    = Def.setting("com.github.japgolly.scalajs-react" %%% "test"                  % Ver.scalaJsReact)

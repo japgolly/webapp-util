@@ -1,6 +1,7 @@
 package japgolly.webapputil.webstorage
 
 import japgolly.scalajs.react.{Callback, CallbackTo, Reusability}
+import japgolly.univeq.UnivEq
 import japgolly.webapputil.general.SetOnceVar
 import org.scalajs.dom.{Storage => StorageJs}
 import scala.scalajs.js
@@ -14,6 +15,12 @@ trait AbstractWebStorage {
   def setItem(key: Key, data: Value): Callback
   def getLength: CallbackTo[Int]
   def getKey(index: Int): CallbackTo[Option[Key]]
+
+  final def setOrRemoveItem(key: Key, data: Option[Value]): Callback =
+    data match {
+      case Some(v) => setItem(key, v)
+      case None    => removeItem(key)
+    }
 }
 
 object AbstractWebStorage {
@@ -71,6 +78,9 @@ object AbstractWebStorage {
     def mod(f: String => String): Value =
       Value(f(value))
   }
+
+  implicit def univEqKey: UnivEq[Key] = UnivEq.derive
+  implicit def univEqValue: UnivEq[Value] = UnivEq.derive
 
   // ===================================================================================================================
 
