@@ -49,6 +49,7 @@ val WebappUtilVer = "<version>"
   * `LazyVal` - A lightweight `lazy val` as a portable value
   * `LoggerJs` - A simple logger *(JS only)*
   * `Protocol` - abstract definitions of protocols
+  * `Retries` - immutable retry policy
   * `ServerSideProcInvoker` - abstract and invokable representation of a server-side procedure *(JS only)*
   * `ThreadUtils` - thread groups, thread pools, `ExecutionContext` util, shutdown hooks  *(JVM only)*
   * `TimersJs` - API over JS timers *(JS only)*
