@@ -1,7 +1,7 @@
 package japgolly.webapputil.entrypoint
 
 import japgolly.univeq.UnivEq
-import japgolly.webapputil.general.EscapeUtil
+import japgolly.microlibs.stdlib_ext.EscapeUtils
 import java.lang.{StringBuilder => JStringBuilder}
 
 final case class Js(val asString: String) extends AnyVal {
@@ -50,7 +50,7 @@ final case class Js(val asString: String) extends AnyVal {
     sb.append(tagSrc)
     sb.append(url)
     sb.append(tagSrcLoad)
-    EscapeUtil.htmlAppendEscaped(sb, asString)
+    EscapeUtils.htmlAppendEscaped(sb, asString)
     sb.append(tagLoadEnd)
 
     Html(sb.toString)

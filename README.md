@@ -44,7 +44,6 @@ val WebappUtilVer = "<version>"
 
 * `japgolly.webapputil.general`
   * `ErrorMsg` - typed error message, with some util and predefined cases
-  * `EscapeUtil` - functions for escaping strings
   * `JsExt` - JS-only implicit extensions *(JS only)*
   * `LazyVal` - lightweight `lazy val` as a portable value
   * `LoggerJs` - simple logger *(JS only)*

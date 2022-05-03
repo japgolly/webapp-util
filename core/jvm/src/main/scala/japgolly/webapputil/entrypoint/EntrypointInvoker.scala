@@ -1,6 +1,6 @@
 package japgolly.webapputil.entrypoint
 
-import japgolly.webapputil.general.EscapeUtil
+import japgolly.microlibs.stdlib_ext.EscapeUtils
 import java.lang.{StringBuilder => JStringBuilder}
 
 object EntrypointInvoker {
@@ -20,7 +20,7 @@ final class EntrypointInvoker[Input](defn: EntrypointDef[Input]) {
 
   private val appendEncoded: (JStringBuilder, String) => Unit =
     if (defn.codec.escapeEncodedString)
-      EscapeUtil.appendEscaped
+      EscapeUtils.appendEscaped
     else
       _.append(_)
 

@@ -10,14 +10,6 @@ import scala.util.{Failure, Success, Try}
 
 object ManagedWebWorker {
 
-  // TODO: Remove after microlibs upgrade
-  private[this] final implicit class TempStringExt(private val s: String) extends AnyVal {
-    def quoteInner: String = {
-      val q = EscapeUtils.quote(s)
-      q.substring(1, q.length - 1)
-    }
-  }
-
   trait Client[Req[_], Push, R[_], Enc] {
 
     final def send[A](req: Req[A])(implicit readResult: R[A]): AsyncCallback[A] =
@@ -108,7 +100,7 @@ object ManagedWebWorker {
 
             def listener(msg: Encoded): Callback = {
               val decoded = Try(protocol.decode[A](msg))
-              logger(_.debug(s"Received WW response #$id: ${decoded.fold(_.toString, a => ("" + a).take(100).quoteInner)}"))
+              logger(_.debug(s"Received WW response #$id: ${decoded.fold(_.toString, a => EscapeUtils.escape(("" + a).take(100)))}"))
               complete(decoded)
             }
 
@@ -116,7 +108,7 @@ object ManagedWebWorker {
             promises ::= promise
 
             val msg = new MessageWithId(id, enc)
-            logger(_.debug(s"Sending WW request #$id: ${("" + req).take(100).quoteInner}"))
+            logger(_.debug(s"Sending WW request #$id: ${EscapeUtils.escape(("" + req).take(100))}"))
             worker.send(msg, protocol.transferables(enc)).runNow()
 
             result
@@ -203,7 +195,7 @@ object ManagedWebWorker {
         def respond[A](client: C, id: Int, req: Req[A]): AsyncCallback[Unit] =
           service(client, req).attemptTry.flatMap {
             case Success(a) =>
-              logger(_.debug(s"Responding to request #$id with result: ${(""+a).take(100).quoteInner}"))
+              logger(_.debug(s"Responding to request #$id with result: ${EscapeUtils.escape((""+a).take(100))}"))
               val enc = protocol.encode(a)(responseEncoder(req))
               val msg = new MessageWithId(id, enc)
               worker.send(client :: Nil, msg, protocol.transferables(enc)).asAsyncCallback
