@@ -43,6 +43,7 @@ val WebappUtilVer = "<version>"
 ## The `core` module:
 
 * `japgolly.webapputil.general`
+  * `Enabled` - type-safe union of `Enabled | Disabled`
   * `ErrorMsg` - typed error message, with some util and predefined cases
   * `JsExt` - JS-only implicit extensions *(JS only)*
   * `LazyVal` - lightweight `lazy val` as a portable value
