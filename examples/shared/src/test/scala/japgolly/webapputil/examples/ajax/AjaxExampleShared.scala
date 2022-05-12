@@ -5,7 +5,7 @@ import japgolly.webapputil.ajax.AjaxProtocol
 import japgolly.webapputil.circe.JsonCodec
 import japgolly.webapputil.general.{Protocol, Url}
 
-object ExampleAjaxShared {
+object AjaxExampleShared {
 
   // This is an example AJAX endpoint definition
   object AddInts {

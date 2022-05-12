@@ -6,8 +6,8 @@ import japgolly.webapputil.ajax.AjaxClient
 import japgolly.webapputil.circe.JsonAjaxClient
 import japgolly.webapputil.general.{ErrorMsg, ServerSideProcInvoker}
 
-object ExampleAjaxJs {
-  import ExampleAjaxShared.AddInts.{protocol, Request, Response}
+object AjaxExampleJs {
+  import AjaxExampleShared.AddInts.{protocol, Request, Response}
 
   // There are different ways to make AJAX calls depending on your app and needs.
 

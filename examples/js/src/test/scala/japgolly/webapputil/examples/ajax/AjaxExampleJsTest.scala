@@ -9,7 +9,7 @@ import japgolly.webapputil.general.{ErrorMsg, ServerSideProcInvoker}
 import org.scalajs.dom.HTMLButtonElement
 import utest._
 
-object ExampleAjaxJsTest extends TestSuite {
+object AjaxExampleJsTest extends TestSuite {
 
   override def tests = Tests {
     "component1" - {
@@ -21,11 +21,11 @@ object ExampleAjaxJsTest extends TestSuite {
 
   // ===================================================================================================================
   private def testExampleComponent1Success() = {
-    import ExampleAjaxJs.ExampleComponent._
+    import AjaxExampleJs.ExampleComponent._
 
     // Here we provide our own ServerSideProcInvoker that provides an answer in-memory immediately
     val props = Props(ServerSideProcInvoker { req =>
-      val result = ExampleAjaxShared.AddInts.logic(req)
+      val result = AjaxExampleShared.AddInts.logic(req)
       AsyncCallback.pure(Right(result))
     })
 
@@ -44,7 +44,7 @@ object ExampleAjaxJsTest extends TestSuite {
 
   // ===================================================================================================================
   private def testExampleComponent1Failure() = {
-    import ExampleAjaxJs.ExampleComponent._
+    import AjaxExampleJs.ExampleComponent._
 
     // Let's simulate a connectivity error
     val error = ErrorMsg("No internet connectivity")
@@ -62,7 +62,7 @@ object ExampleAjaxJsTest extends TestSuite {
 
   // ===================================================================================================================
   private def testExampleComponent2() = {
-    import ExampleAjaxJs.ExampleComponent2._
+    import AjaxExampleJs.ExampleComponent2._
 
     // Here we create our own in-memory client for lower-level ajax testing.
     //
@@ -72,8 +72,8 @@ object ExampleAjaxJsTest extends TestSuite {
     val ajax = TestJsonAjaxClient(autoRespondInitially = false)
 
     // Here we teach our ajax client how to respond to calls to /add-ints
-    ajax.addAutoResponse(ExampleAjaxShared.AddInts.protocol) { testReq =>
-      val result = ExampleAjaxShared.AddInts.logic(testReq.input)
+    ajax.addAutoResponse(AjaxExampleShared.AddInts.protocol) { testReq =>
+      val result = AjaxExampleShared.AddInts.logic(testReq.input)
       val response = AjaxClient.Response.success(result)
       testReq.onResponse(Right(response))
     }
