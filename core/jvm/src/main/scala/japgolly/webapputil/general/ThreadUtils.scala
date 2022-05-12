@@ -148,10 +148,10 @@ object ThreadUtils {
           else {
             done = true
             result = r
-            if (r.isEmpty) {
-              if (thread ne null) thread.interrupt()
-            } else
+            if (r.isDefined)
               timer.cancel()
+            else if (thread ne null)
+              thread.interrupt()
             true
           }
         }
@@ -169,7 +169,8 @@ object ThreadUtils {
           complete(Some(a))
         } catch {
           case _: InterruptedException =>
-        } finally complete(None)
+        } finally
+          complete(None)
 
       val timeout = new TimerTask {
         override def run(): Unit =
@@ -179,7 +180,7 @@ object ThreadUtils {
       timer.schedule(timeout, maxDur.toMillis)
 
       // Note: it's important that this task start *after* the call to timer.schedule above.
-      // Otherwise this thread can complete can cancel the timer before the .schedule call, which results in .schedule
+      // Otherwise this thread can complete and cancel the timer before the .schedule call, which results in .schedule
       // throwing a runtime exception because the timer has already been cancelled.
       thread = new Thread(taskRunnable)
       thread.start()
@@ -189,6 +190,8 @@ object ThreadUtils {
       }
 
       result
-    } finally timer.cancel()
+
+    } finally
+      timer.cancel()
   }
 }
