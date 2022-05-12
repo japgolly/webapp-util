@@ -27,13 +27,13 @@ object Build {
     "-language:implicitConversions",
     "-language:postfixOps",
     "-unchecked",                                    // Enable additional warnings where generated code depends on assumptions.
+    "-Wconf:msg=copyArrayToImmutableIndexedSeq:s",   // utest noise
+    "-Wconf:msg=may.not.be.exhaustive:e",            // Make non-exhaustive matches errors instead of warnings
+    "-Wconf:msg=Reference.to.uninitialized.value:e", // Make uninitialised value calls errors instead of warnings
   )
 
   def scalac2Flags = Seq(
     "-target:11",
-    "-Wconf:msg=copyArrayToImmutableIndexedSeq:s",   // utest noise
-    "-Wconf:msg=may.not.be.exhaustive:e",            // Make non-exhaustive matches errors instead of warnings
-    "-Wconf:msg=Reference.to.uninitialized.value:e", // Make uninitialised value calls errors instead of warnings
     "-Wdead-code",                                   // Warn when dead code is identified.
     "-Wunused:explicits",                            // Warn if an explicit parameter is unused.
     "-Wunused:implicits",                            // Warn if an implicit parameter is unused.
@@ -67,6 +67,7 @@ object Build {
 
   def scalac3Flags = Seq(
     "-source:3.0-migration",
+    "-Wconf:msg=unused:s", // Scala 3.1 doesn't support @nowarn("cat=unused")
     "-Ykind-projector",
   )
 
