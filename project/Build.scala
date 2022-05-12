@@ -99,7 +99,10 @@ object Build {
       parallelExecution := false,
     ))
     .jsConfigure(_.settings(
-      libraryDependencies += Dep.scalajsJavaTime.value % Test,
+      libraryDependencies ++= Seq(
+        Dep.scalaJsReactTest.value % Test,
+        Dep.scalajsJavaTime.value % Test,
+      ),
       Test / jsEnv := new AdvancedNodeJSEnv(
         AdvancedNodeJSEnv.Config().withEnv(Map(
           "CI"       -> (if (inCI) "1" else "0"),
@@ -122,6 +125,8 @@ object Build {
       coreJVM,
       coreOkHttp4,
       dbPostgres,
+      examplesJS,
+      examplesJVM,
       testBoopickleJS,
       testBoopickleJVM,
       testCatsEffectJS,
@@ -328,5 +333,32 @@ object Build {
         Dep.microlibsTestUtil.value,
       ),
     )
+
+  // ===================================================================================================================
+
+  lazy val examplesJVM = examples.jvm
+  lazy val examplesJS  = examples.js
+  lazy val examples = crossProject(JSPlatform, JVMPlatform)
+    .configureCross(commonSettings, testSettings)
+    .configure(preventPublication)
+    .dependsOn(
+      core,
+      coreBoopickle,
+      coreCatsEffect,
+      coreCirce,
+      testBoopickle,
+      testCatsEffect,
+      testCirce,
+      testCore,
+    )
+    .jvmConfigure(_.dependsOn(
+      coreOkHttp4,
+      dbPostgres,
+      testDbPostgres,
+    ))
+    .jsConfigure(addReactJsDependencies(Test))
+    .jsConfigure(_.dependsOn(
+      testNode,
+    ))
 
 }

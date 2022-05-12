@@ -33,3 +33,6 @@ val coreOkHttp4       = Build.coreOkHttp4
 
 val dbPostgres        = Build.dbPostgres
 val testDbPostgres    = Build.testDbPostgres
+
+val examplesJVM       = Build.examplesJVM
+val examplesJS        = Build.examplesJS

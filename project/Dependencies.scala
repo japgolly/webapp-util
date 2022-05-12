@@ -34,6 +34,7 @@ object Dependencies {
     // Internal
     def base32768         = "2.0.2"
     def pako              = "2.0.4"
+    def reactJs           = "17.0.2"
     def scalajsJavaTime   = "1.0.0"
     def utest             = "0.7.11"
   }
@@ -77,5 +78,45 @@ object Dependencies {
 
     def base32768(c: Configuration) = Def.setting("org.webjars.npm" % "base32768" % Ver.base32768 % c / "dist/iife/base32768.js" commonJSName "base32768")
     def pako     (c: Configuration) = Def.setting("org.webjars.npm" % "pako"      % Ver.pako      % c / "dist/pako.min.js"       commonJSName "pako")
+
+    val react             = ReactArtifact("react")
+    val reactDom          = ReactArtifact("react-dom")
+    val reactDomServer    = ReactArtifact("react-dom-server.browser")
+    val reactDoutestUtils = ReactArtifact("react-dom-test-utils")
   }
+
+  final case class ReactArtifact(filename: String) {
+    val dev = s"umd/$filename.development.js"
+    val prod = s"umd/$filename.production.min.js"
+  }
+
+  def addReactJsDependencies(scope: Configuration): Project => Project =
+    _.enablePlugins(JSDependenciesPlugin)
+      .settings(
+        jsDependencies ++= Seq(
+
+          "org.webjars.npm" % "react" % Ver.reactJs % scope
+            /         "umd/react.development.js"
+            minified  "umd/react.production.min.js"
+            commonJSName "React",
+
+          "org.webjars.npm" % "react-dom" % Ver.reactJs % scope
+            /         "umd/react-dom.development.js"
+            minified  "umd/react-dom.production.min.js"
+            dependsOn "umd/react.development.js"
+            commonJSName "ReactDOM",
+
+          "org.webjars.npm" % "react-dom" % Ver.reactJs % scope
+            /         "umd/react-dom-test-utils.development.js"
+            minified  "umd/react-dom-test-utils.production.min.js"
+            dependsOn "umd/react-dom.development.js"
+            commonJSName "ReactTestUtils",
+
+          "org.webjars.npm" % "react-dom" % Ver.reactJs % scope
+            /         "umd/react-dom-server.browser.development.js"
+            minified  "umd/react-dom-server.browser.production.min.js"
+            dependsOn "umd/react-dom.development.js"
+            commonJSName "ReactDOMServer"),
+
+        packageJSDependencies / skip := false)
 }
