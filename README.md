@@ -107,7 +107,7 @@ val WebappUtilVer = "<version>"
 
 * `japgolly.webapputil.websocket`
   * [`WebSocket`](./core/js/src/main/scala/japgolly/webapputil/websocket/WebSocket.scala) - abstract API over a websocket connection *(JS only)*
-  * [`WebSocketClient`](./core/js/src/main/scala/japgolly/webapputil/websocket/WebSocketClient.scala) - high-level, managed websocket connection from client to server, supporting things like authorisation, auto-reconnection, retries, session expiry *(JS only)*
+  * [`WebSocketClient`](./core/js/src/main/scala/japgolly/webapputil/websocket/WebSocketClient.scala) - high-level, managed websocket connection from client to server, supporting things like authorisation, auto-reconnection, retries, session expiry ([`TLA+ spec`](./TLA+/websocket_client.tla)) *(JS only)*
   * [`WebSocketServerUtil`](./core/jvm/src/main/scala/japgolly/webapputil/websocket/WebSocketServerUtil.scala) - util for writing server-side websockets *(JVM only)*
   * [`WebSocketShared`](./core/shared/src/main/scala/japgolly/webapputil/websocket/WebSocketShared.scala) - definitions and util shared between websocket client and server
 
