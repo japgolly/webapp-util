@@ -9,6 +9,7 @@ import japgolly.webapputil.test.TestHttpClient
 package object test {
 
   type TestHttpClientIO = TestHttpClientIO.Client
+
   object TestHttpClientIO extends TestHttpClient.Module[IO, IO] {
 
     def withIORuntime(autoRespondInitially: Boolean)(implicit r: IORuntime): Client = {

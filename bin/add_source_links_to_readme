@@ -1,0 +1,45 @@
+#!/bin/bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# cd "$(dirname "$(readlink -e "$0")")" || exit 1
+# [ $# -ne 1 ] && echo "Usage: $0 <xxx>" && exit 1
+# tmp=/tmp/$(date +%Y%m%d-%H%M%S)-$$
+
+src=README.md
+tmp=/tmp/webapp-util-README.tmp.md
+
+# TODO: In some cases it chooses a /jvm/ link for something declared as shared
+
+function process {
+  local name=
+  local file=
+  local tail=
+
+  while IFS= read -r line; do
+
+    name="$(echo "$line" | perl -pe 's/^  \* `(.+?)`.*/$1/')"
+
+    if [[ "$name" == "$line" ]]; then
+      echo "$line"
+    else
+      file="$(find core* test* db* -name "$name.scala" | fgrep /src/ | head -1 || echo)"
+      if [ -z "$file" ]; then
+        echo >&2 "Failed to find the source for $name"
+        echo "$line"
+      else
+        tail="$(echo "$line" | perl -pe 's/^.*?`.+?`(.*)/$1/')"
+        echo "  * [\`$name\`](./$file)$tail"
+      fi
+    fi
+
+  done < $src
+}
+
+# Dry run
+# process | bat -l markdown --color=always --pager=never -
+
+process > $tmp
+cp $src /tmp/webapp-util-$src
+mv $tmp $src
+echo Done
