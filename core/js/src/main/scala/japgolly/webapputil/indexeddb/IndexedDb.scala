@@ -10,15 +10,13 @@ final class IndexedDb(raw: IDBFactory) {
   import IndexedDb._
   import IndexedDb.Internals._
 
-  type Result = OpenCallbacks => AsyncCallback[Database]
-
-  def open(name: DatabaseName): Result =
+  def open(name: DatabaseName): OpenResult =
     _open(raw.open(name.value))
 
-  def open(name: DatabaseName, version: Int): Result =
+  def open(name: DatabaseName, version: Int): OpenResult =
     _open(raw.open(name.value, version))
 
-  private def _open(rawOpen: => IDBOpenDBRequest[IDBDatabase]): Result =
+  private def _open(rawOpen: => IDBOpenDBRequest[IDBDatabase]): OpenResult =
     callbacks => {
 
       def create(): IDBOpenDBRequest[IDBDatabase] = {
@@ -80,6 +78,8 @@ object IndexedDb {
 
   final case class DatabaseName(value: String)
 
+  type OpenResult = OpenCallbacks => AsyncCallback[Database]
+
   // ===================================================================================================================
 
   import Internals._
@@ -106,7 +106,6 @@ object IndexedDb {
   ) {
 
     // Note: allowing .message to be undefined is presumably only required due to use of fake-indexeddb in tests
-
     val msg: String =
       event.asInstanceOf[js.Dynamic].message.asInstanceOf[js.UndefOr[String]].getOrElse("")
 
@@ -285,7 +284,6 @@ object IndexedDb {
         it.foldLeft[Txn[_]](first)(_ >> f(_)) >> unit
       }
     }
-
   }
 
   private val TxnDsl = new TxnDsl()
