@@ -9,5 +9,5 @@ package object test {
     override type Codec[A] = JsonCodec[A]
   }
 
-  type TestJsonAjaxClient = TestJsonAjaxClient.Client
+  type TestJsonAjaxClient = TestAjaxClient[JsonCodec]
 }

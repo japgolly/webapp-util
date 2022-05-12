@@ -11,9 +11,9 @@ object TestAjaxClient {
 
   trait Module {
     type Codec[A]
-    final type Req                             = TestAjaxClient.Req
-    final type ReqOf[P <: AjaxProtocol[Codec]] = TestAjaxClient.ReqOf[Codec, P]
-    final type Client                          = TestAjaxClient[Codec]
+    type Req                             = TestAjaxClient.Req
+    type ReqOf[P <: AjaxProtocol[Codec]] = TestAjaxClient.ReqOf[Codec, P]
+    type Client                          = TestAjaxClient[Codec]
 
     def apply(autoRespondInitially: Boolean): Client =
       new TestAjaxClient(autoRespondInitially)
@@ -58,7 +58,7 @@ object TestAjaxClient {
   abstract class ResponseDsl[-A, +B] {
 
     final def apply(value: A): B =
-      withResponse(AjaxClient.Response.pass(value))
+      withResponse(AjaxClient.Response.success(value))
 
     final def withResponse(r: AjaxClient.Response[A]): B =
       withResponseAttempt(Right(r))

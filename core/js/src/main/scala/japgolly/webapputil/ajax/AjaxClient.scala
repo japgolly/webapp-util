@@ -42,19 +42,19 @@ object AjaxClient {
       }
     }
 
-    def pass[A](result: A): Response[A] =
+    def success[A](result: A): Response[A] =
       apply(Right(result))
   }
 
   trait WithRetries[P[_]] extends AjaxClient[P] {
 
-    protected def call(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]]
+    protected def singleCall(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]]
 
     protected val maxRetries: Int =
       2
 
     protected def callWithRetry(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]] = {
-      val once = call(p)(req)
+      val once = singleCall(p)(req)
       AsyncCallback.tailrec(maxRetries) { retriesRemaining =>
         if (retriesRemaining > 0)
           once.attempt.flatMap {
@@ -81,9 +81,9 @@ object AjaxClient {
     protected def isSuccess(xhr: XMLHttpRequest): Boolean =
       xhr.status >= 200 && xhr.status < 300
 
-    override protected def call(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]] = {
+    override protected def singleCall(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]] = {
       val prep   = p.protocol.prepareSend(req)
-      val reqBin = encode(p.prepReq.codec, prep.request)
+      val reqBin = encode(p.requestProtocol.codec, prep.request)
 
       Ajax("POST", p.url.relativeUrl)
         .setRequestHeader("Content-Type", "application/octet-stream")
@@ -112,9 +112,9 @@ object AjaxClient {
         case t    => t.takeWhile(_ != ';') == "application/json"
       })
 
-    override def call(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]] = {
+    override def singleCall(p: AjaxProtocol[P])(req: p.protocol.RequestType): AsyncCallback[Response[p.protocol.ResponseType]] = {
       val prep    = p.protocol.prepareSend(req)
-      val reqJson = encode(p.prepReq.codec, prep.request)
+      val reqJson = encode(p.requestProtocol.codec, prep.request)
 
       Ajax("POST", p.url.relativeUrl)
         .setRequestContentTypeJsonUtf8

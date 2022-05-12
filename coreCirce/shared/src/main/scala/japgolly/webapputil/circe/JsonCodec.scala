@@ -18,6 +18,12 @@ final case class JsonCodec[A](encoder: Encoder[A], decoder: Decoder[A]) {
       case b: B => b
       case a    => throw new IllegalArgumentException("Illegal supertype: " + a)
     })(b => b)
+
+  @inline def encode(a: A): Json =
+    encoder(a)
+
+  @inline def decode(json: Json): Decoder.Result[A] =
+    decoder.decodeJson(json)
 }
 
 object JsonCodec {

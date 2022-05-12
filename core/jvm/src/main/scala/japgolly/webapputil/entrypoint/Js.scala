@@ -1,7 +1,7 @@
 package japgolly.webapputil.entrypoint
 
-import japgolly.univeq.UnivEq
 import japgolly.microlibs.stdlib_ext.EscapeUtils
+import japgolly.univeq.UnivEq
 import java.lang.{StringBuilder => JStringBuilder}
 
 final case class Js(val asString: String) extends AnyVal {
