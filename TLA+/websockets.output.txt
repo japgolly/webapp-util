@@ -1,0 +1,39 @@
+TLC2 Version 2.17 of 02 February 2022 (rev: 3c7caa5)
+Running breadth-first search Model-Checking with fp 97 and seed -9177898650443556873 with 32 workers on 32 cores with 25486MB heap and 64MB offheap memory [pid: 114369] (Linux 5.17.5-arch1-2 amd64, GraalVM Community 11.0.14 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/golly/projects/public/webapp-util/TLA+/websockets.tla
+Parsing file /tmp/TLC.tla
+Parsing file /tmp/Naturals.tla
+Parsing file /tmp/Sequences.tla
+Parsing file /tmp/FiniteSets.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module websockets
+Starting... (2022-05-13 08:45:09)
+Computing initial states...
+[cli |-> "closed    ", svr |-> "closed    "]
+Finished computing initial states: 1 distinct state generated at 2022-05-13 08:45:09.
+[cli |-> "connecting", svr |-> "closed    "]
+[cli |-> "closing   ", svr |-> "closed    "]
+[cli |-> "connecting", svr |-> "connecting"]
+[cli |-> "open      ", svr |-> "connecting"]
+[cli |-> "closing   ", svr |-> "connecting"]
+[cli |-> "connecting", svr |-> "open      "]
+[cli |-> "connecting", svr |-> "closing   "]
+[cli |-> "closed    ", svr |-> "connecting"]
+[cli |-> "closing   ", svr |-> "closing   "]
+[cli |-> "open      ", svr |-> "open      "]
+[cli |-> "closed    ", svr |-> "closing   "]
+[cli |-> "open      ", svr |-> "closing   "]
+[cli |-> "closing   ", svr |-> "open      "]
+[cli |-> "open      ", svr |-> "closed    "]
+[cli |-> "closed    ", svr |-> "open      "]
+Model checking completed. No error has been found.
+  Estimates of the probability that TLC did not check all reachable states
+  because two distinct states had the same fingerprint:
+  calculated (optimistic):  val = 4.1E-17
+63 states generated, 16 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 5.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 4 and the 95th percentile is 4).
+Finished in 00s at (2022-05-13 08:45:09)
