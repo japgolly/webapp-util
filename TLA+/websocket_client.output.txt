@@ -1,0 +1,41 @@
+TLC2 Version 2.17 of 02 February 2022 (rev: 3c7caa5)
+Running breadth-first search Model-Checking with fp 25 and seed -2654345447334480850 with 32 workers on 32 cores with 25486MB heap and 64MB offheap memory [pid: 114128] (Linux 5.17.5-arch1-2 amd64, GraalVM Community 11.0.14 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /home/golly/projects/public/webapp-util/TLA+/websocket_client.tla
+Parsing file /tmp/TLC.tla
+Parsing file /tmp/Naturals.tla
+Parsing file /tmp/Sequences.tla
+Parsing file /tmp/FiniteSets.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module websocket_client
+Starting... (2022-05-13 08:44:43)
+Implied-temporal checking--satisfiability problem has 1 branches.
+Computing initial states...
+[authorised |-> TRUE, retry |-> FALSE, scheduled |-> FALSE, ws |-> "None"]
+[authorised |-> TRUE, retry |-> TRUE, scheduled |-> FALSE, ws |-> "None"]
+Finished computing initial states: 2 distinct states generated at 2022-05-13 08:44:43.
+[authorised |-> TRUE, retry |-> FALSE, scheduled |-> FALSE, ws |-> "Connecting"]
+[authorised |-> TRUE, retry |-> TRUE, scheduled |-> FALSE, ws |-> "Connecting"]
+[authorised |-> TRUE, retry |-> FALSE, scheduled |-> FALSE, ws |-> "Open"]
+[authorised |-> TRUE, retry |-> TRUE, scheduled |-> FALSE, ws |-> "Open"]
+[authorised |-> TRUE, retry |-> FALSE, scheduled |-> FALSE, ws |-> "Closing"]
+[authorised |-> TRUE, retry |-> TRUE, scheduled |-> FALSE, ws |-> "Closing"]
+[authorised |-> TRUE, retry |-> FALSE, scheduled |-> FALSE, ws |-> "Closed"]
+[authorised |-> TRUE, retry |-> FALSE, scheduled |-> TRUE, ws |-> "None"]
+[authorised |-> TRUE, retry |-> FALSE, scheduled |-> TRUE, ws |-> "Closed"]
+[authorised |-> FALSE, retry |-> FALSE, scheduled |-> FALSE, ws |-> "None"]
+[authorised |-> TRUE, retry |-> TRUE, scheduled |-> TRUE, ws |-> "None"]
+[authorised |-> TRUE, retry |-> TRUE, scheduled |-> TRUE, ws |-> "Closed"]
+Progress(4) at 2022-05-13 08:44:43: 76 states generated, 14 distinct states found, 0 states left on queue.
+Checking temporal properties for the complete state space with 14 total distinct states at (2022-05-13 08:44:43)
+Finished checking temporal properties in 00s at 2022-05-13 08:44:43
+Model checking completed. No error has been found.
+  Estimates of the probability that TLC did not check all reachable states
+  because two distinct states had the same fingerprint:
+  calculated (optimistic):  val = 4.7E-17
+76 states generated, 14 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 4.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 3 and the 95th percentile is 3).
+Finished in 00s at (2022-05-13 08:44:43)
