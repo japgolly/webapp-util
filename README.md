@@ -1,6 +1,6 @@
 # Scala Webapp Utilities
 [![Build Status](https://travis-ci.org/japgolly/webapp-util.svg?branch=master)](https://travis-ci.org/japgolly/webapp-util)
-[![Latest Version](https://maven-badges.herokuapp.com/maven-central/com.github.japgolly.webapp-util/protocol_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.japgolly.webapp-util/protocol_2.13)
+[![Latest Version](https://maven-badges.herokuapp.com/maven-central/com.github.japgolly.webapp-util/core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.japgolly.webapp-util/core_2.13)
 
 This library was initially extracted (with permission) from the closed-source [ShipReq](https://blog.shipreq.com/about/)
 where it when through many evolutions, and was battled-tested on a real-world, large and complex project.
