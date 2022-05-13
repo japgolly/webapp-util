@@ -97,7 +97,7 @@
 
     </span><span class="comment">// Here we define the protocol between client and server.
 </span><span>    </span><span class="comment">// Specifically, it&#39;s the URL, the request and response types, plus the codecs for
-</span><span>      </span><span class="comment">// serialisation &amp; deserialisation.
+</span><span>    </span><span class="comment">// serialisation &amp; deserialisation.
 </span><span>    </span><span class="keyword">val</span><span> </span><span class="identifier">protocol</span><span>: </span><span class="type-name">AjaxProtocol</span><span>.</span><span class="type-name">Simple</span><span>[</span><span class="type-name">JsonCodec</span><span>, </span><span class="type-name">Request</span><span>, </span><span class="type-name">Response</span><span>] = {
 
       </span><span class="keyword">implicit</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">decoderRequest</span><span>: </span><span class="type-name">Decoder</span><span>[</span><span class="type-name">Request</span><span>] =
