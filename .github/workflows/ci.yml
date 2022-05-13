@@ -29,4 +29,4 @@ jobs:
 
       - name: Build and test
         shell: bash
-        run: sbt++field scala${{ matrix.scala }} -DCI=1 clean test
+        run: sbt++field scala${{ matrix.scala }} -DCI=1 clean test ghpages/laikaSite
