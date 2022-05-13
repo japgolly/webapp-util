@@ -18,7 +18,7 @@ object AjaxExampleShared {
 
     // Here we define the protocol between client and server.
     // Specifically, it's the URL, the request and response types, plus the codecs for
-      // serialisation & deserialisation.
+    // serialisation & deserialisation.
     val protocol: AjaxProtocol.Simple[JsonCodec, Request, Response] = {
 
       implicit val decoderRequest: Decoder[Request] =
