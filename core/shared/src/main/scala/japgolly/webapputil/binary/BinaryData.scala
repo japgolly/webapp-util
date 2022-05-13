@@ -89,7 +89,7 @@ final class BinaryData(private[BinaryData] val bytes: Array[Byte],
 
   override def hashCode =
     // Should use Arrays.hashCode() but have to copy to use provided length instead of array.length
-    length
+    offset * -947 + length
 
   override def equals(o: Any): Boolean =
     o match {
@@ -170,7 +170,16 @@ final class BinaryData(private[BinaryData] val bytes: Array[Byte],
       .mkString
 
   def ++(that: BinaryData): BinaryData =
-    BinaryData.unsafeFromArray(this.unsafeArray ++ that.unsafeArray)
+    if (this.isEmpty)
+      that
+    else if (that.isEmpty)
+      this
+    else {
+      val a = new Array[Byte](length + that.length)
+      Array.copy(this.bytes, this.offset, a, 0, this.length)
+      Array.copy(that.bytes, that.offset, a, this.length, that.length)
+      BinaryData.unsafeFromArray(a)
+    }
 
   def drop(n: Int): BinaryData = {
     val m = n.min(length)
