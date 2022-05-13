@@ -129,6 +129,7 @@ object Build {
       dbPostgres,
       examplesJS,
       examplesJVM,
+      ghpages,
       testBoopickleJS,
       testBoopickleJVM,
       testCatsEffectJS,
@@ -385,12 +386,6 @@ object Build {
         .toVector
     }
 
-    // import laika.api._
-    // import laika.format._
-    // println()
-    // println(Transformer.from(Markdown).to(AST).build.transform("# hehe"))
-    // println()
-
     private val sourceDirective = Blocks.create("sourceFile") {
       import Blocks.dsl._
 
@@ -419,53 +414,6 @@ object Build {
         BlockSequence(Paragraph(nameSpan), codeBlock)
       }
     }
-
-    /*
-    private val sourceDirective = Blocks.create("sourceFile") {
-      import Blocks.dsl._
-
-      (attribute(0).as[String], parsedBody).mapN { (filename, body) =>
-
-        val ext = filename.reverse.takeWhile(_ != '.').reverse
-
-        val syntax = ext match {
-          case "scala" => ScalaSyntax
-        }
-
-        val candidates = files.filter(_.endsWith("/" + filename))
-
-        val path =
-          candidates.length match {
-            case 0 => throw new RuntimeException("File not found: " + filename)
-            case 1 => candidates.head
-            case n => throw new RuntimeException(s"Ambiguous filename: $filename\nCandidates:\n${candidates.map("  " + ).sorted.mkString("\n")}")
-          }
-
-        var source    = IO.read(file(path))
-        val parsed    = syntax.rootParser.parse(source).toEither.fold(sys.error, identity)
-        val codeBlock = CodeBlock(language = ext, content = parsed)
-        val header    = Header(1, Seq(Text(filename)), Style.section)
-        val name      = path.replace("src/test/scala/japgolly/webapputil/examples", "...")
-        val nameSpan  = Seq(InlineCode("text", Seq(CodeSpan(name))), Text(":"))
-
-        val res =
-
-        BlockSequence(
-          header +:
-          body
-          // Paragraph(nameSpan) :+
-          // codeBlock
-          // Section(header, Seq(header))
-        )
-
-    println()
-    println(res)
-    println()
-
-        res
-      }
-    }
-    */
 
     private object CustomDirectives extends DirectiveRegistry {
       override val spanDirectives = Seq()
