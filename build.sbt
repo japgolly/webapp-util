@@ -36,3 +36,4 @@ val testDbPostgres    = Build.testDbPostgres
 
 val examplesJVM       = Build.examplesJVM
 val examplesJS        = Build.examplesJS
+val ghpages           = Build.ghpages

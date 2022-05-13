@@ -12,7 +12,6 @@
 .metals
 .project
 .target
-.vscode/
 *.bak
 *.err
 *.log

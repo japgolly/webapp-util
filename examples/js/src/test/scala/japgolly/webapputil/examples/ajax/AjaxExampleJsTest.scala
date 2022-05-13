@@ -19,11 +19,12 @@ object AjaxExampleJsTest extends TestSuite {
     "component2" - testExampleComponent2()
   }
 
-  // ===================================================================================================================
+  // ===================================================================================
   private def testExampleComponent1Success() = {
     import AjaxExampleJs.ExampleComponent._
 
-    // Here we provide our own ServerSideProcInvoker that provides an answer in-memory immediately
+    // Here we provide our own ServerSideProcInvoker that provides an answer in-memory
+    // immediately
     val props = Props(ServerSideProcInvoker { req =>
       val result = AjaxExampleShared.AddInts.logic(req)
       AsyncCallback.pure(Right(result))
@@ -42,7 +43,7 @@ object AjaxExampleJsTest extends TestSuite {
     }
   }
 
-  // ===================================================================================================================
+  // ===================================================================================
   private def testExampleComponent1Failure() = {
     import AjaxExampleJs.ExampleComponent._
 
@@ -60,14 +61,15 @@ object AjaxExampleJsTest extends TestSuite {
     }
   }
 
-  // ===================================================================================================================
+  // ===================================================================================
   private def testExampleComponent2() = {
     import AjaxExampleJs.ExampleComponent2._
 
     // Here we create our own in-memory client for lower-level ajax testing.
     //
-    // We're setting autoRespondInitially to false so that when it receives a request, it does nothing and waits for us
-    // to command it to respond. This will help us test the state of the component when a request is in-flight.
+    // We're setting autoRespondInitially to false so that when it receives a request,
+    // it does nothing and waits for us to command it to respond. This will help us test
+    // the state of the component when a request is in-flight.
     //
     val ajax = TestJsonAjaxClient(autoRespondInitially = false)
 

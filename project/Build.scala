@@ -1,6 +1,8 @@
 import sbt._
 import sbt.Keys._
 import com.jsuereth.sbtpgp.PgpKeys
+import laika.sbt.LaikaPlugin
+import laika.sbt.LaikaPlugin.autoImport._
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin
 import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport._
@@ -360,5 +362,125 @@ object Build {
     .jsConfigure(_.dependsOn(
       testNode,
     ))
+
+  lazy val ghpages = project
+    .enablePlugins(LaikaPlugin)
+    .configure(commonSettings.jvm, preventPublication, GhPages.settings)
+
+  object GhPages {
+    import cats.syntax.all._
+    import laika.ast._
+    import laika.directive._
+    import laika.markdown.github.GitHubFlavor
+    import laika.parse.code.languages._
+    import laika.parse.code.SyntaxHighlighting
+
+    private val files = {
+      val cmd = "find examples/*/src -name '*.scala'"
+      val out = sys.process.Process(List("bash", "-c", cmd)).!!
+      out
+        .linesIterator
+        .map(_.trim)
+        .filter(_.nonEmpty)
+        .toVector
+    }
+
+    // import laika.api._
+    // import laika.format._
+    // println()
+    // println(Transformer.from(Markdown).to(AST).build.transform("# hehe"))
+    // println()
+
+    private val sourceDirective = Blocks.create("sourceFile") {
+      import Blocks.dsl._
+
+      attribute(0).as[String].map { filename =>
+        val ext = filename.reverse.takeWhile(_ != '.').reverse
+
+        val syntax = ext match {
+          case "scala" => ScalaSyntax
+        }
+
+        val candidates = files.filter(_.endsWith("/" + filename))
+
+        val path =
+          candidates.length match {
+            case 0 => throw new RuntimeException("File not found: " + filename)
+            case 1 => candidates.head
+            case n => throw new RuntimeException(s"Ambiguous filename: $filename\nCandidates:\n${candidates.map("  " + ).sorted.mkString("\n")}")
+          }
+
+        var source    = IO.read(file(path))
+        val parsed    = syntax.rootParser.parse(source).toEither.fold(sys.error, identity)
+        val codeBlock = CodeBlock(language = ext, content = parsed)
+        val name      = path.replace("src/test/scala/japgolly/webapputil/examples", "...")
+        val nameSpan  = Seq(InlineCode("text", Seq(CodeSpan(name))), Text(":"))
+
+        BlockSequence(Paragraph(nameSpan), codeBlock)
+      }
+    }
+
+    /*
+    private val sourceDirective = Blocks.create("sourceFile") {
+      import Blocks.dsl._
+
+      (attribute(0).as[String], parsedBody).mapN { (filename, body) =>
+
+        val ext = filename.reverse.takeWhile(_ != '.').reverse
+
+        val syntax = ext match {
+          case "scala" => ScalaSyntax
+        }
+
+        val candidates = files.filter(_.endsWith("/" + filename))
+
+        val path =
+          candidates.length match {
+            case 0 => throw new RuntimeException("File not found: " + filename)
+            case 1 => candidates.head
+            case n => throw new RuntimeException(s"Ambiguous filename: $filename\nCandidates:\n${candidates.map("  " + ).sorted.mkString("\n")}")
+          }
+
+        var source    = IO.read(file(path))
+        val parsed    = syntax.rootParser.parse(source).toEither.fold(sys.error, identity)
+        val codeBlock = CodeBlock(language = ext, content = parsed)
+        val header    = Header(1, Seq(Text(filename)), Style.section)
+        val name      = path.replace("src/test/scala/japgolly/webapputil/examples", "...")
+        val nameSpan  = Seq(InlineCode("text", Seq(CodeSpan(name))), Text(":"))
+
+        val res =
+
+        BlockSequence(
+          header +:
+          body
+          // Paragraph(nameSpan) :+
+          // codeBlock
+          // Section(header, Seq(header))
+        )
+
+    println()
+    println(res)
+    println()
+
+        res
+      }
+    }
+    */
+
+    private object CustomDirectives extends DirectiveRegistry {
+      override val spanDirectives = Seq()
+      override val blockDirectives = Seq(sourceDirective)
+      override val templateDirectives = Seq()
+      override val linkDirectives = Seq()
+    }
+
+    def settings: Project => Project = _.settings(
+      laikaExtensions := Seq(
+        GitHubFlavor,
+        SyntaxHighlighting,
+        CustomDirectives,
+      )
+    )
+  }
 
 }

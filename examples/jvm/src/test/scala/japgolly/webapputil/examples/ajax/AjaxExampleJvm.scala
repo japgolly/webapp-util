@@ -6,7 +6,8 @@ object AjaxExampleJvm {
 
   // This takes JSON and returns JSON.
   //
-  // It's left as an exercise to the reader to integrate a JSON-to-JSON endpoint into your web server of choice.
+  // It's left as an exercise to the reader to integrate a JSON-to-JSON endpoint into
+  // your web server of choice.
   //
   def serveAddInts(requestJson: Json): Decoder.Result[Json] = {
     import AjaxExampleShared.AddInts.{logic, protocol}
