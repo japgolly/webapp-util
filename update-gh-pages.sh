@@ -16,5 +16,7 @@ echo
 
 git add $output
 git status
-echo "git commit -m 'Refresh ghpages' && git push && git checkout master"
+echo
+echo "git commit -m 'Refresh ghpages'"
+echo "git push && git checkout master"
 echo
