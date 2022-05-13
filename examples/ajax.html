@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 0.18.2 + Helium Theme" />
+    <title>AJAX</title>
+    
+    
+      <meta name="description" content="ghpages"/>
+    
+    
+    
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+    
+    <link rel="stylesheet" type="text/css" href="../helium/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/laika-helium.css" />
+    <script src="../helium/laika-helium.js"></script>
+    
+    
+    <script> /* for avoiding page load transitions */ </script>
+  </head>
+
+  <body>
+
+    <header id="top-bar">
+
+      <div class="row">
+        <a id="nav-icon">
+          <i class="icofont-laika" title="Navigation">&#xefa2;</i>
+        </a>
+        
+      </div>
+  
+      <a class="icon-link" href="../index.html"><i class="icofont-laika" title="Home">&#xef47;</i></a>
+      
+      <span class="row links"></span>
+      
+    </header>
+
+    <nav id="sidebar">
+
+      <div class="row">
+        
+      </div>
+      
+      <ul class="nav-list">
+        <li class="level1 nav-header">Examples</li>
+        <li class="level2 active"><a href="#">AJAX</a></li>
+      </ul>
+      
+    </nav>
+
+    <div id="container">
+
+      <nav id="page-nav">
+        <p class="header"><a href="#">AJAX</a></p>
+        
+        <ul class="nav-list">
+          <li class="level1"><a href="#shared-code">Shared Code</a></li>
+          <li class="level1"><a href="#backend">Backend</a></li>
+          <li class="level1"><a href="#frontend">Frontend</a></li>
+          <li class="level1"><a href="#testing-the-frontend">Testing the Frontend</a></li>
+        </ul>
+        
+        <p class="footer"></p>
+      </nav>
+
+      <main class="content">
+
+        <h1 id="ajax-example" class="title">AJAX Example</h1>
+        <p>This is an example around making and testing AJAX calls.</p>
+        
+        <h2 id="shared-code" class="section"><a class="anchor-link left" href="#shared-code"><i class="icofont-laika">&#xef71;</i></a>Shared Code</h2>
+        <p>First we create a definition of our AJAX endpoint. This is cross-compiled for both JVM and JS.</p>
+        <p><code class="text"><span>examples/shared/.../ajax/AjaxExampleShared.scala</span></code>:</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">ajax</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">io</span><span>.</span><span class="identifier">circe</span><span>.{</span><span class="type-name">Decoder</span><span>, </span><span class="type-name">Encoder</span><span>}
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">ajax</span><span>.</span><span class="type-name">AjaxProtocol</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">circe</span><span>.</span><span class="type-name">JsonCodec</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">general</span><span>.{</span><span class="type-name">Protocol</span><span>, </span><span class="type-name">Url</span><span>}
+
+</span><span class="keyword">object</span><span> </span><span class="type-name">AjaxExampleShared</span><span> {
+
+  </span><span class="comment">// This is an example AJAX endpoint definition
+</span><span>  </span><span class="keyword">object</span><span> </span><span class="type-name">AddInts</span><span> {
+
+    </span><span class="keyword">val</span><span> </span><span class="identifier">url</span><span> = </span><span class="type-name">Url</span><span>.</span><span class="type-name">Relative</span><span>(</span><span class="string-literal">&quot;/add-ints&quot;</span><span>)
+
+    </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Request</span><span>(</span><span class="identifier">m</span><span>: </span><span class="type-name">Int</span><span>, </span><span class="identifier">n</span><span>: </span><span class="type-name">Int</span><span>)
+
+    </span><span class="keyword">type</span><span> </span><span class="type-name">Response</span><span> = </span><span class="type-name">Long</span><span>
+
+    </span><span class="comment">// Here we define the protocol between client and server.
+</span><span>    </span><span class="comment">// Specifically, it&#39;s the URL, the request and response types, plus the codecs for
+</span><span>      </span><span class="comment">// serialisation &amp; deserialisation.
+</span><span>    </span><span class="keyword">val</span><span> </span><span class="identifier">protocol</span><span>: </span><span class="type-name">AjaxProtocol</span><span>.</span><span class="type-name">Simple</span><span>[</span><span class="type-name">JsonCodec</span><span>, </span><span class="type-name">Request</span><span>, </span><span class="type-name">Response</span><span>] = {
+
+      </span><span class="keyword">implicit</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">decoderRequest</span><span>: </span><span class="type-name">Decoder</span><span>[</span><span class="type-name">Request</span><span>] =
+        </span><span class="type-name">Decoder</span><span>.</span><span class="identifier">forProduct2</span><span>(</span><span class="string-literal">&quot;m&quot;</span><span>, </span><span class="string-literal">&quot;n&quot;</span><span>)(</span><span class="type-name">Request</span><span>.</span><span class="identifier">apply</span><span>)
+
+      </span><span class="keyword">implicit</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">encoderRequest</span><span>: </span><span class="type-name">Encoder</span><span>[</span><span class="type-name">Request</span><span>] =
+        </span><span class="type-name">Encoder</span><span>.</span><span class="identifier">forProduct2</span><span>(</span><span class="string-literal">&quot;m&quot;</span><span>, </span><span class="string-literal">&quot;n&quot;</span><span>)(</span><span class="identifier">a</span><span> =&gt; (</span><span class="identifier">a</span><span>.</span><span class="identifier">m</span><span>, </span><span class="identifier">a</span><span>.</span><span class="identifier">n</span><span>))
+
+      </span><span class="keyword">val</span><span> </span><span class="identifier">requestProtocol</span><span>: </span><span class="type-name">Protocol</span><span>.</span><span class="type-name">Of</span><span>[</span><span class="type-name">JsonCodec</span><span>, </span><span class="type-name">Request</span><span>] =
+        </span><span class="comment">// this combines decoderRequest and encoderRequest above
+</span><span>        </span><span class="type-name">Protocol</span><span>(</span><span class="type-name">JsonCodec</span><span>.</span><span class="identifier">summon</span><span>[</span><span class="type-name">Request</span><span>])
+
+      </span><span class="keyword">val</span><span> </span><span class="identifier">responseProtocol</span><span>: </span><span class="type-name">Protocol</span><span>.</span><span class="type-name">Of</span><span>[</span><span class="type-name">JsonCodec</span><span>, </span><span class="type-name">Response</span><span>] =
+        </span><span class="comment">// uses the circe&#39;s default implicits for Long &lt;=&gt; Json
+</span><span>        </span><span class="type-name">Protocol</span><span>(</span><span class="type-name">JsonCodec</span><span>.</span><span class="identifier">summon</span><span>[</span><span class="type-name">Response</span><span>])
+
+      </span><span class="comment">// &quot;Simple&quot; here means that the responseProtocol is static
+</span><span>      </span><span class="comment">// (as opposed to being polymorphic / dependently-typed on the request)
+</span><span>      </span><span class="type-name">AjaxProtocol</span><span>.</span><span class="type-name">Simple</span><span>(</span><span class="identifier">url</span><span>, </span><span class="identifier">requestProtocol</span><span>, </span><span class="identifier">responseProtocol</span><span>)
+    }
+
+    </span><span class="comment">// This is here just so that it&#39;s easily available from the example JS tests.
+</span><span>    </span><span class="comment">//
+</span><span>    </span><span class="comment">// In a real-project you&#39;d share as much logic with the JS tests as possible,
+</span><span>    </span><span class="comment">// abstracting away things like DB access. To do things properly-properly, you&#39;d
+</span><span>    </span><span class="comment">// also use sbt modules to ensure this is only shared with the test JS and not the
+</span><span>    </span><span class="comment">// main JS (so that it becomes impossible for another team-member to accidently use
+</span><span>    </span><span class="comment">// the logic directly from JS and avoid the AJAX call).
+</span><span>    </span><span class="comment">//
+</span><span>    </span><span class="keyword">def</span><span> </span><span class="declaration-name">logic</span><span>(</span><span class="identifier">req</span><span>: </span><span class="type-name">Request</span><span>): </span><span class="type-name">Response</span><span> =
+      </span><span class="identifier">req</span><span>.</span><span class="identifier">m</span><span>.</span><span class="identifier">toLong</span><span> + </span><span class="identifier">req</span><span>.</span><span class="identifier">n</span><span>.</span><span class="identifier">toLong</span><span>
+  }
+}
+</span></code></pre>
+        
+        <h2 id="backend" class="section"><a class="anchor-link left" href="#backend"><i class="icofont-laika">&#xef71;</i></a>Backend</h2>
+        <p><code class="text"><span>examples/jvm/.../ajax/AjaxExampleJvm.scala</span></code>:</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">ajax</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">io</span><span>.</span><span class="identifier">circe</span><span>.{</span><span class="type-name">Decoder</span><span>, </span><span class="type-name">Json</span><span>}
+
+</span><span class="keyword">object</span><span> </span><span class="type-name">AjaxExampleJvm</span><span> {
+
+  </span><span class="comment">// This takes JSON and returns JSON.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// It&#39;s left as an exercise to the reader to integrate a JSON-to-JSON endpoint into
+</span><span>  </span><span class="comment">// your web server of choice.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="keyword">def</span><span> </span><span class="declaration-name">serveAddInts</span><span>(</span><span class="identifier">requestJson</span><span>: </span><span class="type-name">Json</span><span>): </span><span class="type-name">Decoder</span><span>.</span><span class="type-name">Result</span><span>[</span><span class="type-name">Json</span><span>] = {
+    </span><span class="keyword">import</span><span> </span><span class="type-name">AjaxExampleShared</span><span>.</span><span class="type-name">AddInts</span><span>.{</span><span class="identifier">logic</span><span>, </span><span class="identifier">protocol</span><span>}
+
+    </span><span class="identifier">protocol</span><span>.</span><span class="identifier">requestProtocol</span><span>.</span><span class="identifier">codec</span><span>.</span><span class="identifier">decode</span><span>(</span><span class="identifier">requestJson</span><span>).</span><span class="identifier">map</span><span> { </span><span class="identifier">request</span><span> =&gt;
+      </span><span class="keyword">val</span><span> </span><span class="identifier">response</span><span>     = </span><span class="identifier">logic</span><span>(</span><span class="identifier">request</span><span>)
+      </span><span class="keyword">val</span><span> </span><span class="identifier">responseJson</span><span> = </span><span class="identifier">protocol</span><span>.</span><span class="identifier">responseProtocol</span><span>(</span><span class="identifier">request</span><span>).</span><span class="identifier">codec</span><span>.</span><span class="identifier">encode</span><span>(</span><span class="identifier">response</span><span>)
+      </span><span class="identifier">responseJson</span><span>
+    }
+  }
+
+}
+</span></code></pre>
+        
+        <h2 id="frontend" class="section"><a class="anchor-link left" href="#frontend"><i class="icofont-laika">&#xef71;</i></a>Frontend</h2>
+        <p><code class="text"><span>examples/js/.../ajax/AjaxExampleJs.scala</span></code>:</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">ajax</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="identifier">vdom</span><span>.</span><span class="identifier">html_</span><span>&lt;^.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">ajax</span><span>.</span><span class="type-name">AjaxClient</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">circe</span><span>.</span><span class="type-name">JsonAjaxClient</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">general</span><span>.{</span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">ServerSideProcInvoker</span><span>}
+
+</span><span class="keyword">object</span><span> </span><span class="type-name">AjaxExampleJs</span><span> {
+  </span><span class="keyword">import</span><span> </span><span class="type-name">AjaxExampleShared</span><span>.</span><span class="type-name">AddInts</span><span>.{</span><span class="identifier">protocol</span><span>, </span><span class="type-name">Request</span><span>, </span><span class="type-name">Response</span><span>}
+
+  </span><span class="comment">// There are different ways to make AJAX calls depending on your app and needs.
+</span><span>
+  </span><span class="comment">// ===================================================================================
+</span><span>  </span><span class="comment">// This is a primative example that makes a single call attempt and nothing else
+</span><span>
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">primativeExample</span><span>(): </span><span class="type-name">AsyncCallback</span><span>[</span><span class="type-name">AjaxClient</span><span>.</span><span class="type-name">Response</span><span>[</span><span class="type-name">Response</span><span>]] =
+    </span><span class="type-name">JsonAjaxClient</span><span>.</span><span class="identifier">singleCall</span><span>(</span><span class="identifier">protocol</span><span>)(</span><span class="type-name">Request</span><span>(</span><span class="number-literal">3</span><span>, </span><span class="number-literal">8</span><span>))
+
+  </span><span class="comment">// ===================================================================================
+</span><span>  </span><span class="comment">// This is a higher-level example.
+</span><span>  </span><span class="comment">//   - has automatic retries built-in by default
+</span><span>  </span><span class="comment">//   - successful results are wrapped in Either[ErrorMsg, _]
+</span><span>  </span><span class="comment">//   - out-of-protocol errors (eg. client lost connectivity) are caught and converted
+</span><span>  </span><span class="comment">//     into a Left[ErrorMsg].
+</span><span>  </span><span class="comment">//     (see ServerSideProcInvoker.throwableToErrorMsg for details)
+</span><span>
+  </span><span class="keyword">val</span><span> </span><span class="identifier">invoker</span><span>: </span><span class="type-name">ServerSideProcInvoker</span><span>[</span><span class="type-name">Request</span><span>, </span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>] =
+    </span><span class="type-name">JsonAjaxClient</span><span>.</span><span class="identifier">invoker</span><span>(</span><span class="identifier">protocol</span><span>)
+
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">betterExample</span><span>(): </span><span class="type-name">AsyncCallback</span><span>[</span><span class="type-name">Either</span><span>[</span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>]] =
+    </span><span class="identifier">invoker</span><span>(</span><span class="type-name">Request</span><span>(</span><span class="number-literal">3</span><span>, </span><span class="number-literal">8</span><span>))
+
+  </span><span class="comment">// ===================================================================================
+</span><span>  </span><span class="comment">// Here is an example of making AJAX calls from a React component.
+</span><span>
+  </span><span class="keyword">object</span><span> </span><span class="type-name">ExampleComponent</span><span> {
+
+    </span><span class="comment">// Notice how we just ask for a ServerSideProcInvoker here, which is effectively a
+</span><span>    </span><span class="comment">//   Request =&gt; AsyncCallback[Either[ErrorMsg, Response]]
+</span><span>    </span><span class="comment">//
+</span><span>    </span><span class="comment">// The component doesn&#39;t care about the details of how call is made, which makes it
+</span><span>    </span><span class="comment">// super easy to test. In fact, it needn&#39;t even be an AJAX call! It could be a
+</span><span>    </span><span class="comment">// websocket call, a webworker call, etc. Whoever uses the component gets to decide,
+</span><span>    </span><span class="comment">// no changes here are necessary.
+</span><span>    </span><span class="comment">//
+</span><span>    </span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Props</span><span>(</span><span class="identifier">addInts</span><span>: </span><span class="type-name">ServerSideProcInvoker</span><span>[</span><span class="type-name">Request</span><span>, </span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>])
+
+    </span><span class="keyword">sealed</span><span> </span><span class="keyword">trait</span><span> </span><span class="type-name">State</span><span>
+    </span><span class="keyword">object</span><span> </span><span class="type-name">State</span><span> {
+      </span><span class="keyword">case</span><span> </span><span class="keyword">object</span><span> </span><span class="type-name">Ready</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">State</span><span>
+      </span><span class="keyword">case</span><span> </span><span class="keyword">object</span><span> </span><span class="type-name">Pending</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">State</span><span>
+      </span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Finished</span><span>(</span><span class="identifier">result</span><span>: </span><span class="type-name">Either</span><span>[</span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>]) </span><span class="keyword">extends</span><span> </span><span class="type-name">State</span><span>
+    }
+
+    </span><span class="keyword">final</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Backend</span><span>(</span><span class="identifier">$</span><span>: </span><span class="type-name">BackendScope</span><span>[</span><span class="type-name">Props</span><span>, </span><span class="type-name">State</span><span>]) {
+
+      </span><span class="comment">// Hard-coding the request for simplicity
+</span><span>      </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">req</span><span> = </span><span class="type-name">Request</span><span>(</span><span class="number-literal">2</span><span>, </span><span class="number-literal">2</span><span>)
+
+      </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">onSubmit</span><span> =
+        </span><span class="keyword">for</span><span> {
+          </span><span class="identifier">_</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">setStateAsync</span><span>(</span><span class="type-name">State</span><span>.</span><span class="type-name">Pending</span><span>)
+          </span><span class="identifier">p</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">props</span><span>.</span><span class="identifier">asAsyncCallback</span><span>
+          </span><span class="identifier">result</span><span> &lt;- </span><span class="identifier">p</span><span>.</span><span class="identifier">addInts</span><span>(</span><span class="identifier">req</span><span>) </span><span class="comment">// no need to catch errors here,
+</span><span>                                   </span><span class="comment">// as per the ServerSideProcInvoker contract
+</span><span>          </span><span class="identifier">_</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">setStateAsync</span><span>(</span><span class="type-name">State</span><span>.</span><span class="type-name">Finished</span><span>(</span><span class="identifier">result</span><span>))
+        } </span><span class="keyword">yield</span><span> ()
+
+      </span><span class="keyword">private</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">submitButton</span><span> =
+        &lt;.</span><span class="identifier">button</span><span>(
+          </span><span class="string-literal">s&quot;What really is </span><span class="substitution">${req.m}</span><span class="string-literal"> + </span><span class="substitution">${req.n}</span><span class="string-literal">? Ask our proprietary Addition Service!&quot;</span><span>,
+          ^.</span><span class="identifier">onClick</span><span> --&gt; </span><span class="identifier">onSubmit</span><span>)
+
+      </span><span class="keyword">def</span><span> </span><span class="declaration-name">render</span><span>(</span><span class="identifier">s</span><span>: </span><span class="type-name">State</span><span>): </span><span class="type-name">VdomNode</span><span> =
+        </span><span class="identifier">s</span><span> </span><span class="keyword">match</span><span> {
+          </span><span class="keyword">case</span><span> </span><span class="type-name">State</span><span>.</span><span class="type-name">Ready</span><span>                =&gt; </span><span class="identifier">submitButton</span><span>
+          </span><span class="keyword">case</span><span> </span><span class="type-name">State</span><span>.</span><span class="type-name">Pending</span><span>              =&gt; </span><span class="identifier">submitButton</span><span>(^.</span><span class="identifier">disabled</span><span> := </span><span class="boolean-literal">true</span><span>)
+          </span><span class="keyword">case</span><span> </span><span class="type-name">State</span><span>.</span><span class="type-name">Finished</span><span>(</span><span class="type-name">Right</span><span>(</span><span class="identifier">res</span><span>)) =&gt; &lt;.</span><span class="identifier">div</span><span>(</span><span class="string-literal">s&quot;</span><span class="substitution">${req.m}</span><span class="string-literal"> + </span><span class="substitution">${req.n}</span><span class="string-literal"> = </span><span class="substitution">$res</span><span class="string-literal">! OMG!&quot;</span><span>)
+          </span><span class="keyword">case</span><span> </span><span class="type-name">State</span><span>.</span><span class="type-name">Finished</span><span>(</span><span class="type-name">Left</span><span>(</span><span class="identifier">err</span><span>))  =&gt; &lt;.</span><span class="identifier">div</span><span>(^.</span><span class="identifier">color</span><span>.</span><span class="identifier">red</span><span>, </span><span class="string-literal">&quot;Error: &quot;</span><span>, </span><span class="identifier">err</span><span>.</span><span class="identifier">value</span><span>)
+        }
+    }
+
+    </span><span class="keyword">val</span><span> </span><span class="type-name">Component</span><span> = </span><span class="type-name">ScalaComponent</span><span>.</span><span class="identifier">builder</span><span>[</span><span class="type-name">Props</span><span>]
+      .</span><span class="identifier">initialState</span><span>[</span><span class="type-name">State</span><span>](</span><span class="type-name">State</span><span>.</span><span class="type-name">Ready</span><span>)
+      .</span><span class="identifier">renderBackend</span><span>[</span><span class="type-name">Backend</span><span>]
+      .</span><span class="identifier">build</span><span>
+  }
+
+  </span><span class="comment">// ===================================================================================
+</span><span>  </span><span class="comment">// Here is another example of making AJAX calls from a React component, this time in a
+</span><span>  </span><span class="comment">// way that makes lower-level testing a bit easier.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// Most of this is the same as above, except for where there are comments.
+</span><span>
+  </span><span class="keyword">object</span><span> </span><span class="type-name">ExampleComponent2</span><span> {
+
+    </span><span class="comment">// Notice we request a JsonAjaxClient and not a ServerSideProcInvoker here.
+</span><span>    </span><span class="comment">// The JsonAjaxClient could be a real one that makes real calls, or an in-memory
+</span><span>    </span><span class="comment">// instance for lower-level testing.
+</span><span>    </span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Props</span><span>(</span><span class="identifier">ajaxClient</span><span>: </span><span class="type-name">JsonAjaxClient</span><span>)
+
+    </span><span class="keyword">sealed</span><span> </span><span class="keyword">trait</span><span> </span><span class="type-name">State</span><span>
+    </span><span class="keyword">object</span><span> </span><span class="type-name">State</span><span> {
+      </span><span class="keyword">case</span><span> </span><span class="keyword">object</span><span> </span><span class="type-name">Ready</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">State</span><span>
+      </span><span class="keyword">case</span><span> </span><span class="keyword">object</span><span> </span><span class="type-name">Pending</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">State</span><span>
+      </span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Finished</span><span>(</span><span class="identifier">result</span><span>: </span><span class="type-name">Either</span><span>[</span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>]) </span><span class="keyword">extends</span><span> </span><span class="type-name">State</span><span>
+    }
+
+    </span><span class="keyword">final</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Backend</span><span>(</span><span class="identifier">$</span><span>: </span><span class="type-name">BackendScope</span><span>[</span><span class="type-name">Props</span><span>, </span><span class="type-name">State</span><span>]) {
+
+      </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">req</span><span> = </span><span class="type-name">Request</span><span>(</span><span class="number-literal">2</span><span>, </span><span class="number-literal">2</span><span>)
+
+      </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">onSubmit</span><span> =
+        </span><span class="keyword">for</span><span> {
+          </span><span class="identifier">_</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">setStateAsync</span><span>(</span><span class="type-name">State</span><span>.</span><span class="type-name">Pending</span><span>)
+          </span><span class="identifier">p</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">props</span><span>.</span><span class="identifier">asAsyncCallback</span><span>
+          </span><span class="identifier">invoker</span><span> = </span><span class="identifier">p</span><span>.</span><span class="identifier">ajaxClient</span><span>.</span><span class="identifier">invoker</span><span>(</span><span class="identifier">protocol</span><span>) </span><span class="comment">// create our own invoker using the
+</span><span>                                                   </span><span class="comment">// provided AjaxClient
+</span><span>          </span><span class="identifier">result</span><span> &lt;- </span><span class="identifier">invoker</span><span>(</span><span class="identifier">req</span><span>) </span><span class="comment">// again: no need to catch errors here,
+</span><span>                                 </span><span class="comment">// as per the ServerSideProcInvoker contract
+</span><span>          </span><span class="identifier">_</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">setStateAsync</span><span>(</span><span class="type-name">State</span><span>.</span><span class="type-name">Finished</span><span>(</span><span class="identifier">result</span><span>))
+        } </span><span class="keyword">yield</span><span> ()
+
+      </span><span class="keyword">private</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">submitButton</span><span> =
+        &lt;.</span><span class="identifier">button</span><span>(
+          </span><span class="string-literal">s&quot;What really is </span><span class="substitution">${req.m}</span><span class="string-literal"> + </span><span class="substitution">${req.n}</span><span class="string-literal">? Ask our proprietary Addition Service!&quot;</span><span>,
+          ^.</span><span class="identifier">onClick</span><span> --&gt; </span><span class="identifier">onSubmit</span><span>)
+
+      </span><span class="keyword">def</span><span> </span><span class="declaration-name">render</span><span>(</span><span class="identifier">s</span><span>: </span><span class="type-name">State</span><span>): </span><span class="type-name">VdomNode</span><span> =
+        </span><span class="identifier">s</span><span> </span><span class="keyword">match</span><span> {
+          </span><span class="keyword">case</span><span> </span><span class="type-name">State</span><span>.</span><span class="type-name">Ready</span><span>                =&gt; </span><span class="identifier">submitButton</span><span>
+          </span><span class="keyword">case</span><span> </span><span class="type-name">State</span><span>.</span><span class="type-name">Pending</span><span>              =&gt; </span><span class="identifier">submitButton</span><span>(^.</span><span class="identifier">disabled</span><span> := </span><span class="boolean-literal">true</span><span>)
+          </span><span class="keyword">case</span><span> </span><span class="type-name">State</span><span>.</span><span class="type-name">Finished</span><span>(</span><span class="type-name">Right</span><span>(</span><span class="identifier">res</span><span>)) =&gt; &lt;.</span><span class="identifier">div</span><span>(</span><span class="string-literal">s&quot;</span><span class="substitution">${req.m}</span><span class="string-literal"> + </span><span class="substitution">${req.n}</span><span class="string-literal"> = </span><span class="substitution">$res</span><span class="string-literal">! Wow!&quot;</span><span>)
+          </span><span class="keyword">case</span><span> </span><span class="type-name">State</span><span>.</span><span class="type-name">Finished</span><span>(</span><span class="type-name">Left</span><span>(</span><span class="identifier">err</span><span>))  =&gt; &lt;.</span><span class="identifier">div</span><span>(^.</span><span class="identifier">color</span><span>.</span><span class="identifier">red</span><span>, </span><span class="string-literal">&quot;Error: &quot;</span><span>, </span><span class="identifier">err</span><span>.</span><span class="identifier">value</span><span>)
+        }
+    }
+
+    </span><span class="keyword">val</span><span> </span><span class="type-name">Component</span><span> = </span><span class="type-name">ScalaComponent</span><span>.</span><span class="identifier">builder</span><span>[</span><span class="type-name">Props</span><span>]
+      .</span><span class="identifier">initialState</span><span>[</span><span class="type-name">State</span><span>](</span><span class="type-name">State</span><span>.</span><span class="type-name">Ready</span><span>)
+      .</span><span class="identifier">renderBackend</span><span>[</span><span class="type-name">Backend</span><span>]
+      .</span><span class="identifier">build</span><span>
+  }
+}
+</span></code></pre>
+        
+        <h2 id="testing-the-frontend" class="section"><a class="anchor-link left" href="#testing-the-frontend"><i class="icofont-laika">&#xef71;</i></a>Testing the Frontend</h2>
+        <p><code class="text"><span>examples/js/.../ajax/AjaxExampleJsTest.scala</span></code>:</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">ajax</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">microlibs</span><span>.</span><span class="identifier">testutil</span><span>.</span><span class="type-name">TestUtil</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="type-name">AsyncCallback</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="identifier">test</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">ajax</span><span>.</span><span class="type-name">AjaxClient</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">circe</span><span>.</span><span class="identifier">test</span><span>.</span><span class="type-name">TestJsonAjaxClient</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">general</span><span>.{</span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">ServerSideProcInvoker</span><span>}
+</span><span class="keyword">import</span><span> </span><span class="identifier">org</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">dom</span><span>.</span><span class="type-name">HTMLButtonElement</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">utest</span><span>.</span><span class="identifier">_</span><span>
+
+</span><span class="keyword">object</span><span> </span><span class="type-name">AjaxExampleJsTest</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">TestSuite</span><span> {
+
+  </span><span class="keyword">override</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">tests</span><span> = </span><span class="type-name">Tests</span><span> {
+    </span><span class="string-literal">&quot;component1&quot;</span><span> - {
+      </span><span class="string-literal">&quot;success&quot;</span><span> - </span><span class="identifier">testExampleComponent1Success</span><span>()
+      </span><span class="string-literal">&quot;failure&quot;</span><span> - </span><span class="identifier">testExampleComponent1Failure</span><span>()
+    }
+    </span><span class="string-literal">&quot;component2&quot;</span><span> - </span><span class="identifier">testExampleComponent2</span><span>()
+  }
+
+  </span><span class="comment">// ===================================================================================
+</span><span>  </span><span class="keyword">private</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">testExampleComponent1Success</span><span>() = {
+    </span><span class="keyword">import</span><span> </span><span class="type-name">AjaxExampleJs</span><span>.</span><span class="type-name">ExampleComponent</span><span>.</span><span class="identifier">_</span><span>
+
+    </span><span class="comment">// Here we provide our own ServerSideProcInvoker that provides an answer in-memory
+</span><span>    </span><span class="comment">// immediately
+</span><span>    </span><span class="keyword">val</span><span> </span><span class="identifier">props</span><span> = </span><span class="type-name">Props</span><span>(</span><span class="type-name">ServerSideProcInvoker</span><span> { </span><span class="identifier">req</span><span> =&gt;
+      </span><span class="keyword">val</span><span> </span><span class="identifier">result</span><span> = </span><span class="type-name">AjaxExampleShared</span><span>.</span><span class="type-name">AddInts</span><span>.</span><span class="identifier">logic</span><span>(</span><span class="identifier">req</span><span>)
+      </span><span class="type-name">AsyncCallback</span><span>.</span><span class="identifier">pure</span><span>(</span><span class="type-name">Right</span><span>(</span><span class="identifier">result</span><span>))
+    })
+
+    </span><span class="comment">// Mount the component for testing...
+</span><span>    </span><span class="type-name">ReactTestUtils</span><span>.</span><span class="identifier">withRenderedIntoBody</span><span>(</span><span class="type-name">Component</span><span>(</span><span class="identifier">props</span><span>)) { </span><span class="identifier">m</span><span> =&gt;
+      </span><span class="keyword">def</span><span> </span><span class="declaration-name">dom</span><span>() = </span><span class="identifier">m</span><span>.</span><span class="identifier">getDOMNode</span><span>.</span><span class="identifier">asMounted</span><span>().</span><span class="identifier">asHtml</span><span>()
+
+      </span><span class="comment">// Test initial state
+</span><span>      </span><span class="identifier">assertContains</span><span>(</span><span class="identifier">dom</span><span>().</span><span class="identifier">innerHTML</span><span>, </span><span class="string-literal">&quot;What really is 2 + 2?&quot;</span><span>)
+
+      </span><span class="comment">// Test clicking through to the immediate test result
+</span><span>      </span><span class="type-name">Simulate</span><span>.</span><span class="identifier">click</span><span>(</span><span class="identifier">dom</span><span>())
+      </span><span class="identifier">assertContains</span><span>(</span><span class="identifier">dom</span><span>().</span><span class="identifier">innerHTML</span><span>, </span><span class="string-literal">&quot;2 + 2 = 4&quot;</span><span>)
+    }
+  }
+
+  </span><span class="comment">// ===================================================================================
+</span><span>  </span><span class="keyword">private</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">testExampleComponent1Failure</span><span>() = {
+    </span><span class="keyword">import</span><span> </span><span class="type-name">AjaxExampleJs</span><span>.</span><span class="type-name">ExampleComponent</span><span>.</span><span class="identifier">_</span><span>
+
+    </span><span class="comment">// Let&#39;s simulate a connectivity error
+</span><span>    </span><span class="keyword">val</span><span> </span><span class="identifier">error</span><span> = </span><span class="type-name">ErrorMsg</span><span>(</span><span class="string-literal">&quot;No internet connectivity&quot;</span><span>)
+    </span><span class="keyword">val</span><span> </span><span class="identifier">props</span><span> = </span><span class="type-name">Props</span><span>(</span><span class="type-name">ServerSideProcInvoker</span><span>.</span><span class="identifier">const</span><span>(</span><span class="type-name">Left</span><span>(</span><span class="identifier">error</span><span>)))
+
+    </span><span class="comment">// Mount the component for testing...
+</span><span>    </span><span class="type-name">ReactTestUtils</span><span>.</span><span class="identifier">withRenderedIntoBody</span><span>(</span><span class="type-name">Component</span><span>(</span><span class="identifier">props</span><span>)) { </span><span class="identifier">m</span><span> =&gt;
+      </span><span class="keyword">def</span><span> </span><span class="declaration-name">dom</span><span>() = </span><span class="identifier">m</span><span>.</span><span class="identifier">getDOMNode</span><span>.</span><span class="identifier">asMounted</span><span>().</span><span class="identifier">asHtml</span><span>()
+
+      </span><span class="comment">// Click button, and confirm the component gracefully handles the error
+</span><span>      </span><span class="type-name">Simulate</span><span>.</span><span class="identifier">click</span><span>(</span><span class="identifier">dom</span><span>())
+      </span><span class="identifier">assertContains</span><span>(</span><span class="identifier">dom</span><span>().</span><span class="identifier">innerHTML</span><span>, </span><span class="string-literal">&quot;Error: No internet connectivity&quot;</span><span>)
+    }
+  }
+
+  </span><span class="comment">// ===================================================================================
+</span><span>  </span><span class="keyword">private</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">testExampleComponent2</span><span>() = {
+    </span><span class="keyword">import</span><span> </span><span class="type-name">AjaxExampleJs</span><span>.</span><span class="type-name">ExampleComponent2</span><span>.</span><span class="identifier">_</span><span>
+
+    </span><span class="comment">// Here we create our own in-memory client for lower-level ajax testing.
+</span><span>    </span><span class="comment">//
+</span><span>    </span><span class="comment">// We&#39;re setting autoRespondInitially to false so that when it receives a request,
+</span><span>    </span><span class="comment">// it does nothing and waits for us to command it to respond. This will help us test
+</span><span>    </span><span class="comment">// the state of the component when a request is in-flight.
+</span><span>    </span><span class="comment">//
+</span><span>    </span><span class="keyword">val</span><span> </span><span class="identifier">ajax</span><span> = </span><span class="type-name">TestJsonAjaxClient</span><span>(</span><span class="identifier">autoRespondInitially</span><span> = </span><span class="boolean-literal">false</span><span>)
+
+    </span><span class="comment">// Here we teach our ajax client how to respond to calls to /add-ints
+</span><span>    </span><span class="identifier">ajax</span><span>.</span><span class="identifier">addAutoResponse</span><span>(</span><span class="type-name">AjaxExampleShared</span><span>.</span><span class="type-name">AddInts</span><span>.</span><span class="identifier">protocol</span><span>) { </span><span class="identifier">testReq</span><span> =&gt;
+      </span><span class="keyword">val</span><span> </span><span class="identifier">result</span><span> = </span><span class="type-name">AjaxExampleShared</span><span>.</span><span class="type-name">AddInts</span><span>.</span><span class="identifier">logic</span><span>(</span><span class="identifier">testReq</span><span>.</span><span class="identifier">input</span><span>)
+      </span><span class="keyword">val</span><span> </span><span class="identifier">response</span><span> = </span><span class="type-name">AjaxClient</span><span>.</span><span class="type-name">Response</span><span>.</span><span class="identifier">success</span><span>(</span><span class="identifier">result</span><span>)
+      </span><span class="identifier">testReq</span><span>.</span><span class="identifier">onResponse</span><span>(</span><span class="type-name">Right</span><span>(</span><span class="identifier">response</span><span>))
+    }
+
+    </span><span class="comment">// Mount the component for testing...
+</span><span>    </span><span class="type-name">ReactTestUtils</span><span>.</span><span class="identifier">withRenderedIntoBody</span><span>(</span><span class="type-name">Component</span><span>(</span><span class="type-name">Props</span><span>(</span><span class="identifier">ajax</span><span>))) { </span><span class="identifier">m</span><span> =&gt;
+      </span><span class="keyword">def</span><span> </span><span class="declaration-name">dom</span><span>() = </span><span class="identifier">m</span><span>.</span><span class="identifier">getDOMNode</span><span>.</span><span class="identifier">asMounted</span><span>().</span><span class="identifier">asHtml</span><span>()
+
+      </span><span class="comment">// Test initial state
+</span><span>      </span><span class="identifier">assertContains</span><span>(</span><span class="identifier">dom</span><span>().</span><span class="identifier">innerHTML</span><span>, </span><span class="string-literal">&quot;What really is 2 + 2?&quot;</span><span>)
+
+      </span><span class="comment">// Click button, and test that the button is disabled, pending the ajax result
+</span><span>      </span><span class="type-name">Simulate</span><span>.</span><span class="identifier">click</span><span>(</span><span class="identifier">dom</span><span>())
+      </span><span class="identifier">assert</span><span>(</span><span class="identifier">dom</span><span>().</span><span class="identifier">asInstanceOf</span><span>[</span><span class="type-name">HTMLButtonElement</span><span>].</span><span class="identifier">disabled</span><span>)
+
+      </span><span class="comment">// Release the ajax response, and test the component displays it
+</span><span>      </span><span class="identifier">ajax</span><span>.</span><span class="identifier">autoRespondToLast</span><span>()
+      </span><span class="identifier">assertContains</span><span>(</span><span class="identifier">dom</span><span>().</span><span class="identifier">innerHTML</span><span>, </span><span class="string-literal">&quot;2 + 2 = 4&quot;</span><span>)
+    }
+  }
+}</span></code></pre>
+
+      </main>
+
+    </div>
+
+  </body>
+</html>
