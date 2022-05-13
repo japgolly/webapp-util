@@ -129,6 +129,7 @@ object Build {
       dbPostgres,
       examplesJS,
       examplesJVM,
+      ghpages,
       testBoopickleJS,
       testBoopickleJVM,
       testCatsEffectJS,
