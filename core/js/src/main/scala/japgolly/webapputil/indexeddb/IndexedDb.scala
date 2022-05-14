@@ -139,12 +139,15 @@ object IndexedDb {
     val transactionRO: TxnStep1 = new TxnStep1(IDBTransactionMode.readonly)
     val transactionRW: TxnStep1 = new TxnStep1(IDBTransactionMode.readwrite)
 
+    private def mkStoreArray(stores: Seq[ObjectStoreDef[_, _]]): js.Array[String] = {
+      val a = new js.Array[String]
+      stores.foreach(s => a.push(s.name))
+      a
+    }
+
     final class TxnStep1 private[Database] (mode: IDBTransactionMode) {
-      def apply(stores: ObjectStoreDef[_, _]*): TxnStep2 = {
-        val storeArray = new js.Array[String]
-        stores.foreach(s => storeArray.push(s.name))
-        new TxnStep2(mode, storeArray)
-      }
+      def apply(stores: ObjectStoreDef[_, _]*): TxnStep2 =
+        new TxnStep2(mode, mkStoreArray(stores))
     }
 
     final class TxnStep2 private[Database] (mode: IDBTransactionMode, stores: js.Array[String]) {
