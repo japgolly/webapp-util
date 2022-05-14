@@ -4,7 +4,6 @@ import boopickle.DefaultBasic._
 import japgolly.microlibs.testutil.TestUtil._
 import japgolly.scalajs.react._
 import japgolly.webapputil.binary._
-import japgolly.webapputil.boopickle.BinaryFormatExt.Implicits._
 import japgolly.webapputil.boopickle.SafePickler.ConstructionHelperImplicits._
 import japgolly.webapputil.boopickle._
 import japgolly.webapputil.indexeddb._

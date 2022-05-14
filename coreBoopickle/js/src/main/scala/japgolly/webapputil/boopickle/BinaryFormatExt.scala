@@ -8,9 +8,18 @@ import scala.scalajs.js
 
 object BinaryFormatExt {
 
-  object Implicits {
+  trait Implicits {
 
-    @inline implicit final class BinaryFormatBoopickleExt[A](private val self: BinaryFormat[A]) extends AnyVal {
+    @inline final implicit def BinaryFormatBoopickleExt[A](self: BinaryFormat[A]): Implicits.BinaryFormatBoopickleExt[A] =
+      new Implicits.BinaryFormatBoopickleExt[A](self)
+
+    @inline final implicit def BinaryFormatBoopickleStaticExt(self: BinaryFormat.type): Implicits.BinaryFormatBoopickleStaticExt =
+      new Implicits.BinaryFormatBoopickleStaticExt(self)
+  }
+
+  object Implicits extends Implicits {
+
+    final class BinaryFormatBoopickleExt[A](private val self: BinaryFormat[A]) extends AnyVal {
       type ThisIsBinary = BinaryFormat[A] =:= BinaryFormat[BinaryData]
 
       def pickle[B](implicit pickler: SafePickler[B], ev: ThisIsBinary): BinaryFormat[B] =
@@ -24,18 +33,19 @@ object BinaryFormatExt {
       }
     }
 
-    @inline implicit final class BinaryFormatBoopickleStaticExt[A](private val self: BinaryFormat.type) extends AnyVal {
-      def pickleCompressEncrypt[A](c: Compression, e: Encryption)(implicit pickler: SafePickler[A]): BinaryFormat[A] =
+    final class BinaryFormatBoopickleStaticExt(private val self: BinaryFormat.type) extends AnyVal {
+      @inline def pickleCompressEncrypt[A](c: Compression, e: Encryption)(implicit pickler: SafePickler[A]): BinaryFormat[A] =
         BinaryFormatExt.pickleCompressEncrypt(c, e)
+
+      @inline def versioned[A](oldest: BinaryFormat[A], toLatest: BinaryFormat[A]*): BinaryFormat[A] =
+        BinaryFormatExt.versioned(oldest, toLatest: _*)
     }
   }
 
-  import Implicits._
-
   // ===================================================================================================================
 
-  def versioned[A](oldest: BinaryFormat[A], latestLast: BinaryFormat[A]*): BinaryFormat[A] = {
-    val layers          = oldest +: latestLast.toArray
+  def versioned[A](oldest: BinaryFormat[A], toLatest: BinaryFormat[A]*): BinaryFormat[A] = {
+    val layers          = oldest +: toLatest.toArray
     val decoders        = layers
     val decoderIndices  = decoders.indices
     val latestVer       = decoders.length - 1
@@ -67,8 +77,8 @@ object BinaryFormatExt {
 
   def pickleCompressEncrypt[A](c: Compression, e: Encryption)(implicit pickler: SafePickler[A]): BinaryFormat[A] =
     BinaryFormat.id
-      .encrypt(e) // Encryption is the very last step
-      .compress(c) // Here we compress the binary *before* encrypting
-      .pickle[A]
+      .encrypt(e)  // 3. Encryption is the very last step
+      .compress(c) // 2. Here we compress the binary *before* encrypting
+      .pickle[A]   // 1. Generate binary first
 
 }

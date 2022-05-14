@@ -3,7 +3,6 @@ package japgolly.webapputil.boopickle
 import boopickle.DefaultBasic._
 import japgolly.microlibs.testutil.TestUtil._
 import japgolly.webapputil.binary._
-import japgolly.webapputil.boopickle.BinaryFormatExt.Implicits._
 import japgolly.webapputil.test.node.TestNode.asyncTest
 import utest._
 
