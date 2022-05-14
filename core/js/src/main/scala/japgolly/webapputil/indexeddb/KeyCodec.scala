@@ -1,6 +1,7 @@
 package japgolly.webapputil.indexeddb
 
 import japgolly.scalajs.react.CallbackTo
+import java.util.UUID
 import scala.scalajs.js
 
 final case class KeyCodec[A](encode: A => IndexedDbKey,
@@ -35,4 +36,8 @@ object KeyCodec {
         case _         => throw js.JavaScriptException(k.toString + " is not a str")
       }
     ))
+
+  lazy val uuid: KeyCodec[UUID] =
+    string.xmap(UUID.fromString)(_.toString)
+
 }
