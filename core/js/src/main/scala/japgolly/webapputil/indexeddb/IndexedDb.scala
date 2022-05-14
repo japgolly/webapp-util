@@ -273,12 +273,24 @@ object IndexedDb {
   // -------------------------------------------------------------------------------------------------------------------
   final class TxnDsl private[IndexedDb] () {
 
+    def pure[A](a: A): Txn[A] =
+      eval(CallbackTo.pure(a))
+
+    def delay[A](a: => A): Txn[A] =
+      eval(CallbackTo(a))
+
+    def suspend[A](a: => Txn[A]): Txn[A] =
+      Txn.Suspend(CallbackTo(a))
+
     // Sync only. Async not allowed by IndexedDB.
     def eval[A](c: CallbackTo[A]): Txn[A] =
       Txn.Eval(c)
 
     def unit: Txn[Unit] =
       Txn.unit
+
+    def tailRec[A, B](a: A)(f: A => Txn[Either[A, B]]): Txn[B] =
+      Txn.TailRec(a, f)
 
     def objectStore[K, V](s: ObjectStoreDef.Sync[K, V]): Txn[ObjectStore[K, V]] =
       Txn.GetStore(s)
@@ -338,6 +350,8 @@ object IndexedDb {
     final case class Map            [A, B](from: Txn[A], f: A => B)                                      extends Txn[B]
     final case class FlatMap        [A, B](from: Txn[A], f: A => Txn[B])                                 extends Txn[B]
     final case class Eval           [A]   (body: CallbackTo[A])                                          extends Txn[A]
+    final case class Suspend        [A]   (body: CallbackTo[Txn[A]])                                     extends Txn[A]
+    final case class TailRec        [A, B](a: A, f: A => Txn[Either[A, B]])                              extends Txn[B]
     final case class GetStore       [K, V](defn: ObjectStoreDef.Sync[K, V])                              extends Txn[ObjectStore[K, V]]
     final case class StoreAdd             (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends Txn[Unit]
     final case class StorePut             (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends Txn[Unit]
@@ -346,7 +360,6 @@ object IndexedDb {
     final case class StoreGetAllVals[K, V](store: ObjectStore[K, V])                                     extends Txn[Vector[V]]
     final case class StoreDelete    [K, V](store: ObjectStore[K, V], key: IndexedDbKey)                  extends Txn[Unit]
     final case class StoreClear           (store: ObjectStore[_, _])                                     extends Txn[Unit]
-
 
     val unit = Eval(Callback.empty)
     val toUnit = (_: Any) => unit
@@ -376,6 +389,9 @@ object IndexedDb {
 
             case Eval(c) =>
               c.asAsyncCallback
+
+            case Suspend(s) =>
+              s.asAsyncCallback.flatMap(interpret(_))
 
             case GetStore(sd) =>
               AsyncCallback.delay {
@@ -430,6 +446,9 @@ object IndexedDb {
               getStore(s).flatMap { store =>
                 asyncRequest_(store.clear())
               }
+
+            case TailRec(z, f) =>
+              AsyncCallback.tailrec(z)(a => interpret(f(a)))
 
           } // dsl match
 
