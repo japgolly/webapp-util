@@ -32,7 +32,7 @@ final case class ValueCodec[A](encode: A => CallbackTo[IDBValue],
 
 object ValueCodec {
 
-  val binary: ValueCodec[BinaryData] =
+  lazy val binary: ValueCodec[BinaryData] =
     apply(
       encode = b => CallbackTo.pure(b.unsafeArrayBuffer),
       decode = d => CallbackTo(BinaryData.unsafeFromArrayBuffer(d.asInstanceOf[ArrayBuffer]))
@@ -72,6 +72,11 @@ object ValueCodec {
   }
 
   object Async {
-    val binary = ValueCodec.binary.async
+
+    lazy val binary: ValueCodec.Async[BinaryData] =
+      ValueCodec.binary.async
+
+    def binary[A](fmt: BinaryFormat[A]): ValueCodec.Async[A] =
+      binary.xmapBinaryFormat(fmt)
   }
 }
