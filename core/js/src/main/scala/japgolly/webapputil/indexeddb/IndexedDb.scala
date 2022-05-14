@@ -152,20 +152,26 @@ object IndexedDb {
       }
 
       def sync[A](dslCB: TxnDsl => CallbackTo[Txn[A]]): AsyncCallback[A] = {
+
+        @inline def startRawTxn(complete: Try[Unit] => Callback) = {
+          val txn = raw.transaction(stores, mode)
+
+          txn.onerror = event => {
+            complete(Failure(Error(event))).runNow()
+          }
+
+          txn.oncomplete = complete(success_).toJsFn1
+
+          txn
+        }
+
         for {
           dsl <- dslCB(TxnDsl).asAsyncCallback
 
           (awaitTxnCompletion, complete) <- AsyncCallback.promise[Unit].asAsyncCallback
 
           result <- AsyncCallback.suspend {
-            val txn = raw.transaction(stores, mode)
-
-            txn.onerror = event => {
-              complete(Failure(Error(event))).runNow()
-            }
-
-            txn.oncomplete = complete(success_).toJsFn1
-
+            val txn = startRawTxn(complete)
             Txn.interpret(txn, dsl)
           }
 
@@ -175,7 +181,12 @@ object IndexedDb {
       }
 
       def async[A](dsl: TxnDsl => AsyncCallback[Txn[A]]): AsyncCallback[A] =
-        dsl(TxnDsl).flatMap(d => apply(_ => d))
+        // Note: This is safer than it looks.
+        //       1) This is `TxnDsl => AsyncCallback[Txn[A]]`
+        //          and not `TxnDsl => Txn[AsyncCallback[A]]`
+        //       2) Everything within Txn is still synchronous and lawful
+        //       3) Only one transaction is created (i.e. only one call to `apply`)
+        dsl(TxnDsl).flatMap(txnA => apply(_ => txnA))
 
     } // TxnStep2
 
@@ -234,13 +245,13 @@ object IndexedDb {
     /** Note: insert only */
     def add(key: K, value: V): Txn[Unit] = {
       val k = keyCodec.encode(key)
-      Txn.EvalCallback(valueCodec.encode(value)).flatMap(Txn.StoreAdd(this, k, _))
+      Txn.Eval(valueCodec.encode(value)).flatMap(Txn.StoreAdd(this, k, _))
     }
 
     /** aka upsert */
     def put(key: K, value: V): Txn[Unit] = {
       val k = keyCodec.encode(key)
-      Txn.EvalCallback(valueCodec.encode(value)).flatMap(Txn.StorePut(this, k, _))
+      Txn.Eval(valueCodec.encode(value)).flatMap(Txn.StorePut(this, k, _))
     }
 
     def get(key: K): Txn[Option[V]] =
@@ -264,10 +275,10 @@ object IndexedDb {
 
     // Sync only. Async not allowed by IndexedDB.
     def eval[A](c: CallbackTo[A]): Txn[A] =
-      Txn.EvalCallback(c)
+      Txn.Eval(c)
 
-    val unit: Txn[Unit] =
-      eval(Callback.empty)
+    def unit: Txn[Unit] =
+      Txn.unit
 
     def objectStore[K, V](s: ObjectStoreDef.Sync[K, V]): Txn[ObjectStore[K, V]] =
       Txn.GetStore(s)
@@ -317,13 +328,16 @@ object IndexedDb {
       FlatMap(this, f)
 
     final def >>[B](f: Txn[B]): Txn[B] =
-      flatMap(_ => f)
+      FlatMap(this, (_: A) => f)
+
+    final def void: Txn[Unit] =
+      FlatMap(this, Txn.toUnit)
   }
 
   private object Txn {
     final case class Map            [A, B](from: Txn[A], f: A => B)                                      extends Txn[B]
     final case class FlatMap        [A, B](from: Txn[A], f: A => Txn[B])                                 extends Txn[B]
-    final case class EvalCallback   [A]   (callback: CallbackTo[A])                                      extends Txn[A]
+    final case class Eval           [A]   (body: CallbackTo[A])                                          extends Txn[A]
     final case class GetStore       [K, V](defn: ObjectStoreDef.Sync[K, V])                              extends Txn[ObjectStore[K, V]]
     final case class StoreAdd             (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends Txn[Unit]
     final case class StorePut             (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends Txn[Unit]
@@ -332,6 +346,10 @@ object IndexedDb {
     final case class StoreGetAllVals[K, V](store: ObjectStore[K, V])                                     extends Txn[Vector[V]]
     final case class StoreDelete    [K, V](store: ObjectStore[K, V], key: IndexedDbKey)                  extends Txn[Unit]
     final case class StoreClear           (store: ObjectStore[_, _])                                     extends Txn[Unit]
+
+
+    val unit = Eval(Callback.empty)
+    val toUnit = (_: Any) => unit
 
     def interpret[A](txn: IDBTransaction, dsl: Txn[A]): AsyncCallback[A] =
       AsyncCallback.suspend {
@@ -356,7 +374,7 @@ object IndexedDb {
                 }
               }
 
-            case EvalCallback(c) =>
+            case Eval(c) =>
               c.asAsyncCallback
 
             case GetStore(sd) =>
