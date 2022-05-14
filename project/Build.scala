@@ -376,7 +376,7 @@ object Build {
     import laika.parse.code.languages._
     import laika.parse.code.SyntaxHighlighting
 
-    private val files = {
+    private def allSourceFiles() = {
       val cmd = "find examples/*/src -name '*.scala'"
       val out = sys.process.Process(List("bash", "-c", cmd)).!!
       out
@@ -395,6 +395,10 @@ object Build {
         val syntax = ext match {
           case "scala" => ScalaSyntax
         }
+
+        // Notice we re-load all source files on-demand so that we don't have to restart
+        // sbt to detect changes at the file-system level.
+        val files = allSourceFiles()
 
         val candidates = files.filter(_.endsWith("/" + filename))
 
