@@ -164,5 +164,19 @@ object IndexedDbTest extends TestSuite {
       }
     }
 
+    "txn" - {
+      import TxnMode._
+
+      val rw: Txn[RW, Int] = TxnDslRW.pure(1)
+      val ro: Txn[RO, Int] = TxnDslRO.pure(1)
+
+      "rw≠ro" - { compileError("rw: Txn[RO, Int]") }
+      "ro=rw" - { ro: Txn[RW, Int] }
+
+      "rw+rw" - { (rw >> rw): Txn[RW, Int] }
+      "rw+ro" - { (rw >> ro): Txn[RW, Int] }
+      "ro-rw" - { compileError("ro >> rw") }
+      "ro+ro" - { (ro >> ro): Txn[RO, Int] }
+    }
   }
 }

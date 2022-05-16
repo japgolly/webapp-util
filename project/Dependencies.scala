@@ -33,6 +33,8 @@ object Dependencies {
 
     // Internal
     def base32768         = "2.0.2"
+    def betterMonadicFor  = "0.3.1"
+    def kindProjector     = "0.13.2"
     def pako              = "2.0.4"
     def reactJs           = "17.0.2"
     def scalajsJavaTime   = "1.0.0"
@@ -83,6 +85,9 @@ object Dependencies {
     val reactDom          = ReactArtifact("react-dom")
     val reactDomServer    = ReactArtifact("react-dom-server.browser")
     val reactDoutestUtils = ReactArtifact("react-dom-test-utils")
+
+    val betterMonadicFor = compilerPlugin("com.olegpy"    %% "better-monadic-for" % Ver.betterMonadicFor)
+    val kindProjector    = compilerPlugin("org.typelevel" %% "kind-projector"     % Ver.kindProjector cross CrossVersion.full)
   }
 
   final case class ReactArtifact(filename: String) {

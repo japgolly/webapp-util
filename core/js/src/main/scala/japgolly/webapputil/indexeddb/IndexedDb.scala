@@ -142,27 +142,25 @@ object IndexedDb {
       actuallyClose >> onClose
     }
 
-    def transactionRO: TxnStep1[RO, TxnDslRO] =
+    def transactionRO: TxnStep1[RO] =
       new TxnStep1(TxnDslRO, IDBTransactionMode.readonly)
 
-    def transactionRW: TxnStep1[RW, TxnDslRW] =
+    def transactionRW: TxnStep1[RW] =
       new TxnStep1(TxnDslRW, IDBTransactionMode.readwrite)
 
-    final class TxnStep1[Mode <: TxnMode, Dsl <: TxnDsl] private[Database](txnDsl: Dsl, mode: IDBTransactionMode) {
-      def apply(stores: ObjectStoreDef[_, _]*): TxnStep2[Mode, Dsl] =
+    final class TxnStep1[M <: TxnMode] private[Database](txnDsl: TxnDsl[M], mode: IDBTransactionMode) {
+      def apply(stores: ObjectStoreDef[_, _]*): TxnStep2[M] =
         new TxnStep2(txnDsl, mode, mkStoreArray(stores))
     }
 
-    final class TxnStep2[Mode <: TxnMode, Dsl <: TxnDsl] private[Database](txnDsl: Dsl, mode: IDBTransactionMode, stores: js.Array[String]) {
+    final class TxnStep2[M <: TxnMode] private[Database](txnDsl: TxnDsl[M], mode: IDBTransactionMode, stores: js.Array[String]) {
 
-      final type Txn[+A] = Txn.WithMode[Mode, A]
-
-      def apply[A](f: Dsl => Txn[A]): AsyncCallback[A] = {
+      def apply[A](f: TxnDsl[M] => Txn[M, A]): AsyncCallback[A] = {
         val x = CallbackTo.pure(f(txnDsl))
         sync(_ => x)
       }
 
-      def sync[A](dslCB: Dsl => CallbackTo[Txn[A]]): AsyncCallback[A] = {
+      def sync[A](dslCB: TxnDsl[M] => CallbackTo[Txn[M, A]]): AsyncCallback[A] = {
 
         @inline def startRawTxn(complete: Try[Unit] => Callback) = {
           val txn = raw.transaction(stores, mode)
@@ -191,7 +189,7 @@ object IndexedDb {
         } yield result
       }
 
-      def async[A](dsl: Dsl => AsyncCallback[Txn[A]]): AsyncCallback[A] =
+      def async[A](dsl: TxnDsl[M] => AsyncCallback[Txn[M, A]]): AsyncCallback[A] =
         // Note: This is safer than it looks.
         //       1) This is `Dsl => AsyncCallback[Txn[A]]`
         //          and not `Dsl => Txn[AsyncCallback[A]]`
@@ -247,34 +245,34 @@ object IndexedDb {
   final class ObjectStore[K, V](val defn: ObjectStoreDef.Sync[K, V]) {
     import defn.{keyCodec, valueCodec}
 
-    private implicit def autoWrapRW[A](s: TxnStep[RW, A]): TxnRW[A] = TxnRW(s)
-    private implicit def autoWrapRO[A](s: TxnStep[RO, A]): TxnRO[A] = TxnRO(s)
+    private implicit def autoWrap[M <: TxnMode, A](s: TxnStep[M, A]): Txn[M, A] =
+      Txn(s)
 
     /** Note: insert only */
-    def add(key: K, value: V): TxnRW[Unit] = {
+    def add(key: K, value: V): Txn[RW, Unit] = {
       val k = keyCodec.encode(key)
       TxnDslRW.eval(valueCodec.encode(value)).flatMap(TxnStep.StoreAdd(this, k, _))
     }
 
     /** aka upsert */
-    def put(key: K, value: V): TxnRW[Unit] = {
+    def put(key: K, value: V): Txn[RW, Unit] = {
       val k = keyCodec.encode(key)
       TxnDslRW.eval(valueCodec.encode(value)).flatMap(TxnStep.StorePut(this, k, _))
     }
 
-    def get(key: K): TxnRO[Option[V]] =
+    def get(key: K): Txn[RO, Option[V]] =
       TxnStep.StoreGet(this, keyCodec.encode(key))
 
-    def getAllKeys: TxnRO[Vector[K]] =
+    def getAllKeys: Txn[RO, Vector[K]] =
       TxnStep.StoreGetAllKeys(this)
 
-    def getAllValues: TxnRO[Vector[V]] =
+    def getAllValues: Txn[RO, Vector[V]] =
       TxnStep.StoreGetAllVals(this)
 
-    def delete(key: K): TxnRW[Unit] =
+    def delete(key: K): Txn[RW, Unit] =
       TxnStep.StoreDelete(this, keyCodec.encode(key))
 
-    def clear: TxnRW[Unit] =
+    def clear: Txn[RW, Unit] =
       TxnStep.StoreClear(this)
   }
 
@@ -310,7 +308,7 @@ object IndexedDb {
       a
     }
 
-    def interpretTxn[A](txn: IDBTransaction, dsl: Txn[A]): AsyncCallback[A] =
+    def interpretTxn[M <: TxnMode, A](txn: IDBTransaction, dsl: Txn[M, A]): AsyncCallback[A] =
       AsyncCallback.suspend {
         import TxnStep._
 

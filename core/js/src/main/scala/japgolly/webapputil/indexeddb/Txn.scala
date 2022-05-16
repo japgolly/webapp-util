@@ -20,101 +20,41 @@ import japgolly.webapputil.indexeddb.TxnMode._
   *
   * @tparam A The return type.
   */
-sealed trait Txn[+A] { self =>
+final case class Txn[+M <: TxnMode, +A](step: TxnStep[M, A]) { self =>
   import TxnStep._
 
-  type Mode <: TxnMode
-  type Self[+B] <: Txn.WithMode[Mode, B] { type Self[+C] = self.Self[C] }
+  def map[B](f: A => B): Txn[M, B] =
+    Txn(Map(step, f))
 
-  protected implicit def autoWrapStep[B](step: TxnStep[Mode, B]): Self[B]
-
-  def step: TxnStep[Mode, A]
-
-  final def map[B](f: A => B): Self[B] =
-    Map(step, f)
-
-  final def flatMap[B](f: A => Self[B]): Self[B] =
-    FlatMap(step, f.andThen(_.step))
-
-  final def >>[B](f: Self[B]): Self[B] = {
-    val next = f.step
-    FlatMap[Mode, A, B](step, _ => next)
-  }
-
-  final def void: Self[Unit] =
-    Map[Mode, A, Unit](step, _ => ())
+  def void: Txn[M, Unit] =
+    map(_ => ())
 }
 
 object Txn {
-  type WithMode[M <: TxnMode, +A] = Txn[A] { type Mode = M }
-}
 
-// =====================================================================================================================
+  @inline implicit final class InvariantOps[M <: TxnMode, A](private val self: Txn[M, A]) extends AnyVal {
+    import TxnStep._
+    import self.step
 
-/** Embedded language for safely working with(in) a read-write IndexedDB transaction.
-  *
-  * This is necessary because whilst all the transaction methods are async, any other type of asynchronicity is not
-  * supported and will result in IndexedDB automatically committing and closing the transaction, in which case,
-  * further interaction with the transaction will result in a runtime error.
-  *
-  * Therefore, returning [[AsyncCallback]] from within transactions is dangerous because it allows composition of
-  * both kinds of asynchronicity. To avoid this, we use this embedded language and don't publicly expose its
-  * interpretation/translation to [[AsyncCallback]]. From the call-site's point of view, a `Txn[A]` is completely
-  * opaque.
-  *
-  * This also has a nice side-effect of ensuring that transaction completion is always awaited because we do it in the
-  * transaction functions right after interpretation. Otherwise, the call-sites would always need to remember to do it
-  * if live transaction access were exposed.
-  *
-  * @tparam A The return type.
-  */
-final case class TxnRW[+A](step: TxnStep[RW, A]) extends Txn[A] {
-  override type Self[+B] = TxnRW[B]
-  override type Mode = RW
-  override protected implicit def autoWrapStep[B](s: TxnStep[Mode, B]) = TxnRW(s)
-}
+    def flatMap[B](f: A => Txn[M, B]): Txn[M, B] =
+      Txn(FlatMap(step, f.andThen(_.step)))
 
-object TxnRW {
-  implicit lazy val catsInstance: Monad[TxnRW] = new Monad[TxnRW] {
-    override def pure[A](a: A) = TxnDslRW.pure(a)
-    override def map[A, B](fa: TxnRW[A])(f: A => B) = fa map f
-    override def flatMap[A, B](fa: TxnRW[A])(f: A => TxnRW[B]) = fa flatMap f
-    override def tailRecM[A, B](a: A)(f: A => TxnRW[Either[A, B]]) = TxnDslRW.tailRec(a)(f)
+    def >>[B](f: Txn[M, B]): Txn[M, B] = {
+      val next = f.step
+      Txn(FlatMap[M, A, B](step, _ => next))
+    }
   }
-}
-// =====================================================================================================================
 
-/** Embedded language for safely working with(in) a read-only IndexedDB transaction.
-  *
-  * This is necessary because whilst all the transaction methods are async, any other type of asynchronicity is not
-  * supported and will result in IndexedDB automatically committing and closing the transaction, in which case,
-  * further interaction with the transaction will result in a runtime error.
-  *
-  * Therefore, returning [[AsyncCallback]] from within transactions is dangerous because it allows composition of
-  * both kinds of asynchronicity. To avoid this, we use this embedded language and don't publicly expose its
-  * interpretation/translation to [[AsyncCallback]]. From the call-site's point of view, a `Txn[A]` is completely
-  * opaque.
-  *
-  * This also has a nice side-effect of ensuring that transaction completion is always awaited because we do it in the
-  * transaction functions right after interpretation. Otherwise, the call-sites would always need to remember to do it
-  * if live transaction access were exposed.
-  *
-  * @tparam A The return type.
-  */
-final case class TxnRO[+A](step: TxnStep[RO, A]) extends Txn[A] {
-  override type Self[+B] = TxnRO[B]
-  override type Mode = RO
-  override protected implicit def autoWrapStep[B](s: TxnStep[Mode, B]) = TxnRO(s)
+  type CatsInstance[M <: TxnMode] = Monad[Txn[M, *]]
 
-  def rw: TxnRW[A] =
-    TxnRW(step)
-}
+  def catsInstance[M <: TxnMode](dsl: TxnDsl[M]): CatsInstance[M] =
+    new CatsInstance[M] {
+      override def pure[A](a: A) = dsl.pure(a)
+      override def map[A, B](fa: Txn[M, A])(f: A => B) = fa map f
+      override def flatMap[A, B](fa: Txn[M, A])(f: A => Txn[M, B]) = fa flatMap f
+      override def tailRecM[A, B](a: A)(f: A => Txn[M, Either[A, B]]) = dsl.tailRec(a)(f)
+    }
 
-object TxnRO {
-  implicit lazy val catsInstance: Monad[TxnRO] = new Monad[TxnRO] {
-    override def pure[A](a: A) = TxnDslRO.pure(a)
-    override def map[A, B](fa: TxnRO[A])(f: A => B) = fa map f
-    override def flatMap[A, B](fa: TxnRO[A])(f: A => TxnRO[B]) = fa flatMap f
-    override def tailRecM[A, B](a: A)(f: A => TxnRO[Either[A, B]]) = TxnDslRO.tailRec(a)(f)
-  }
+  implicit def catsInstanceRO: CatsInstance[RO] = catsInstance(TxnDslRO)
+  implicit def catsInstanceRW: CatsInstance[RW] = catsInstance(TxnDslRW)
 }

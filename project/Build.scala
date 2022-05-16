@@ -77,6 +77,7 @@ object Build {
     _.settings(
       scalaVersion                  := Ver.scala2,
       crossScalaVersions            := Seq(Ver.scala2, Ver.scala3),
+      libraryDependencies          ++= Seq(Dep.betterMonadicFor, Dep.kindProjector),
       scalacOptions                ++= scalacCommonFlags,
       scalacOptions                ++= scalac2Flags.filter(_ => scalaVersion.value.startsWith("2")),
       scalacOptions                ++= scalac3Flags.filter(_ => scalaVersion.value.startsWith("3")),
