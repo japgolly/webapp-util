@@ -10,6 +10,7 @@ import japgolly.webapputil.indexeddb._
 import japgolly.webapputil.test.node.TestNode.asyncTest
 import nyaya.gen.Gen
 import utest._
+import japgolly.webapputil.test.node.TestNode
 
 object IndexedDbTest extends TestSuite {
 
@@ -176,8 +177,13 @@ object IndexedDbTest extends TestSuite {
 
       "rw+rw" - { (rw >> rw): Txn[RW, Int] }
       "rw+ro" - { (rw >> ro): Txn[RW, Int] }
-      "ro-rw" - { compileError("ro >> rw") }
       "ro+ro" - { (ro >> ro): Txn[RO, Int] }
+      "ro-rw" - {
+        if (TestNode.envVarNeed("SCALA_VER").startsWith("2."))
+          compileError("ro >> rw")
+        else
+          () // https://github.com/lampepfl/dotty/issues/15193
+      }
     }
 
     "cas" - asyncTest() {

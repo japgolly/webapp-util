@@ -108,8 +108,9 @@ object Build {
       ),
       Test / jsEnv := new AdvancedNodeJSEnv(
         AdvancedNodeJSEnv.Config().withEnv(Map(
-          "CI"       -> (if (inCI) "1" else "0"),
-          "SBT_ROOT" -> (ThisBuild / baseDirectory).value.getAbsolutePath,
+          "CI"        -> (if (inCI) "1" else "0"),
+          "SBT_ROOT"  -> (ThisBuild / baseDirectory).value.getAbsolutePath,
+          "SCALA_VER" -> scalaVersion.value,
         ))
       ),
     ))
