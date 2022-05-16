@@ -4,14 +4,6 @@ import japgolly.scalajs.react._
 import japgolly.webapputil.indexeddb.IndexedDb.ObjectStore
 import org.scalajs.dom._
 
-sealed trait TxnMode
-object TxnMode {
-  sealed trait RW extends TxnMode
-  sealed trait RO extends RW
-}
-
-// =====================================================================================================================
-
 /** Embedded language for safely working with(in) an IndexedDB transaction.
   *
   * This is necessary because whilst all the transaction methods are async, any other type of asynchronicity is not
