@@ -91,7 +91,7 @@ val WebappUtilVer = "<version>"
   * `UrlEncoder` - cross-platform URL encoding and decoding
 
 * `japgolly.webapputil.indexeddb` *(JS only)*
-  * [`IndexedDb`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/IndexedDb.scala) - monadic API over IndexedDb that enforces transaction rules at compile-time *(JS only)*
+  * [`IndexedDb`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/IndexedDb.scala) - monadic API over IndexedDb that enforces transaction rules at compile-time, and provides higher-level ops such as atomic async modification *(JS only)*
   * [`IndexedDbKey`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/IndexedDbKey.scala) - typed key for use in IndexedDb *(JS only)*
   * [`KeyCodec`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/KeyCodec.scala) - codec between an arbitrary type and a IndexedDb key *(JS only)*
   * [`ObjectStoreDef`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/ObjectStoreDef.scala) - IndexedDb store and codecs *(JS only)*

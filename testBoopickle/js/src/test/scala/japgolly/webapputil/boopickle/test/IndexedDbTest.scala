@@ -8,6 +8,7 @@ import japgolly.webapputil.boopickle.SafePickler.ConstructionHelperImplicits._
 import japgolly.webapputil.boopickle._
 import japgolly.webapputil.indexeddb._
 import japgolly.webapputil.test.node.TestNode.asyncTest
+import nyaya.gen.Gen
 import utest._
 
 object IndexedDbTest extends TestSuite {
@@ -177,6 +178,36 @@ object IndexedDbTest extends TestSuite {
       "rw+ro" - { (rw >> ro): Txn[RW, Int] }
       "ro-rw" - { compileError("ro >> rw") }
       "ro+ro" - { (ro >> ro): Txn[RO, Int] }
+    }
+
+    "cas" - asyncTest {
+
+      val ids: Vector[Int] = {
+        val quantity = 100
+        val longest = 200
+        val step = longest.toDouble / quantity
+        Gen.shuffle((1 to quantity).iterator.map(_ * step).map(_.toInt).toVector).sample()
+      }
+
+      val store = ObjectStoreDef.Async("test", KeyCodec.int, ValueCodec.string.async)
+      val k = 1
+
+      def newTask(db: IndexedDb.Database, n: Int) = {
+        val blockOnce = AsyncCallback.unit.delayMs(n).memo()
+        db.modifyAsync(store)(k)(s => blockOnce.map(_ => s + "," + n))
+      }
+
+      for {
+        db   <- TestIndexedDb(store)
+        _    <- db.add(store)(k, "")
+        _    <- AsyncCallback.traverse(ids)(newTask(db, _))
+        ov   <- db.get(store)(k)
+      } yield {
+        val v = ov.get.drop(1)
+        val results = v.split(',').toVector
+        assertSeqIgnoreOrder(results, ids.map(_.toString))
+        v
+      }
     }
   }
 }
