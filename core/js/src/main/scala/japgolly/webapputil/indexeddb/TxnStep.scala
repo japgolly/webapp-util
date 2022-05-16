@@ -42,5 +42,12 @@ object TxnStep {
   final case class StoreDelete    [K, V]              (store: ObjectStore[K, V], key: IndexedDbKey)                  extends TxnStep[RW, Unit]
   final case class StorePut                           (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends TxnStep[RW, Unit]
 
-  val unit = Eval(Callback.empty)
+  val none: TxnStep[RO, Option[Nothing]] =
+    pure(None)
+
+  def pure[A](a: A): TxnStep[RO, A] =
+    Eval(CallbackTo.pure(a))
+
+  val unit: TxnStep[RO, Unit] =
+    Eval(Callback.empty)
 }

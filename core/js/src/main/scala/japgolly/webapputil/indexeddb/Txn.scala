@@ -39,6 +39,18 @@ object Txn {
     def flatMap[B](f: A => Txn[M, B]): Txn[M, B] =
       Txn(FlatMap(step, f.andThen(_.step)))
 
+    @inline def unless(cond: Boolean)(implicit ev: TxnStep[RO, Option[Nothing]] => Txn[M, Option[Nothing]]): Txn[M, Option[A]] =
+      when(!cond)
+
+    @inline def unless_(cond: Boolean)(implicit ev: TxnStep[RO, Unit] => Txn[M, Unit]): Txn[M, Unit] =
+      when_(!cond)
+
+    def when(cond: Boolean)(implicit ev: TxnStep[RO, Option[Nothing]] => Txn[M, Option[Nothing]]): Txn[M, Option[A]] =
+      if (cond) self.map(Some(_)) else TxnStep.none
+
+    def when_(cond: Boolean)(implicit ev: TxnStep[RO, Unit] => Txn[M, Unit]): Txn[M, Unit] =
+      if (cond) self.void else TxnStep.unit
+
     def >>[B](f: Txn[M, B]): Txn[M, B] = {
       val next = f.step
       Txn(FlatMap[M, A, B](step, _ => next))

@@ -17,11 +17,11 @@ sealed abstract class TxnDsl[M <: TxnMode] {
     Txn(step)
 
   // Sync only. Async not allowed by IndexedDB.
-  @inline final def eval[A](c: CallbackTo[A]): Txn[M, A] =
+  final def eval[A](c: CallbackTo[A]): Txn[M, A] =
     TxnStep.Eval(c)
 
   final def pure[A](a: A): Txn[M, A] =
-    eval(CallbackTo.pure(a))
+    TxnStep.pure(a)
 
   @inline final def delay[A](a: => A): Txn[M, A] =
     eval(CallbackTo(a))
@@ -100,6 +100,18 @@ sealed abstract class TxnDsl[M <: TxnMode] {
         case None    => unit
       }
     }
+
+  @inline final def unless[A](cond: Boolean)(txn: => Txn[M, A]): Txn[M, Option[A]] =
+    when(!cond)(txn)
+
+  @inline final def unless_(cond: Boolean)(txn: => Txn[M, Any]): Txn[M, Unit] =
+    when_(!cond)(txn)
+
+  final def when[A](cond: Boolean)(txn: => Txn[M, A]): Txn[M, Option[A]] =
+    if (cond) txn.map(Some(_)) else none
+
+  final def when_(cond: Boolean)(txn: => Txn[M, Any]): Txn[M, Unit] =
+    if (cond) txn.void else unit
 }
 
 // =====================================================================================================================
