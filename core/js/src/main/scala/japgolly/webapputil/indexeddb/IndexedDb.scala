@@ -161,7 +161,7 @@ object IndexedDb {
       compareAndSet(store)
         .getValueAsync(store)(key)
         .mapAsync(AsyncCallback.traverseOption(_)(v1 => f(v1).map((v1, _))))
-        .putResultOptionBy(store)(key, _.map(_._2))
+        .putResultWhenDefinedBy(store)(key, _.map(_._2))
 
     /** Performs an async modification on an optional store value.
       *
@@ -173,7 +173,7 @@ object IndexedDb {
       compareAndSet(store)
         .getValueAsync(store)(key)
         .mapAsync { o1 => f(o1).map((o1, _)) }
-        .putResultOptionBy(store)(key, _._2)
+        .putResultWhenDefinedBy(store)(key, _._2)
 
     def transactionRO: RunTxnDsl1[RO] =
       new RunTxnDsl1(raw, TxnDslRO, IDBTransactionMode.readonly)
@@ -192,11 +192,11 @@ object IndexedDb {
       transactionRW(store)(_.objectStore(store).flatMap(_.add(key, value)))
 
     /** Note: insert only */
-    def addOption[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+    def addWhenDefined[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
       AsyncCallback.traverseOption_(value)(add(store)(key, _))
 
     /** Note: insert only */
-    def addOption[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+    def addWhenDefined[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
       AsyncCallback.traverseOption_(value)(add(store)(key, _))
 
     def clear[K, V](store: ObjectStoreDef[K, V]): AsyncCallback[Unit] =
@@ -229,11 +229,11 @@ object IndexedDb {
       transactionRW(store)(_.objectStore(store).flatMap(_.put(key, value)))
 
     /** aka upsert */
-    def putOption[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+    def putWhenDefined[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
       AsyncCallback.traverseOption_(value)(put(store)(key, _))
 
     /** aka upsert */
-    def putOption[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+    def putWhenDefined[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
       AsyncCallback.traverseOption_(value)(put(store)(key, _))
   } // class Database
 
@@ -250,7 +250,7 @@ object IndexedDb {
     }
 
     /** Note: insert only */
-    def addOption(key: K, value: Option[V]): Txn[RW, Unit] =
+    def addWhenDefined(key: K, value: Option[V]): Txn[RW, Unit] =
       value.fold[Txn[RW, Unit]](TxnStep.unit)(add(key, _))
 
     def clear: Txn[RW, Unit] =
@@ -275,7 +275,7 @@ object IndexedDb {
     }
 
     /** aka upsert */
-    def putOption(key: K, value: Option[V]): Txn[RW, Unit] =
+    def putWhenDefined(key: K, value: Option[V]): Txn[RW, Unit] =
       value.fold[Txn[RW, Unit]](TxnStep.unit)(put(key, _))
   }
 
@@ -423,11 +423,11 @@ object IndexedDb {
       setConst(_.objectStore(store).flatMap(_.add(key, value)))
 
     /** Note: insert only */
-    def addOption[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+    def addWhenDefined[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
       value.fold(AsyncCallback.unit)(add(store)(key, _))
 
     /** Note: insert only */
-    def addOption[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+    def addWhenDefined[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
       value.fold(AsyncCallback.unit)(add(store)(key, _))
 
     /** Note: insert only */
@@ -454,21 +454,21 @@ object IndexedDb {
       )
 
     /** Note: insert only */
-    @inline def addResultOption[K, V](store: ObjectStoreDef.Async[K, V])(key: K)(implicit ev: B => Option[V]): AsyncCallback[B] =
-      addResultOptionBy(store)(key, ev)
+    @inline def addResultWhenDefined[K, V](store: ObjectStoreDef.Async[K, V])(key: K)(implicit ev: B => Option[V]): AsyncCallback[B] =
+      addResultWhenDefinedBy(store)(key, ev)
 
     /** Note: insert only */
-    @inline def addResultOption[K, V](store: ObjectStoreDef.Sync[K, V])(key: K)(implicit ev: B => Option[V]): AsyncCallback[B] =
-      addResultOptionBy(store)(key, ev)
+    @inline def addResultWhenDefined[K, V](store: ObjectStoreDef.Sync[K, V])(key: K)(implicit ev: B => Option[V]): AsyncCallback[B] =
+      addResultWhenDefinedBy(store)(key, ev)
 
     /** Note: insert only */
-    def addResultOptionBy[K, V](store: ObjectStoreDef.Async[K, V])(key: K, f: B => Option[V]): AsyncCallback[B] =
+    def addResultWhenDefinedBy[K, V](store: ObjectStoreDef.Async[K, V])(key: K, f: B => Option[V]): AsyncCallback[B] =
       mapAsync { b => AsyncCallback.traverseOption(f(b))(store.encode(_)).map((b, _)) }
-      .addResultOptionBy(store.sync)(key, _._2)
+      .addResultWhenDefinedBy(store.sync)(key, _._2)
       .map(_._1)
 
     /** Note: insert only */
-    def addResultOptionBy[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, f: B => Option[V]): AsyncCallback[B] =
+    def addResultWhenDefinedBy[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, f: B => Option[V]): AsyncCallback[B] =
       set(dsl => (_, b) =>
         f(b) match {
           case Some(v) =>
@@ -496,11 +496,11 @@ object IndexedDb {
       setConst(_.objectStore(store).flatMap(_.put(key, value)))
 
     /** Note: upsert */
-    def putOption[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+    def putWhenDefined[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
       value.fold(AsyncCallback.unit)(put(store)(key, _))
 
     /** Note: upsert */
-    def putOption[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+    def putWhenDefined[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
       value.fold(AsyncCallback.unit)(put(store)(key, _))
 
     /** Note: upsert */
@@ -532,21 +532,21 @@ object IndexedDb {
       )
 
     /** Note: upsert */
-    @inline def putResultOption[K, V](store: ObjectStoreDef.Async[K, V])(key: K)(implicit ev: B => Option[V]): AsyncCallback[B] =
-      putResultOptionBy(store)(key, ev)
+    @inline def putResultWhenDefined[K, V](store: ObjectStoreDef.Async[K, V])(key: K)(implicit ev: B => Option[V]): AsyncCallback[B] =
+      putResultWhenDefinedBy(store)(key, ev)
 
     /** Note: upsert */
-    @inline def putResultOption[K, V](store: ObjectStoreDef.Sync[K, V])(key: K)(implicit ev: B => Option[V]): AsyncCallback[B] =
-      putResultOptionBy(store)(key, ev)
+    @inline def putResultWhenDefined[K, V](store: ObjectStoreDef.Sync[K, V])(key: K)(implicit ev: B => Option[V]): AsyncCallback[B] =
+      putResultWhenDefinedBy(store)(key, ev)
 
     /** Note: upsert */
-    def putResultOptionBy[K, V](store: ObjectStoreDef.Async[K, V])(key: K, f: B => Option[V]): AsyncCallback[B] =
+    def putResultWhenDefinedBy[K, V](store: ObjectStoreDef.Async[K, V])(key: K, f: B => Option[V]): AsyncCallback[B] =
       mapAsync { b => AsyncCallback.traverseOption(f(b))(store.encode(_)).map((b, _)) }
-      .putResultOptionBy(store.sync)(key, _._2)
+      .putResultWhenDefinedBy(store.sync)(key, _._2)
       .map(_._1)
 
     /** Note: upsert */
-    def putResultOptionBy[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, f: B => Option[V]): AsyncCallback[B] =
+    def putResultWhenDefinedBy[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, f: B => Option[V]): AsyncCallback[B] =
       set(dsl => (_, b) =>
         f(b) match {
           case Some(v) =>
