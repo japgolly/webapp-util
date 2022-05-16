@@ -159,6 +159,14 @@ object IndexedDb {
     def add[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: V): AsyncCallback[Unit] =
       store.encode(value).flatMap(add(store.sync)(key, _))
 
+    /** Note: insert only */
+    def addOption[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+      AsyncCallback.traverseOption_(value)(add(store)(key, _))
+
+    /** Note: insert only */
+    def addOption[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+      AsyncCallback.traverseOption_(value)(add(store)(key, _))
+
     /** aka upsert */
     def put[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: V): AsyncCallback[Unit] =
       transactionRW(store)(_.objectStore(store).flatMap(_.put(key, value)))
@@ -166,6 +174,14 @@ object IndexedDb {
     /** aka upsert */
     def put[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: V): AsyncCallback[Unit] =
       store.encode(value).flatMap(put(store.sync)(key, _))
+
+    /** Note: insert only */
+    def putOption[K, V](store: ObjectStoreDef.Sync[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+      AsyncCallback.traverseOption_(value)(put(store)(key, _))
+
+    /** Note: insert only */
+    def putOption[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: Option[V]): AsyncCallback[Unit] =
+      AsyncCallback.traverseOption_(value)(put(store)(key, _))
 
     def get[K, V](store: ObjectStoreDef.Sync[K, V])(key: K): AsyncCallback[Option[V]] =
       transactionRO(store)(_.objectStore(store).flatMap(_.get(key)))
@@ -207,6 +223,14 @@ object IndexedDb {
       val k = keyCodec.encode(key)
       TxnDslRW.eval(valueCodec.encode(value)).flatMap(TxnStep.StorePut(this, k, _))
     }
+
+    /** Note: insert only */
+    def addOption(key: K, value: Option[V]): Txn[RW, Unit] =
+      value.fold[Txn[RW, Unit]](TxnStep.unit)(add(key, _))
+
+    /** aka upsert */
+    def putOption(key: K, value: Option[V]): Txn[RW, Unit] =
+      value.fold[Txn[RW, Unit]](TxnStep.unit)(put(key, _))
 
     def get(key: K): Txn[RO, Option[V]] =
       TxnStep.StoreGet(this, keyCodec.encode(key))
