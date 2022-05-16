@@ -1,11 +1,9 @@
 package japgolly.webapputil.indexeddb
 
-import cats.Traverse
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.util.Util.{identity => identityFn}
+import japgolly.webapputil.indexeddb.TxnMode._
 import org.scalajs.dom._
 import scala.annotation.elidable
-import scala.collection.BuildFrom
 import scala.scalajs.js
 import scala.util.{Failure, Success, Try}
 
@@ -67,6 +65,8 @@ final class IndexedDb(raw: IDBFactory) {
     asyncRequest_(raw.deleteDatabase(name.value))
 }
 
+// =====================================================================================================================
+
 object IndexedDb {
 
   def apply(raw: IDBFactory): IndexedDb =
@@ -82,8 +82,6 @@ object IndexedDb {
   final case class DatabaseName(value: String)
 
   type OpenResult = OpenCallbacks => AsyncCallback[Database]
-
-  // ===================================================================================================================
 
   import Internals._
 
@@ -123,7 +121,15 @@ object IndexedDb {
     }
   }
 
-  // -------------------------------------------------------------------------------------------------------------------
+  final class DatabaseInVersionChange(raw: IDBDatabase) {
+    def createObjectStore[K, V](defn: ObjectStoreDef[K, V]): Callback =
+      Callback {
+        raw.createObjectStore(defn.name)
+      }
+  }
+
+  // ===================================================================================================================
+
   final class Database(raw: IDBDatabase, onClose: Callback) {
 
     def close: Callback = {
@@ -136,28 +142,27 @@ object IndexedDb {
       actuallyClose >> onClose
     }
 
-    val transactionRO: TxnStep1 = new TxnStep1(IDBTransactionMode.readonly)
-    val transactionRW: TxnStep1 = new TxnStep1(IDBTransactionMode.readwrite)
+    def transactionRO: TxnStep1[RO, TxnDslRO] =
+      new TxnStep1(TxnDslRO, IDBTransactionMode.readonly)
 
-    private def mkStoreArray(stores: Seq[ObjectStoreDef[_, _]]): js.Array[String] = {
-      val a = new js.Array[String]
-      stores.foreach(s => a.push(s.name))
-      a
+    def transactionRW: TxnStep1[RW, TxnDslRW] =
+      new TxnStep1(TxnDslRW, IDBTransactionMode.readwrite)
+
+    final class TxnStep1[Mode <: TxnMode, Dsl <: TxnDsl] private[Database](txnDsl: Dsl, mode: IDBTransactionMode) {
+      def apply(stores: ObjectStoreDef[_, _]*): TxnStep2[Mode, Dsl] =
+        new TxnStep2(txnDsl, mode, mkStoreArray(stores))
     }
 
-    final class TxnStep1 private[Database] (mode: IDBTransactionMode) {
-      def apply(stores: ObjectStoreDef[_, _]*): TxnStep2 =
-        new TxnStep2(mode, mkStoreArray(stores))
-    }
+    final class TxnStep2[Mode <: TxnMode, Dsl <: TxnDsl] private[Database](txnDsl: Dsl, mode: IDBTransactionMode, stores: js.Array[String]) {
 
-    final class TxnStep2 private[Database] (mode: IDBTransactionMode, stores: js.Array[String]) {
+      final type Txn[+A] = Txn.WithMode[Mode, A]
 
-      def apply[A](f: TxnDsl => Txn[A]): AsyncCallback[A] = {
-        val x = CallbackTo.pure(f(TxnDsl))
+      def apply[A](f: Dsl => Txn[A]): AsyncCallback[A] = {
+        val x = CallbackTo.pure(f(txnDsl))
         sync(_ => x)
       }
 
-      def sync[A](dslCB: TxnDsl => CallbackTo[Txn[A]]): AsyncCallback[A] = {
+      def sync[A](dslCB: Dsl => CallbackTo[Txn[A]]): AsyncCallback[A] = {
 
         @inline def startRawTxn(complete: Try[Unit] => Callback) = {
           val txn = raw.transaction(stores, mode)
@@ -172,13 +177,13 @@ object IndexedDb {
         }
 
         for {
-          dsl <- dslCB(TxnDsl).asAsyncCallback
+          dsl <- dslCB(txnDsl).asAsyncCallback
 
           (awaitTxnCompletion, complete) <- AsyncCallback.promise[Unit].asAsyncCallback
 
           result <- AsyncCallback.suspend {
             val txn = startRawTxn(complete)
-            Txn.interpret(txn, dsl)
+            interpretTxn(txn, dsl)
           }
 
           _ <- awaitTxnCompletion
@@ -186,13 +191,13 @@ object IndexedDb {
         } yield result
       }
 
-      def async[A](dsl: TxnDsl => AsyncCallback[Txn[A]]): AsyncCallback[A] =
+      def async[A](dsl: Dsl => AsyncCallback[Txn[A]]): AsyncCallback[A] =
         // Note: This is safer than it looks.
-        //       1) This is `TxnDsl => AsyncCallback[Txn[A]]`
-        //          and not `TxnDsl => Txn[AsyncCallback[A]]`
+        //       1) This is `Dsl => AsyncCallback[Txn[A]]`
+        //          and not `Dsl => Txn[AsyncCallback[A]]`
         //       2) Everything within Txn is still synchronous and lawful
         //       3) Only one transaction is created (i.e. only one call to `apply`)
-        dsl(TxnDsl).flatMap(txnA => apply(_ => txnA))
+        dsl(txnDsl).flatMap(txnA => apply(_ => txnA))
 
     } // TxnStep2
 
@@ -234,201 +239,88 @@ object IndexedDb {
 
     def clear[K, V](store: ObjectStoreDef[K, V]): AsyncCallback[Unit] =
       transactionRW(store)(_.objectStore(store.sync).flatMap(_.clear))
-  }
 
-  // -------------------------------------------------------------------------------------------------------------------
-  final class DatabaseInVersionChange(raw: IDBDatabase) {
-    def createObjectStore[K, V](defn: ObjectStoreDef[K, V]): Callback =
-      Callback {
-        raw.createObjectStore(defn.name)
-      }
-  }
+  } // class Database
 
-  // -------------------------------------------------------------------------------------------------------------------
+  // ===================================================================================================================
+
   final class ObjectStore[K, V](val defn: ObjectStoreDef.Sync[K, V]) {
     import defn.{keyCodec, valueCodec}
 
+    private implicit def autoWrapRW[A](s: TxnStep[RW, A]): TxnRW[A] = TxnRW(s)
+    private implicit def autoWrapRO[A](s: TxnStep[RO, A]): TxnRO[A] = TxnRO(s)
+
     /** Note: insert only */
-    def add(key: K, value: V): Txn[Unit] = {
+    def add(key: K, value: V): TxnRW[Unit] = {
       val k = keyCodec.encode(key)
-      Txn.Eval(valueCodec.encode(value)).flatMap(Txn.StoreAdd(this, k, _))
+      TxnDslRW.eval(valueCodec.encode(value)).flatMap(TxnStep.StoreAdd(this, k, _))
     }
 
     /** aka upsert */
-    def put(key: K, value: V): Txn[Unit] = {
+    def put(key: K, value: V): TxnRW[Unit] = {
       val k = keyCodec.encode(key)
-      Txn.Eval(valueCodec.encode(value)).flatMap(Txn.StorePut(this, k, _))
+      TxnDslRW.eval(valueCodec.encode(value)).flatMap(TxnStep.StorePut(this, k, _))
     }
 
-    def get(key: K): Txn[Option[V]] =
-      Txn.StoreGet(this, keyCodec.encode(key))
+    def get(key: K): TxnRO[Option[V]] =
+      TxnStep.StoreGet(this, keyCodec.encode(key))
 
-    def getAllKeys: Txn[Vector[K]] =
-      Txn.StoreGetAllKeys(this)
+    def getAllKeys: TxnRO[Vector[K]] =
+      TxnStep.StoreGetAllKeys(this)
 
-    def getAllValues: Txn[Vector[V]] =
-      Txn.StoreGetAllVals(this)
+    def getAllValues: TxnRO[Vector[V]] =
+      TxnStep.StoreGetAllVals(this)
 
-    def delete(key: K): Txn[Unit] =
-      Txn.StoreDelete(this, keyCodec.encode(key))
+    def delete(key: K): TxnRW[Unit] =
+      TxnStep.StoreDelete(this, keyCodec.encode(key))
 
-    def clear: Txn[Unit] =
-      Txn.StoreClear(this)
+    def clear: TxnRW[Unit] =
+      TxnStep.StoreClear(this)
   }
 
-  // -------------------------------------------------------------------------------------------------------------------
-  final class TxnDsl private[IndexedDb] () {
+  // ===================================================================================================================
+  private object Internals {
 
-    def pure[A](a: A): Txn[A] =
-      eval(CallbackTo.pure(a))
+    val success_ = Success(())
 
-    def delay[A](a: => A): Txn[A] =
-      eval(CallbackTo(a))
+    def asyncRequest_[R <: IDBRequest[Any, _]](act: => R): AsyncCallback[Unit] =
+      asyncRequest(act)(_ => ())
 
-    def suspend[A](a: => Txn[A]): Txn[A] =
-      Txn.Suspend(CallbackTo(a))
+    def asyncRequest[R <: IDBRequest[Any, _], A](act: => R)(onSuccess: R => A): AsyncCallback[A] =
+      AsyncCallback.promise[A].asAsyncCallback.flatMap { case (promise, complete) =>
+        val raw = act
 
-    // Sync only. Async not allowed by IndexedDB.
-    def eval[A](c: CallbackTo[A]): Txn[A] =
-      Txn.Eval(c)
-
-    def unit: Txn[Unit] =
-      Txn.unit
-
-    @inline def none: Txn[Option[Nothing]] =
-      pure(None)
-
-    def tailRec[A, B](a: A)(f: A => Txn[Either[A, B]]): Txn[B] =
-      Txn.TailRec(a, f)
-
-    def objectStore[K, V](s: ObjectStoreDef.Sync[K, V]): Txn[ObjectStore[K, V]] =
-      Txn.GetStore(s)
-
-    @inline def objectStore[K, V](s: ObjectStoreDef.Async[K, V]): Txn[ObjectStore[K, s.Value]] =
-      objectStore(s.sync)
-
-    @inline def sequence[G[_], A](txns: G[Txn[A]])(implicit G: Traverse[G]): Txn[G[A]] =
-      traverse(txns)(identityFn)
-
-    @inline def sequenceIterable[F[x] <: Iterable[x], A](txns: => F[Txn[A]])(implicit cbf: BuildFrom[F[Txn[A]], A, F[A]]): Txn[F[A]] =
-      traverseIterable(txns)(identityFn)
-
-    @inline def sequenceIterable_(txns: => Iterable[Txn[Any]]): Txn[Unit] =
-      traverseIterable_(txns)(identityFn)
-
-    @inline def sequenceOption[A](o: => Option[Txn[A]]): Txn[Option[A]] =
-      traverseOption(o)(identityFn)
-
-    @inline def sequenceOption_(o: Option[Txn[Any]]): Txn[Unit] =
-      traverseOption_(o)(identityFn)
-
-    def traverse[G[_], A, B](ga: G[A])(f: A => Txn[B])(implicit G: Traverse[G]): Txn[G[B]] =
-      G.traverse(ga)(f)
-
-    def traverseIterable[F[x] <: Iterable[x], A, B](fa: => F[A])(f: A => Txn[B])(implicit cbf: BuildFrom[F[A], B, F[B]]): Txn[F[B]] =
-      suspend {
-        val as = fa
-        val b = cbf.newBuilder(as)
-
-        if (as.isEmpty)
-          pure(b.result())
-        else
-          as.iterator.map(f(_).map(b += _)).reduce(_ >> _) >> delay(b.result())
-      }
-
-    def traverseIterable_[A](fa: => Iterable[A])(f: A => Txn[Any]): Txn[Unit] =
-      suspend {
-        val as = fa
-        val it = as.iterator
-        if (it.isEmpty)
-          unit
-        else {
-          val first = f(it.next())
-          it.foldLeft(first)(_ >> f(_)).void
+        raw.onerror = event => {
+          complete(Failure(Error(event))).runNow()
         }
-      }
 
-    def traverseOption[A, B](o: => Option[A])(f: A => Txn[B]): Txn[Option[B]] =
-      suspend {
-        o match {
-          case Some(a) => f(a).map(Some(_))
-          case None    => none
+        raw.onsuccess = _ => {
+          complete(Try(onSuccess(raw))).runNow()
         }
+
+        promise
       }
 
-    def traverseOption_[A, B](o: => Option[A])(f: A => Txn[B]): Txn[Unit] =
-      suspend {
-        o match {
-          case Some(a) => f(a).void
-          case None    => unit
-        }
-      }
-  }
+    def versionChange(db: DatabaseInVersionChange, e: IDBVersionChangeEvent): VersionChange =
+      VersionChange(db, e.oldVersion.toInt, e.newVersionOption.map(_.toInt))
 
-  private val TxnDsl = new TxnDsl()
+    def mkStoreArray(stores: Seq[ObjectStoreDef[_, _]]): js.Array[String] = {
+      val a = new js.Array[String]
+      stores.foreach(s => a.push(s.name))
+      a
+    }
 
-  // -------------------------------------------------------------------------------------------------------------------
-
-  /** Embedded language for safely working with(in) an IndexedDB transaction.
-    *
-    * This is necessary because whilst all the transaction methods are async, any other type of asynchronicity is not
-    * supported and will result in IndexedDB automatically committing and closing the transaction, in which case,
-    * further interaction with the transaction will result in a runtime error.
-    *
-    * Therefore, returning [[AsyncCallback]] from within transactions is dangerous because it allows composition of
-    * both kinds of asynchronicity. To avoid this, we use this embedded language and don't publicly expose its
-    * interpretation/translation to [[AsyncCallback]]. From the call-site's point of view, a `Txn[A]` is completely
-    * opaque.
-    *
-    * This also has a nice side-effect of ensuring that transaction completion is always awaited because we do it in the
-    * transaction functions right after interpretation. Otherwise, the call-sites would always need to remember to do it
-    * if live transaction access were exposed.
-    *
-    * @tparam A The return type.
-    */
-  sealed trait Txn[+A] {
-    import Txn._
-
-    final def map[B](f: A => B): Txn[B] =
-      Map(this, f)
-
-    final def flatMap[B](f: A => Txn[B]): Txn[B] =
-      FlatMap(this, f)
-
-    final def >>[B](f: Txn[B]): Txn[B] =
-      FlatMap(this, (_: A) => f)
-
-    final def void: Txn[Unit] =
-      FlatMap(this, Txn.toUnit)
-  }
-
-  private object Txn {
-    final case class Map            [A, B](from: Txn[A], f: A => B)                                      extends Txn[B]
-    final case class FlatMap        [A, B](from: Txn[A], f: A => Txn[B])                                 extends Txn[B]
-    final case class Eval           [A]   (body: CallbackTo[A])                                          extends Txn[A]
-    final case class Suspend        [A]   (body: CallbackTo[Txn[A]])                                     extends Txn[A]
-    final case class TailRec        [A, B](a: A, f: A => Txn[Either[A, B]])                              extends Txn[B]
-    final case class GetStore       [K, V](defn: ObjectStoreDef.Sync[K, V])                              extends Txn[ObjectStore[K, V]]
-    final case class StoreAdd             (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends Txn[Unit]
-    final case class StorePut             (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends Txn[Unit]
-    final case class StoreGet       [K, V](store: ObjectStore[K, V], key: IndexedDbKey)                  extends Txn[Option[V]]
-    final case class StoreGetAllKeys[K, V](store: ObjectStore[K, V])                                     extends Txn[Vector[K]]
-    final case class StoreGetAllVals[K, V](store: ObjectStore[K, V])                                     extends Txn[Vector[V]]
-    final case class StoreDelete    [K, V](store: ObjectStore[K, V], key: IndexedDbKey)                  extends Txn[Unit]
-    final case class StoreClear           (store: ObjectStore[_, _])                                     extends Txn[Unit]
-
-    val unit = Eval(Callback.empty)
-    val toUnit = (_: Any) => unit
-
-    def interpret[A](txn: IDBTransaction, dsl: Txn[A]): AsyncCallback[A] =
+    def interpretTxn[A](txn: IDBTransaction, dsl: Txn[A]): AsyncCallback[A] =
       AsyncCallback.suspend {
+        import TxnStep._
+
         val stores = js.Dynamic.literal().asInstanceOf[js.Dictionary[IDBObjectStore]]
 
         def getStore(s: ObjectStore[_, _]) =
           AsyncCallback.delay(stores.get(s.defn.name).get)
 
-        def interpret[B](dsl: Txn[B]): AsyncCallback[B] =
-          dsl match {
+        def interpret[B](step: TxnStep[TxnMode, B]): AsyncCallback[B] = {
+          step match {
 
             case FlatMap(fa, f) =>
               interpret(fa).flatMap(a => interpret(f(a)))
@@ -506,57 +398,11 @@ object IndexedDb {
             case TailRec(z, f) =>
               AsyncCallback.tailrec(z)(a => interpret(f(a)))
 
-          } // dsl match
-
-        interpret(dsl)
-      }
-
-  } // Txn
-
-  private class TxnCats extends cats.Monad[Txn] {
-
-    override def pure[A](a: A): Txn[A] =
-      TxnDsl.pure(a)
-
-    override def map[A, B](fa: Txn[A])(f: A => B): Txn[B] =
-      fa map f
-
-    override def flatMap[A, B](fa: Txn[A])(f: A => Txn[B]): Txn[B] =
-      fa flatMap f
-
-    override def tailRecM[A, B](a: A)(f: A => Txn[Either[A, B]]): Txn[B] =
-      TxnDsl.tailRec(a)(f)
-  }
-
-  implicit lazy val txnCatsInstance: cats.Monad[Txn] =
-    new TxnCats
-
-  // ===================================================================================================================
-
-  private object Internals {
-
-    val success_ = Success(())
-
-    def asyncRequest_[R <: IDBRequest[Any, _]](act: => R): AsyncCallback[Unit] =
-      asyncRequest(act)(_ => ())
-
-    def asyncRequest[R <: IDBRequest[Any, _], A](act: => R)(onSuccess: R => A): AsyncCallback[A] =
-      AsyncCallback.promise[A].asAsyncCallback.flatMap { case (promise, complete) =>
-        val raw = act
-
-        raw.onerror = event => {
-          complete(Failure(Error(event))).runNow()
+          }
         }
 
-        raw.onsuccess = _ => {
-          complete(Try(onSuccess(raw))).runNow()
-        }
-
-        promise
+        interpret(dsl.step)
       }
 
-    def versionChange(db: DatabaseInVersionChange, e: IDBVersionChangeEvent): VersionChange =
-      VersionChange(db, e.oldVersion.toInt, e.newVersionOption.map(_.toInt))
-  }
-
+  } // object Internals
 }
