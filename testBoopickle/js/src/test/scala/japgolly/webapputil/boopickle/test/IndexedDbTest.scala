@@ -31,7 +31,7 @@ object IndexedDbTest extends TestSuite {
 
   override def tests = Tests {
 
-    "basicSync" - asyncTest {
+    "basicSync" - asyncTest() {
       val store = ObjectStoreDef.Sync("test", KeyCodec.int, ValueCodec.string)
       for {
         db    <- TestIndexedDb(store)
@@ -56,7 +56,7 @@ object IndexedDbTest extends TestSuite {
       }
     }
 
-    "basicAsync" - asyncTest {
+    "basicAsync" - asyncTest() {
       val store = ObjectStoreDef.Async("test", KeyCodec.int, ValueCodec.string.async)
       for {
         db   <- TestIndexedDb(store)
@@ -69,7 +69,7 @@ object IndexedDbTest extends TestSuite {
       }
     }
 
-    "put" - asyncTest {
+    "put" - asyncTest() {
       val store = ObjectStoreDef.Sync("test", KeyCodec.int, ValueCodec.string)
       for {
         db    <- TestIndexedDb(store)
@@ -87,7 +87,7 @@ object IndexedDbTest extends TestSuite {
       }
     }
 
-    "closeOnUpgrade" - asyncTest {
+    "closeOnUpgrade" - asyncTest() {
       val name = TestIndexedDb.freshDbName()
       val c = TestIndexedDb.unusedOpenCallbacks
       val store = ObjectStoreDef.Sync("test", KeyCodec.int, ValueCodec.string)
@@ -117,7 +117,7 @@ object IndexedDbTest extends TestSuite {
       }
     }
 
-    "pickleCompressEncrypt" - asyncTest {
+    "pickleCompressEncrypt" - asyncTest() {
       import SampleData._
       import TestEncryption.UnsafeTypes._
       import ValueCodec.Async.binary
@@ -180,7 +180,7 @@ object IndexedDbTest extends TestSuite {
       "ro+ro" - { (ro >> ro): Txn[RO, Int] }
     }
 
-    "cas" - asyncTest {
+    "cas" - asyncTest() {
 
       val ids: Vector[Int] = {
         val quantity = 100

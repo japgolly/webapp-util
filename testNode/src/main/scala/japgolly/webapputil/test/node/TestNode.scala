@@ -24,12 +24,11 @@ trait TestNode {
   val inCI             = envVarGet("CI").contains("1")
   var asyncTestTimeout = if (inCI) 60000 else 3000
 
-  def asyncTest[A](ac: AsyncCallback[A]): Future[A] = {
-    ac.timeoutMs(asyncTestTimeout).map {
+  def asyncTest[A](timeoutMs: Int = asyncTestTimeout)(ac: AsyncCallback[A]): Future[A] =
+    ac.timeoutMs(timeoutMs).map {
       case Some(a) => a
-      case None    => fail(s"Async test timed out after ${asyncTestTimeout / 1000} sec.")
+      case None    => fail(s"Async test timed out after ${timeoutMs / 1000} sec.")
     }.unsafeToFuture()
-  }
 
   lazy val webCrypto: Crypto = {
     // https://github.com/nodejs/node/pull/35093

@@ -12,7 +12,7 @@ object BinaryFormatTest extends TestSuite {
 
     // Note: pickleCompressEncrypt is covered in IndexedDbTest
 
-    "versionedBinary" - asyncTest {
+    "versionedBinary" - asyncTest() {
       type A = Int
 
       val codec1: BinaryFormat[A] = BinaryFormat.id.pickleBasic[Int]
