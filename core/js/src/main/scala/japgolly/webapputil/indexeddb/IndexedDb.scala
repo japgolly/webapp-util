@@ -79,16 +79,14 @@ object IndexedDb {
       case _: Throwable => None
     }
 
-  final case class DatabaseName(value: String)
-
-  type OpenResult = OpenCallbacks => AsyncCallback[Database]
+  // ===================================================================================================================
+  // Main types and classes
 
   import Internals._
 
-  final case class VersionChange(db: DatabaseInVersionChange, oldVersion: Int, newVersion: Option[Int]) {
-    def createObjectStore[K, V](ver: Int, defn: ObjectStoreDef[K, V]): Callback =
-      db.createObjectStore(defn).when_(oldVersion < ver && newVersion.exists(_ >= ver))
-  }
+  final case class DatabaseName(value: String)
+
+  type OpenResult = OpenCallbacks => AsyncCallback[Database]
 
   /** Callbacks to install when opening a DB.
    *
@@ -121,14 +119,17 @@ object IndexedDb {
     }
   }
 
+  final case class VersionChange(db: DatabaseInVersionChange, oldVersion: Int, newVersion: Option[Int]) {
+    def createObjectStore[K, V](ver: Int, defn: ObjectStoreDef[K, V]): Callback =
+      db.createObjectStore(defn).when_(oldVersion < ver && newVersion.exists(_ >= ver))
+  }
+
   final class DatabaseInVersionChange(raw: IDBDatabase) {
     def createObjectStore[K, V](defn: ObjectStoreDef[K, V]): Callback =
       Callback {
         raw.createObjectStore(defn.name)
       }
   }
-
-  // ===================================================================================================================
 
   final class Database(raw: IDBDatabase, onClose: Callback) {
 
@@ -142,62 +143,11 @@ object IndexedDb {
       actuallyClose >> onClose
     }
 
-    def transactionRO: TxnStep1[RO] =
-      new TxnStep1(TxnDslRO, IDBTransactionMode.readonly)
+    def transactionRO: RunTxnDsl1[RO] =
+      new RunTxnDsl1(raw, TxnDslRO, IDBTransactionMode.readonly)
 
-    def transactionRW: TxnStep1[RW] =
-      new TxnStep1(TxnDslRW, IDBTransactionMode.readwrite)
-
-    final class TxnStep1[M <: TxnMode] private[Database](txnDsl: TxnDsl[M], mode: IDBTransactionMode) {
-      def apply(stores: ObjectStoreDef[_, _]*): TxnStep2[M] =
-        new TxnStep2(txnDsl, mode, mkStoreArray(stores))
-    }
-
-    final class TxnStep2[M <: TxnMode] private[Database](txnDsl: TxnDsl[M], mode: IDBTransactionMode, stores: js.Array[String]) {
-
-      def apply[A](f: TxnDsl[M] => Txn[M, A]): AsyncCallback[A] = {
-        val x = CallbackTo.pure(f(txnDsl))
-        sync(_ => x)
-      }
-
-      def sync[A](dslCB: TxnDsl[M] => CallbackTo[Txn[M, A]]): AsyncCallback[A] = {
-
-        @inline def startRawTxn(complete: Try[Unit] => Callback) = {
-          val txn = raw.transaction(stores, mode)
-
-          txn.onerror = event => {
-            complete(Failure(Error(event))).runNow()
-          }
-
-          txn.oncomplete = complete(success_).toJsFn1
-
-          txn
-        }
-
-        for {
-          dsl <- dslCB(txnDsl).asAsyncCallback
-
-          (awaitTxnCompletion, complete) <- AsyncCallback.promise[Unit].asAsyncCallback
-
-          result <- AsyncCallback.suspend {
-            val txn = startRawTxn(complete)
-            interpretTxn(txn, dsl)
-          }
-
-          _ <- awaitTxnCompletion
-
-        } yield result
-      }
-
-      def async[A](dsl: TxnDsl[M] => AsyncCallback[Txn[M, A]]): AsyncCallback[A] =
-        // Note: This is safer than it looks.
-        //       1) This is `Dsl => AsyncCallback[Txn[A]]`
-        //          and not `Dsl => Txn[AsyncCallback[A]]`
-        //       2) Everything within Txn is still synchronous and lawful
-        //       3) Only one transaction is created (i.e. only one call to `apply`)
-        dsl(txnDsl).flatMap(txnA => apply(_ => txnA))
-
-    } // TxnStep2
+    def transactionRW: RunTxnDsl1[RW] =
+      new RunTxnDsl1(raw, TxnDslRW, IDBTransactionMode.readwrite)
 
     // Convenience methods
 
@@ -240,8 +190,6 @@ object IndexedDb {
 
   } // class Database
 
-  // ===================================================================================================================
-
   final class ObjectStore[K, V](val defn: ObjectStoreDef.Sync[K, V]) {
     import defn.{keyCodec, valueCodec}
 
@@ -274,6 +222,59 @@ object IndexedDb {
 
     def clear: Txn[RW, Unit] =
       TxnStep.StoreClear(this)
+  }
+
+  // ===================================================================================================================
+  // DSLs
+
+  final class RunTxnDsl1[M <: TxnMode] private[IndexedDb](raw: IDBDatabase, txnDsl: TxnDsl[M], mode: IDBTransactionMode) {
+    def apply(stores: ObjectStoreDef[_, _]*): RunTxnDsl2[M] =
+      new RunTxnDsl2(raw, txnDsl, mode, mkStoreArray(stores))
+  }
+
+  final class RunTxnDsl2[M <: TxnMode] private[IndexedDb](raw: IDBDatabase, txnDsl: TxnDsl[M], mode: IDBTransactionMode, stores: js.Array[String]) {
+
+    def apply[A](f: TxnDsl[M] => Txn[M, A]): AsyncCallback[A] = {
+      val x = CallbackTo.pure(f(txnDsl))
+      sync(_ => x)
+    }
+
+    def sync[A](dslCB: TxnDsl[M] => CallbackTo[Txn[M, A]]): AsyncCallback[A] = {
+
+      @inline def startRawTxn(complete: Try[Unit] => Callback) = {
+        val txn = raw.transaction(stores, mode)
+
+        txn.onerror = event => {
+          complete(Failure(Error(event))).runNow()
+        }
+
+        txn.oncomplete = complete(success_).toJsFn1
+
+        txn
+      }
+
+      for {
+        dsl <- dslCB(txnDsl).asAsyncCallback
+
+        (awaitTxnCompletion, complete) <- AsyncCallback.promise[Unit].asAsyncCallback
+
+        result <- AsyncCallback.suspend {
+          val txn = startRawTxn(complete)
+          interpretTxn(txn, dsl)
+        }
+
+        _ <- awaitTxnCompletion
+
+      } yield result
+    }
+
+    def async[A](dsl: TxnDsl[M] => AsyncCallback[Txn[M, A]]): AsyncCallback[A] =
+      // Note: This is safer than it looks.
+      //       1) This is `Dsl => AsyncCallback[Txn[A]]`
+      //          and not `Dsl => Txn[AsyncCallback[A]]`
+      //       2) Everything within Txn is still synchronous and lawful
+      //       3) Only one transaction is created (i.e. only one call to `apply`)
+      dsl(txnDsl).flatMap(txnA => apply(_ => txnA))
   }
 
   // ===================================================================================================================
