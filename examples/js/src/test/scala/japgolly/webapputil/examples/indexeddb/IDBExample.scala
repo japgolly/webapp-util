@@ -6,8 +6,9 @@ import japgolly.webapputil.boopickle._
 import japgolly.webapputil.indexeddb.IndexedDb
 import java.util.UUID
 
-object IndexedDbExample {
+object IDBExample {
 
+  // ===================================================================================
   // Firstly, let's setup our dependencies.
 
   // 1) We need an instance of `window.indexeddb`
@@ -24,7 +25,7 @@ object IndexedDbExample {
   // 4) We need an encryption key
   val encKey = BinaryData.fromStringAsUtf8("this is my secret key, wow!")
 
-  // Done!
+  // ===================================================================================
 
   // Now let's create same sample data to use
   val bobId  = PersonId(UUID.fromString("174b625b-9057-4d64-a92e-dee2fad89d27"))
@@ -34,11 +35,14 @@ object IndexedDbExample {
   def examples: AsyncCallback[Unit] =
     for {
       enc  <- encryptionEngine(encKey) // initialise our encryption
-      p     = IndexedDbProtocols(enc)  // initialise our protocols
+      p     = IDBExampleProtocols(enc) // initialise our protocols
       db   <- p.open(idb)              // open and initialise the DB
 
       // ===============================================================================
       // Example 1: Simple usage
+      //
+      // All encoding, data compression, and encryption is handled automatically via
+      // the `people` store.
 
       _    <- db.put(p.people)(bob.id, bob) // save a Person instance
       bob2 <- db.get(p.people)(bob.id)      // load a Person instance

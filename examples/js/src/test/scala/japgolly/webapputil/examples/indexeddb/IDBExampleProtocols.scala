@@ -5,17 +5,9 @@ import japgolly.scalajs.react.{AsyncCallback, Callback}
 import japgolly.webapputil.binary._
 import japgolly.webapputil.boopickle._
 import japgolly.webapputil.indexeddb._
-import java.util.UUID
 
-// Let's say these are the data types we want to store in IndexedDb...
-final case class PersonId(value: UUID)
-final case class Person(id: PersonId, name: String, age: Int)
-
-// Our protocols API.
-//
-// This is all that the rest of our example app will see.
-trait IndexedDbProtocols {
-  import IndexedDbProtocols._
+trait IDBExampleProtocols {
+  import IDBExampleProtocols.{dbName, version}
 
   // Opens a connection to the IndexedDB database
   final def open(idb: IndexedDb): AsyncCallback[IndexedDb.Database] =
@@ -34,7 +26,8 @@ trait IndexedDbProtocols {
   val pointsPending: ObjectStoreDef.Sync[PersonId, Int]
 }
 
-object IndexedDbProtocols {
+// =====================================================================================
+object IDBExampleProtocols {
 
   // The name of our IndexedDB database
   val dbName = IndexedDb.DatabaseName("demo")
@@ -44,7 +37,7 @@ object IndexedDbProtocols {
 
   // Here we'll define how to covert from our data types to IndexedDB values and back.
   // We'll just define the binary formats, compression and encryption come later.
-  private[IndexedDbProtocols] object Picklers {
+  private[IDBExampleProtocols] object Picklers {
     import SafePickler.ConstructionHelperImplicits._
 
     // This is a binary codec using the Boopickle library
@@ -88,8 +81,8 @@ object IndexedDbProtocols {
   //      We could've asked for a Compression instance instead but in this example,
   //      we'll opt to configure the compression here in a static manner.
   //
-  def apply(encryption: Encryption)(implicit pako: Pako): IndexedDbProtocols =
-    new IndexedDbProtocols {
+  def apply(encryption: Encryption)(implicit pako: Pako): IDBExampleProtocols =
+    new IDBExampleProtocols {
       import Picklers._
 
       // Here we configure our compression preferences:
