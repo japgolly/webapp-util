@@ -418,7 +418,8 @@ object Build {
         val name      = path.replace("src/test/scala/japgolly/webapputil/examples", "...")
         val nameSpan  = Seq(InlineCode("text", Seq(CodeSpan(name))), Text(":"))
 
-        BlockSequence(Paragraph(nameSpan), codeBlock)
+        // BlockSequence(Paragraph(nameSpan), codeBlock)
+        codeBlock
       }
     }
 
