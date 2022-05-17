@@ -114,6 +114,10 @@ object Build {
 
   lazy val root = project
     .in(file("."))
+    .settings(
+      name := "webapp-util",
+      crossScalaVersions := Nil,
+    )
     .configure(commonSettings.jvm, preventPublication)
     .aggregate(
       coreBoopickleJS,
