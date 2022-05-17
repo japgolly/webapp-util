@@ -62,7 +62,7 @@
         
         <ul class="nav-list">
           <li class="level1"><a href="#models">Models</a></li>
-          <li class="level1"><a href="#protocols">Protocols</a></li>
+          <li class="level1"><a href="#stores">Stores</a></li>
           <li class="level1"><a href="#usage">Usage</a></li>
           <li class="level1"><a href="#testing">Testing</a></li>
         </ul>
@@ -87,9 +87,9 @@
 </span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Person</span><span>(</span><span class="identifier">id</span><span>: </span><span class="type-name">PersonId</span><span>, </span><span class="identifier">name</span><span>: </span><span class="type-name">String</span><span>, </span><span class="identifier">age</span><span>: </span><span class="type-name">Int</span><span>)
 </span></code></pre>
         
-        <h2 id="protocols" class="section"><a class="anchor-link left" href="#protocols"><i class="icofont-laika">&#xef71;</i></a>Protocols</h2>
-        <p>Now we&#39;ll define our IndexedDB protocols and demonstrate some nice features like
-        easy-to-use data compression and encryption.</p>
+        <h2 id="stores" class="section"><a class="anchor-link left" href="#stores"><i class="icofont-laika">&#xef71;</i></a>Stores</h2>
+        <p>Now we&#39;ll define our IndexedDB stores (like DB tables) and demonstrate some nice
+        features like data compression and encryption.</p>
         <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">indexeddb</span><span>
 
 </span><span class="keyword">import</span><span> </span><span class="identifier">boopickle</span><span>.</span><span class="type-name">DefaultBasic</span><span>.</span><span class="identifier">_</span><span>
@@ -98,12 +98,9 @@
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">boopickle</span><span>.</span><span class="identifier">_</span><span>
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">indexeddb</span><span>.</span><span class="identifier">_</span><span>
 
-</span><span class="keyword">trait</span><span> </span><span class="type-name">IDBExampleProtocols</span><span> {
-  </span><span class="keyword">import</span><span> </span><span class="type-name">IDBExampleProtocols</span><span>.{</span><span class="identifier">dbName</span><span>, </span><span class="identifier">version</span><span>}
-
-  </span><span class="comment">// Opens a connection to the IndexedDB database
-</span><span>  </span><span class="keyword">final</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">open</span><span>(</span><span class="identifier">idb</span><span>: </span><span class="type-name">IndexedDb</span><span>): </span><span class="type-name">AsyncCallback</span><span>[</span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">Database</span><span>] =
-    </span><span class="identifier">idb</span><span>.</span><span class="identifier">open</span><span>(</span><span class="identifier">dbName</span><span>, </span><span class="identifier">version</span><span>)(</span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">OpenCallbacks</span><span>(</span><span class="identifier">onUpgradeNeeded</span><span>))
+</span><span class="comment">// Our example IndexedDB&#39;s stores (like DB tables)
+</span><span class="keyword">trait</span><span> </span><span class="type-name">IDBExampleStores</span><span> {
+  </span><span class="keyword">import</span><span> </span><span class="type-name">IDBExampleStores</span><span>.{</span><span class="identifier">dbName</span><span>, </span><span class="identifier">version</span><span>}
 
   </span><span class="comment">// Initialises or upgrades the IndexedDB database
 </span><span>  </span><span class="keyword">protected</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">onUpgradeNeeded</span><span>(</span><span class="identifier">c</span><span>: </span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">VersionChange</span><span>): </span><span class="type-name">Callback</span><span>
@@ -116,10 +113,14 @@
   </span><span class="comment">// We&#39;ll also create two separate stores to later demonstrate how to use transactions
 </span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">pointsEarned</span><span> : </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Int</span><span>]
   </span><span class="keyword">val</span><span> </span><span class="identifier">pointsPending</span><span>: </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Int</span><span>]
+
+  </span><span class="comment">// Convenience function to open a connection to the IndexedDB database
+</span><span>  </span><span class="keyword">final</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">open</span><span>(</span><span class="identifier">idb</span><span>: </span><span class="type-name">IndexedDb</span><span>): </span><span class="type-name">AsyncCallback</span><span>[</span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">Database</span><span>] =
+    </span><span class="identifier">idb</span><span>.</span><span class="identifier">open</span><span>(</span><span class="identifier">dbName</span><span>, </span><span class="identifier">version</span><span>)(</span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">OpenCallbacks</span><span>(</span><span class="identifier">onUpgradeNeeded</span><span>))
 }
 
 </span><span class="comment">// =====================================================================================
-</span><span class="keyword">object</span><span> </span><span class="type-name">IDBExampleProtocols</span><span> {
+</span><span class="keyword">object</span><span> </span><span class="type-name">IDBExampleStores</span><span> {
 
   </span><span class="comment">// The name of our IndexedDB database
 </span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">dbName</span><span> = </span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">DatabaseName</span><span>(</span><span class="string-literal">&quot;demo&quot;</span><span>)
@@ -129,7 +130,7 @@
 
   </span><span class="comment">// Here we&#39;ll define how to convert from our data types to IndexedDB values and back.
 </span><span>  </span><span class="comment">// We&#39;ll just define the binary formats, compression and encryption come later.
-</span><span>  </span><span class="keyword">private</span><span>[</span><span class="type-name">IDBExampleProtocols</span><span>] </span><span class="keyword">object</span><span> </span><span class="type-name">Picklers</span><span> {
+</span><span>  </span><span class="keyword">private</span><span>[</span><span class="type-name">IDBExampleStores</span><span>] </span><span class="keyword">object</span><span> </span><span class="type-name">Picklers</span><span> {
     </span><span class="keyword">import</span><span> </span><span class="type-name">SafePickler</span><span>.</span><span class="type-name">ConstructionHelperImplicits</span><span>.</span><span class="identifier">_</span><span>
 
     </span><span class="comment">// This is a binary codec using the Boopickle library
@@ -161,24 +162,20 @@
 </span><span>                                                  </span><span class="comment">//   a bit of extra integrity.
 </span><span>  }
 
-  </span><span class="comment">// This is how we create an instance.
+  </span><span class="comment">// This is how we finally create an IDBExampleStores instance.
 </span><span>  </span><span class="comment">//
-</span><span>  </span><span class="comment">// We require two things to create an instance,
+</span><span>  </span><span class="comment">// @param encryption A means of binary encryption and decryption.
+</span><span>  </span><span class="comment">//                   The encryption key isn&#39;t provided directly, it will be in the
+</span><span>  </span><span class="comment">//                   Encryption instance.
 </span><span>  </span><span class="comment">//
-</span><span>  </span><span class="comment">//   1) A means of binary encryption and decryption.
-</span><span>  </span><span class="comment">//      The encryption key isn&#39;t provided directly, it will be in the Encryption
-</span><span>  </span><span class="comment">//      instance.
+</span><span>  </span><span class="comment">// @param pako An instance of Pako, a JS zlib/compression library.
 </span><span>  </span><span class="comment">//
-</span><span>  </span><span class="comment">//   2) An instance of Pako, a JS zlib/compression library.
-</span><span>  </span><span class="comment">//      We could&#39;ve asked for a Compression instance instead but in this example,
-</span><span>  </span><span class="comment">//      we&#39;ll opt to configure the compression from within, in a static manner.
-</span><span>  </span><span class="comment">//
-</span><span>  </span><span class="keyword">def</span><span> </span><span class="declaration-name">apply</span><span>(</span><span class="identifier">encryption</span><span>: </span><span class="type-name">Encryption</span><span>)(</span><span class="keyword">implicit</span><span> </span><span class="identifier">pako</span><span>: </span><span class="type-name">Pako</span><span>): </span><span class="type-name">IDBExampleProtocols</span><span> =
-    </span><span class="keyword">new</span><span> </span><span class="type-name">IDBExampleProtocols</span><span> {
+</span><span>  </span><span class="keyword">def</span><span> </span><span class="declaration-name">apply</span><span>(</span><span class="identifier">encryption</span><span>: </span><span class="type-name">Encryption</span><span>)(</span><span class="keyword">implicit</span><span> </span><span class="identifier">pako</span><span>: </span><span class="type-name">Pako</span><span>): </span><span class="type-name">IDBExampleStores</span><span> =
+    </span><span class="keyword">new</span><span> </span><span class="type-name">IDBExampleStores</span><span> {
       </span><span class="keyword">import</span><span> </span><span class="type-name">Picklers</span><span>.</span><span class="identifier">_</span><span>
 
       </span><span class="comment">// Here we configure our compression preferences:
-</span><span>      </span><span class="comment">//   - maximum compression (i.e. set compression level to 9)
+</span><span>      </span><span class="comment">//   - use maximum compression (i.e. set compression level to 9)
 </span><span>      </span><span class="comment">//   - opt-out of using zlib headers
 </span><span>      </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">compression</span><span>: </span><span class="type-name">Compression</span><span> =
         </span><span class="type-name">Compression</span><span>.</span><span class="type-name">ViaPako</span><span>.</span><span class="identifier">maxWithoutHeaders</span><span>
@@ -261,16 +258,16 @@
   </span><span class="comment">// 4) We need an encryption key
 </span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">encKey</span><span> = </span><span class="type-name">BinaryData</span><span>.</span><span class="identifier">fromStringAsUtf8</span><span>(</span><span class="string-literal">&quot;!&quot;</span><span> * </span><span class="number-literal">32</span><span>)
 
-  </span><span class="comment">// Next, let&#39;s create same sample data to use
+  </span><span class="comment">// Next, let&#39;s create some sample data
 </span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">bobId</span><span>  = </span><span class="type-name">PersonId</span><span>(</span><span class="type-name">UUID</span><span>.</span><span class="identifier">fromString</span><span>(</span><span class="string-literal">&quot;174b625b-9057-4d64-a92e-dee2fad89d27&quot;</span><span>))
   </span><span class="keyword">val</span><span> </span><span class="identifier">bob</span><span>    = </span><span class="type-name">Person</span><span>(</span><span class="identifier">bobId</span><span>, </span><span class="string-literal">&quot;Bob Loblaw&quot;</span><span>, </span><span class="number-literal">100</span><span>)
 
-  </span><span class="comment">// And now we arrive at our examples:
+  </span><span class="comment">// Now, we arrive at our examples:
 </span><span>  </span><span class="keyword">def</span><span> </span><span class="declaration-name">examples</span><span>: </span><span class="type-name">AsyncCallback</span><span>[</span><span class="type-name">Unit</span><span>] =
     </span><span class="keyword">for</span><span> {
       </span><span class="identifier">enc</span><span>  &lt;- </span><span class="identifier">encryptionEngine</span><span>(</span><span class="identifier">encKey</span><span>) </span><span class="comment">// initialise our encryption
-</span><span>      </span><span class="identifier">p</span><span>     = </span><span class="type-name">IDBExampleProtocols</span><span>(</span><span class="identifier">enc</span><span>) </span><span class="comment">// initialise our protocols
-</span><span>      </span><span class="identifier">db</span><span>   &lt;- </span><span class="identifier">p</span><span>.</span><span class="identifier">open</span><span>(</span><span class="identifier">idb</span><span>)              </span><span class="comment">// open and initialise the DB
+</span><span>      </span><span class="identifier">s</span><span>     = </span><span class="type-name">IDBExampleStores</span><span>(</span><span class="identifier">enc</span><span>)    </span><span class="comment">// initialise our stores
+</span><span>      </span><span class="identifier">db</span><span>   &lt;- </span><span class="identifier">s</span><span>.</span><span class="identifier">open</span><span>(</span><span class="identifier">idb</span><span>)              </span><span class="comment">// open and initialise the DB
 </span><span>
       </span><span class="comment">// ===============================================================================
 </span><span>      </span><span class="comment">// Example 1: Simple usage
@@ -278,8 +275,8 @@
 </span><span>      </span><span class="comment">// All encoding, data compression, and encryption is handled automatically via
 </span><span>      </span><span class="comment">// the `people` store.
 </span><span>
-      </span><span class="identifier">_</span><span>    &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">put</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="identifier">bob</span><span>) </span><span class="comment">// save a Person instance
-</span><span>      </span><span class="identifier">bob2</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">get</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>)      </span><span class="comment">// load a Person instance
+      </span><span class="identifier">_</span><span>    &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">put</span><span>(</span><span class="identifier">s</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="identifier">bob</span><span>) </span><span class="comment">// save a Person instance
+</span><span>      </span><span class="identifier">bob2</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">get</span><span>(</span><span class="identifier">s</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>)      </span><span class="comment">// load a Person instance
 </span><span>      </span><span class="identifier">_</span><span>     = </span><span class="identifier">assert</span><span>(</span><span class="identifier">bob2</span><span> == </span><span class="type-name">Some</span><span>(</span><span class="identifier">bob</span><span>))
 
       </span><span class="comment">// ===============================================================================
@@ -291,15 +288,20 @@
 </span><span>      </span><span class="comment">// allow bugs if another instance of your app (eg. another browser tab or a web
 </span><span>      </span><span class="comment">// worker) changes the database between the two transactions.
 </span><span>      </span><span class="comment">//
-</span><span>      </span><span class="comment">// DSL exists for working within a transaction, however due to IndexedDB
-</span><span>      </span><span class="comment">// constraints no arbitrary async processing can occur mid-transaction.
+</span><span>      </span><span class="comment">// DSL exists for working within a transaction however, due to constraints in
+</span><span>      </span><span class="comment">// IndexedDB itself, no arbitrary async processing can occur mid-transaction.
 </span><span>      </span><span class="comment">// We&#39;re using compression and encryption in this demo, both of which are async
 </span><span>      </span><span class="comment">// and by necessity, must be performed outside of an IndexedDB transaction.
+</span><span>      </span><span class="comment">// In our example above, a transaction is opened and closed automatically on both
+</span><span>      </span><span class="comment">//  db.put() and db.get(). Thus modification via get and put wouldn&#39;t be atomic.
 </span><span>      </span><span class="comment">//
-</span><span>      </span><span class="comment">// Here we&#39;ll use db.atomic, which uses db.compareAndSet under-the-hood to
-</span><span>      </span><span class="comment">// perform our operation atomically, despite its cross-transactional nature.
+</span><span>      </span><span class="comment">// Here we&#39;ll use db.atomic() to modify a person atomically, despite the necessity
+</span><span>      </span><span class="comment">// for multiple IDB transactions. Under-the-hood, db.atomic() will call
+</span><span>      </span><span class="comment">// db.compareAndSet() which is able to detect when external changes to the DB
+</span><span>      </span><span class="comment">// occur, automatically retry, and only make changes when we&#39;ve detected it&#39;s
+</span><span>      </span><span class="comment">// safe to do so, and we know they&#39;re correct.
 </span><span>
-      </span><span class="identifier">_</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">atomic</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>).</span><span class="identifier">modify</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>)(</span><span class="identifier">x</span><span> =&gt; </span><span class="identifier">x</span><span>.</span><span class="identifier">copy</span><span>(</span><span class="identifier">age</span><span> = </span><span class="identifier">x</span><span>.</span><span class="identifier">age</span><span> + </span><span class="number-literal">1</span><span>))
+      </span><span class="identifier">_</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">atomic</span><span>(</span><span class="identifier">s</span><span>.</span><span class="identifier">people</span><span>).</span><span class="identifier">modify</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>)(</span><span class="identifier">x</span><span> =&gt; </span><span class="identifier">x</span><span>.</span><span class="identifier">copy</span><span>(</span><span class="identifier">age</span><span> = </span><span class="identifier">x</span><span>.</span><span class="identifier">age</span><span> + </span><span class="number-literal">1</span><span>))
 
       </span><span class="comment">// ===============================================================================
 </span><span>      </span><span class="comment">// Example 3: Transaction
@@ -307,14 +309,15 @@
 </span><span>      </span><span class="comment">// This example locks two stores into a single transaction. It atomically moves
 </span><span>      </span><span class="comment">// pending points into Bob&#39;s earned points.
 </span><span>
-      </span><span class="identifier">_</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">transactionRW</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">pointsEarned</span><span>, </span><span class="identifier">p</span><span>.</span><span class="identifier">pointsPending</span><span>) { </span><span class="identifier">txn</span><span> =&gt;
+      </span><span class="comment">// The RW here means &quot;Read/Write&quot;
+</span><span>      </span><span class="identifier">_</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">transactionRW</span><span>(</span><span class="identifier">s</span><span>.</span><span class="identifier">pointsEarned</span><span>, </span><span class="identifier">s</span><span>.</span><span class="identifier">pointsPending</span><span>) { </span><span class="identifier">txn</span><span> =&gt;
         </span><span class="keyword">for</span><span> {
-          </span><span class="identifier">pointsPending</span><span> &lt;- </span><span class="identifier">txn</span><span>.</span><span class="identifier">objectStore</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">pointsPending</span><span>)
-          </span><span class="identifier">pointsEarned</span><span>  &lt;- </span><span class="identifier">txn</span><span>.</span><span class="identifier">objectStore</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">pointsEarned</span><span>)
-          </span><span class="identifier">m</span><span>             &lt;- </span><span class="identifier">pointsEarned</span><span> .</span><span class="identifier">get</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>).</span><span class="identifier">map</span><span>(</span><span class="identifier">_</span><span>.</span><span class="identifier">getOrElse</span><span>(</span><span class="number-literal">0</span><span>))
-          </span><span class="identifier">n</span><span>             &lt;- </span><span class="identifier">pointsPending</span><span>.</span><span class="identifier">get</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>).</span><span class="identifier">map</span><span>(</span><span class="identifier">_</span><span>.</span><span class="identifier">getOrElse</span><span>(</span><span class="number-literal">0</span><span>))
-          </span><span class="identifier">_</span><span>             &lt;- </span><span class="identifier">pointsEarned</span><span> .</span><span class="identifier">put</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="identifier">m</span><span> + </span><span class="identifier">n</span><span>)
-          </span><span class="identifier">_</span><span>             &lt;- </span><span class="identifier">pointsPending</span><span>.</span><span class="identifier">put</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="number-literal">0</span><span>)
+          </span><span class="identifier">pending</span><span> &lt;- </span><span class="identifier">txn</span><span>.</span><span class="identifier">objectStore</span><span>(</span><span class="identifier">s</span><span>.</span><span class="identifier">pointsPending</span><span>)
+          </span><span class="identifier">earned</span><span>  &lt;- </span><span class="identifier">txn</span><span>.</span><span class="identifier">objectStore</span><span>(</span><span class="identifier">s</span><span>.</span><span class="identifier">pointsEarned</span><span>)
+          </span><span class="identifier">m</span><span>       &lt;- </span><span class="identifier">earned</span><span> .</span><span class="identifier">get</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>).</span><span class="identifier">map</span><span>(</span><span class="identifier">_</span><span> </span><span class="identifier">getOrElse</span><span> </span><span class="number-literal">0</span><span>)
+          </span><span class="identifier">n</span><span>       &lt;- </span><span class="identifier">pending</span><span>.</span><span class="identifier">get</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>).</span><span class="identifier">map</span><span>(</span><span class="identifier">_</span><span> </span><span class="identifier">getOrElse</span><span> </span><span class="number-literal">0</span><span>)
+          </span><span class="identifier">_</span><span>       &lt;- </span><span class="identifier">earned</span><span> .</span><span class="identifier">put</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="identifier">m</span><span> + </span><span class="identifier">n</span><span>)
+          </span><span class="identifier">_</span><span>       &lt;- </span><span class="identifier">pending</span><span>.</span><span class="identifier">put</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="number-literal">0</span><span>)
         } </span><span class="keyword">yield</span><span> ()
       }
 
@@ -345,18 +348,18 @@
   </span><span class="keyword">private</span><span> </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">idb</span><span>: </span><span class="type-name">IndexedDb</span><span> = </span><span class="type-name">FakeIndexedDb</span><span>()
   </span><span class="keyword">private</span><span> </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">pako</span><span>: </span><span class="type-name">Pako</span><span> = </span><span class="type-name">Pako</span><span>.</span><span class="identifier">global</span><span>
 
-  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">encKey</span><span>    = </span><span class="type-name">BinaryData</span><span>.</span><span class="identifier">fromStringAsUtf8</span><span>(</span><span class="string-literal">&quot;?&quot;</span><span> * </span><span class="number-literal">32</span><span>)
-  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">protocols</span><span> = </span><span class="type-name">TestEncryption</span><span>(</span><span class="identifier">encKey</span><span>).</span><span class="identifier">map</span><span>(</span><span class="type-name">IDBExampleProtocols</span><span>(</span><span class="identifier">_</span><span>))
-  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">bob</span><span>       = </span><span class="type-name">Person</span><span>(</span><span class="type-name">PersonId</span><span>(</span><span class="type-name">UUID</span><span>.</span><span class="identifier">randomUUID</span><span>()), </span><span class="string-literal">&quot;Bob Loblaw&quot;</span><span>, </span><span class="number-literal">100</span><span>)
+  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">encKey</span><span> = </span><span class="type-name">BinaryData</span><span>.</span><span class="identifier">fromStringAsUtf8</span><span>(</span><span class="string-literal">&quot;?&quot;</span><span> * </span><span class="number-literal">32</span><span>)
+  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">stores</span><span> = </span><span class="type-name">TestEncryption</span><span>(</span><span class="identifier">encKey</span><span>).</span><span class="identifier">map</span><span>(</span><span class="type-name">IDBExampleStores</span><span>(</span><span class="identifier">_</span><span>))
+  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">bob</span><span>    = </span><span class="type-name">Person</span><span>(</span><span class="type-name">PersonId</span><span>(</span><span class="type-name">UUID</span><span>.</span><span class="identifier">randomUUID</span><span>()), </span><span class="string-literal">&quot;Bob Loblaw&quot;</span><span>, </span><span class="number-literal">100</span><span>)
 
   </span><span class="keyword">override</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">tests</span><span> = </span><span class="type-name">Tests</span><span> {
 
     </span><span class="string-literal">&quot;saveAndReload&quot;</span><span> - </span><span class="identifier">asyncTest</span><span>() {
       </span><span class="keyword">for</span><span> {
-        </span><span class="identifier">p</span><span>    &lt;- </span><span class="identifier">protocols</span><span>
-        </span><span class="identifier">db</span><span>   &lt;- </span><span class="type-name">TestIndexedDb</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)
-        </span><span class="identifier">_</span><span>    &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">put</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="identifier">bob</span><span>) </span><span class="comment">// save a Person instance
-</span><span>        </span><span class="identifier">bob2</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">get</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>)      </span><span class="comment">// load a Person instance
+        </span><span class="identifier">s</span><span>    &lt;- </span><span class="identifier">stores</span><span>
+        </span><span class="identifier">db</span><span>   &lt;- </span><span class="type-name">TestIndexedDb</span><span>(</span><span class="identifier">s</span><span>.</span><span class="identifier">people</span><span>)
+        </span><span class="identifier">_</span><span>    &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">put</span><span>(</span><span class="identifier">s</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="identifier">bob</span><span>) </span><span class="comment">// save a Person instance
+</span><span>        </span><span class="identifier">bob2</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">get</span><span>(</span><span class="identifier">s</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>)      </span><span class="comment">// load a Person instance
 </span><span>      } </span><span class="keyword">yield</span><span> {
         </span><span class="identifier">assert</span><span>(</span><span class="identifier">bob2</span><span> == </span><span class="type-name">Some</span><span>(</span><span class="identifier">bob</span><span>))
       }
