@@ -200,7 +200,7 @@ object IndexedDbTest extends TestSuite {
 
       def newTask(db: IndexedDb.Database, n: Int) = {
         val blockOnce = AsyncCallback.unit.delayMs(n).memo()
-        db.modifyAsync(store)(k)(s => blockOnce.map(_ => s + "," + n))
+        db.atomic(store).modifyAsync(k)(s => blockOnce.map(_ => s + "," + n))
       }
 
       for {

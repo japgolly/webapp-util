@@ -136,6 +136,9 @@ object IndexedDb {
 
   final class Database(raw: IDBDatabase, onClose: Callback) {
 
+    def atomic[K, V](store: ObjectStoreDef.Async[K, V]): AtomicAsyncDsl[K, V] =
+      new AtomicAsyncDsl(this, store)
+
     def close: Callback = {
       val actuallyClose =
         Callback(raw.close()).attempt
@@ -148,32 +151,6 @@ object IndexedDb {
 
     def compareAndSet(stores: ObjectStoreDef[_, _]*): CasDsl1 =
       new CasDsl1(this, stores)
-
-    /** Performs an async modification on a store value.
-      *
-      * This only modifies an existing value. Use [[modifyAsyncOption()]] to upsert and/or delete values.
-      *
-      * This uses [[compareAndSet()]] for atomicity and thread-safety.
-      *
-      * @return If the value exists, this returns the previous and updated values
-      */
-    def modifyAsync[K, V](store: ObjectStoreDef.Async[K, V])(key: K)(f: V => AsyncCallback[V]): AsyncCallback[Option[(V, V)]] =
-      compareAndSet(store)
-        .getValueAsync(store)(key)
-        .mapAsync(AsyncCallback.traverseOption(_)(v1 => f(v1).map((v1, _))))
-        .putResultWhenDefinedBy(store)(key, _.map(_._2))
-
-    /** Performs an async modification on an optional store value.
-      *
-      * This uses [[compareAndSet()]] for atomicity and thread-safety.
-      *
-      * @return The previous and updated values
-      */
-    def modifyAsyncOption[K, V](store: ObjectStoreDef.Async[K, V])(key: K)(f: Option[V] => AsyncCallback[Option[V]]): AsyncCallback[(Option[V], Option[V])] =
-      compareAndSet(store)
-        .getValueAsync(store)(key)
-        .mapAsync { o1 => f(o1).map((o1, _)) }
-        .putOrDeleteResultBy(store)(key, _._2)
 
     def transactionRO: RunTxnDsl1[RO] =
       new RunTxnDsl1(raw, TxnDslRO, IDBTransactionMode.readonly)
@@ -302,6 +279,57 @@ object IndexedDb {
 
   // ===================================================================================================================
   // DSLs
+
+  final class AtomicAsyncDsl[K, V](db: Database, store: ObjectStoreDef.Async[K, V]) {
+
+    /** Performs an async modification on a store value.
+      *
+      * This only modifies an existing value. Use [[modifyAsyncOption()]] to upsert and/or delete values.
+      *
+      * This uses [[compareAndSet()]] for atomicity and thread-safety.
+      *
+      * @return If the value exists, this returns the previous and updated values
+      */
+    def modify(key: K)(f: V => V): AsyncCallback[Option[(V, V)]] =
+      modifyAsync(key)(v => AsyncCallback.pure(f(v)))
+
+    /** Performs an async modification on a store value.
+      *
+      * This only modifies an existing value. Use [[modifyAsyncOption()]] to upsert and/or delete values.
+      *
+      * This uses [[compareAndSet()]] for atomicity and thread-safety.
+      *
+      * @return If the value exists, this returns the previous and updated values
+      */
+    def modifyAsync(key: K)(f: V => AsyncCallback[V]): AsyncCallback[Option[(V, V)]] =
+      db
+        .compareAndSet(store)
+        .getValueAsync(store)(key)
+        .mapAsync(AsyncCallback.traverseOption(_)(v1 => f(v1).map((v1, _))))
+        .putResultWhenDefinedBy(store)(key, _.map(_._2))
+
+    /** Performs an async modification on an optional store value.
+      *
+      * This uses [[compareAndSet()]] for atomicity and thread-safety.
+      *
+      * @return The previous and updated values
+      */
+    def modifyOption(key: K)(f: Option[V] => Option[V]): AsyncCallback[(Option[V], Option[V])] =
+      modifyOptionAsync(key)(v => AsyncCallback.pure(f(v)))
+
+    /** Performs an async modification on an optional store value.
+      *
+      * This uses [[compareAndSet()]] for atomicity and thread-safety.
+      *
+      * @return The previous and updated values
+      */
+    def modifyOptionAsync(key: K)(f: Option[V] => AsyncCallback[Option[V]]): AsyncCallback[(Option[V], Option[V])] =
+      db
+        .compareAndSet(store)
+        .getValueAsync(store)(key)
+        .mapAsync { o1 => f(o1).map((o1, _)) }
+        .putOrDeleteResultBy(store)(key, _._2)
+  }
 
   final class RunTxnDsl1[M <: TxnMode] private[IndexedDb](raw: IDBDatabase, txnDsl: TxnDsl[M], mode: IDBTransactionMode) {
     def apply(stores: ObjectStoreDef[_, _]*): RunTxnDsl2[M] =
