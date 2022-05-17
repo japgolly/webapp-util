@@ -123,8 +123,9 @@ object IndexedDb {
   }
 
   final case class VersionChange(db: DatabaseInVersionChange, oldVersion: Int, newVersion: Option[Int]) {
-    def createObjectStore[K, V](ver: Int, defn: ObjectStoreDef[K, V]): Callback =
-      db.createObjectStore(defn).when_(oldVersion < ver && newVersion.exists(_ >= ver))
+    def createObjectStore[K, V](defn: ObjectStoreDef[K, V], createdInDbVer: Int): Callback =
+      Callback.when(oldVersion < createdInDbVer && newVersion.exists(_ >= createdInDbVer))(
+        db.createObjectStore(defn))
   }
 
   final class DatabaseInVersionChange(raw: IDBDatabase) {

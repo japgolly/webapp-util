@@ -97,7 +97,7 @@ object IndexedDbTest extends TestSuite {
         closed <- AsyncCallback.barrier.asAsyncCallback
 
         db1    <- idb.open(name, 1)(c.copy(
-                    upgradeNeeded = _.createObjectStore(1, store),
+                    upgradeNeeded = _.createObjectStore(store, 1),
                     versionChange = _ => Callback.log("db1 verChg") >> verChg.complete,
                     closed        = Callback.log("db1 closing") >> closed.complete))
 
