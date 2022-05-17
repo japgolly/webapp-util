@@ -12,12 +12,12 @@ For our demo, we start with a few model classes.
 
 @:sourceFile(IDBExampleModels.scala)
 
-## Protocols
+## Stores
 
-Now we'll define our IndexedDB protocols and demonstrate some nice features like
-easy-to-use data compression and encryption.
+Now we'll define our IndexedDB stores (like DB tables) and demonstrate some nice
+features like data compression and encryption.
 
-@:sourceFile(IDBExampleProtocols.scala)
+@:sourceFile(IDBExampleStores.scala)
 
 ## Usage
 

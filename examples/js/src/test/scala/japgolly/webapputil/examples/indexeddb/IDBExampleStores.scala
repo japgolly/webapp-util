@@ -6,12 +6,9 @@ import japgolly.webapputil.binary._
 import japgolly.webapputil.boopickle._
 import japgolly.webapputil.indexeddb._
 
-trait IDBExampleProtocols {
-  import IDBExampleProtocols.{dbName, version}
-
-  // Opens a connection to the IndexedDB database
-  final def open(idb: IndexedDb): AsyncCallback[IndexedDb.Database] =
-    idb.open(dbName, version)(IndexedDb.OpenCallbacks(onUpgradeNeeded))
+// Our example IndexedDB's stores (like DB tables)
+trait IDBExampleStores {
+  import IDBExampleStores.{dbName, version}
 
   // Initialises or upgrades the IndexedDB database
   protected def onUpgradeNeeded(c: IndexedDb.VersionChange): Callback
@@ -24,10 +21,14 @@ trait IDBExampleProtocols {
   // We'll also create two separate stores to later demonstrate how to use transactions
   val pointsEarned : ObjectStoreDef.Sync[PersonId, Int]
   val pointsPending: ObjectStoreDef.Sync[PersonId, Int]
+
+  // Convenience function to open a connection to the IndexedDB database
+  final def open(idb: IndexedDb): AsyncCallback[IndexedDb.Database] =
+    idb.open(dbName, version)(IndexedDb.OpenCallbacks(onUpgradeNeeded))
 }
 
 // =====================================================================================
-object IDBExampleProtocols {
+object IDBExampleStores {
 
   // The name of our IndexedDB database
   val dbName = IndexedDb.DatabaseName("demo")
@@ -37,7 +38,7 @@ object IDBExampleProtocols {
 
   // Here we'll define how to convert from our data types to IndexedDB values and back.
   // We'll just define the binary formats, compression and encryption come later.
-  private[IDBExampleProtocols] object Picklers {
+  private[IDBExampleStores] object Picklers {
     import SafePickler.ConstructionHelperImplicits._
 
     // This is a binary codec using the Boopickle library
@@ -69,24 +70,20 @@ object IDBExampleProtocols {
                                                   //   a bit of extra integrity.
   }
 
-  // This is how we create an instance.
+  // This is how we finally create an IDBExampleStores instance.
   //
-  // We require two things to create an instance,
+  // @param encryption A means of binary encryption and decryption.
+  //                   The encryption key isn't provided directly, it will be in the
+  //                   Encryption instance.
   //
-  //   1) A means of binary encryption and decryption.
-  //      The encryption key isn't provided directly, it will be in the Encryption
-  //      instance.
+  // @param pako An instance of Pako, a JS zlib/compression library.
   //
-  //   2) An instance of Pako, a JS zlib/compression library.
-  //      We could've asked for a Compression instance instead but in this example,
-  //      we'll opt to configure the compression from within, in a static manner.
-  //
-  def apply(encryption: Encryption)(implicit pako: Pako): IDBExampleProtocols =
-    new IDBExampleProtocols {
+  def apply(encryption: Encryption)(implicit pako: Pako): IDBExampleStores =
+    new IDBExampleStores {
       import Picklers._
 
       // Here we configure our compression preferences:
-      //   - maximum compression (i.e. set compression level to 9)
+      //   - use maximum compression (i.e. set compression level to 9)
       //   - opt-out of using zlib headers
       private val compression: Compression =
         Compression.ViaPako.maxWithoutHeaders
