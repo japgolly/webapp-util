@@ -10,7 +10,6 @@ import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbtcrossproject.CrossPlugin.autoImport._
-import sbtrelease.ReleasePlugin.autoImport._
 import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
 
 object Build {
@@ -75,18 +74,15 @@ object Build {
 
   val commonSettings = ConfigureBoth(
     _.settings(
-      scalaVersion                  := Ver.scala2,
-      crossScalaVersions            := Seq(Ver.scala2, Ver.scala3),
-      libraryDependencies          ++= Seq(Dep.betterMonadicFor, Dep.kindProjector).filter(_ => scalaVersion.value startsWith "2"),
-      scalacOptions                ++= scalacCommonFlags,
-      scalacOptions                ++= scalac2Flags.filter(_ => scalaVersion.value.startsWith("2")),
-      scalacOptions                ++= scalac3Flags.filter(_ => scalaVersion.value.startsWith("3")),
-      Test / scalacOptions         --= Seq("-Ywarn-dead-code"),
-      testFrameworks                := Nil,
-      updateOptions                 := updateOptions.value.withCachedResolution(true),
-      releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-      releaseTagComment             := s"v${(ThisBuild / version).value}",
-      releaseVcsSign                := true,
+      scalaVersion          := Ver.scala2,
+      crossScalaVersions    := Seq(Ver.scala2, Ver.scala3),
+      libraryDependencies  ++= Seq(Dep.betterMonadicFor, Dep.kindProjector).filter(_ => scalaVersion.value startsWith "2"),
+      scalacOptions        ++= scalacCommonFlags,
+      scalacOptions        ++= scalac2Flags.filter(_ => scalaVersion.value.startsWith("2")),
+      scalacOptions        ++= scalac3Flags.filter(_ => scalaVersion.value.startsWith("3")),
+      Test / scalacOptions --= Seq("-Ywarn-dead-code"),
+      testFrameworks        := Nil,
+      updateOptions         := updateOptions.value.withCachedResolution(true),
     ))
 
   def testSettings = ConfigureBoth(

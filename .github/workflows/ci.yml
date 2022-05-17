@@ -9,10 +9,9 @@ on:
       - v*.*.*
 
 jobs:
+
   ci:
     runs-on: ubuntu-latest
-
-    name: Scala v${{ matrix.scala }} / Java v${{ matrix.java }}
     strategy:
       fail-fast: false
       matrix:
@@ -21,8 +20,9 @@ jobs:
             scala: 2
           - java: 11
             scala: 3
-
+    name: Scala v${{ matrix.scala }} / Java v${{ matrix.java }}
     steps:
+
       - name: Git checkout
         uses: actions/checkout@v3
 
