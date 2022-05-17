@@ -57,31 +57,31 @@ object IndexedDbTest extends TestSuite {
     }
 
     "basicAsync" - asyncTest() {
-      val store = ObjectStoreDef.Async("test", KeyCodec.int, ValueCodec.string.async)
+      val store = ObjectStoreDef.Async("test", KeyCodec.int, ValueCodec.double.async)
       for {
         db   <- TestIndexedDb(store)
-        _    <- db.add(store)(1, "hello")
+        _    <- db.add(store)(1, 123.45)
         get1 <- db.get(store)(1)
         get2 <- db.get(store)(2)
       } yield {
-        assertEq(get1, Some("hello"))
+        assertEq(get1, Some(123.45))
         assertEq(get2, None)
       }
     }
 
     "put" - asyncTest() {
-      val store = ObjectStoreDef.Sync("test", KeyCodec.int, ValueCodec.string)
+      val store = ObjectStoreDef.Sync("test", KeyCodec.int, ValueCodec.int)
       for {
         db    <- TestIndexedDb(store)
-        _     <- db.add(store)(1, "x1")
-        add2  <- db.add(store)(1, "x2").attempt
-        _     <- db.put(store)(2, "y1")
-        _     <- db.put(store)(2, "y2")
+        _     <- db.add(store)(1, 11)
+        add2  <- db.add(store)(1, 12).attempt
+        _     <- db.put(store)(2, 21)
+        _     <- db.put(store)(2, 22)
         get1  <- db.get(store)(1)
         get2  <- db.get(store)(2)
       } yield {
-        assertEq(get1, Some("x1"))
-        assertEq(get2, Some("y2"))
+        assertEq(get1, Some(11))
+        assertEq(get2, Some(22))
         assert(add2.isLeft)
         add2
       }
