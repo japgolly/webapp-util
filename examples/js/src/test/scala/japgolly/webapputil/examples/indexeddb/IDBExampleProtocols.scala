@@ -21,7 +21,7 @@ trait IDBExampleProtocols {
   // compression and encryption are async operations so we define an async object-store.
   val people: ObjectStoreDef.Async[PersonId, Person]
 
-  // We'll also create two seprate stores to later demonstrate how to use transactions.
+  // We'll also create two seprate stores to later demonstrate how to use transactions
   val pointsEarned : ObjectStoreDef.Sync[PersonId, Int]
   val pointsPending: ObjectStoreDef.Sync[PersonId, Int]
 }

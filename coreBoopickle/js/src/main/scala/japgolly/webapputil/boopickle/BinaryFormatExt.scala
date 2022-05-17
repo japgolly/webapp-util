@@ -78,7 +78,7 @@ object BinaryFormatExt {
   def pickleCompressEncrypt[A](c: Compression, e: Encryption)(implicit pickler: SafePickler[A]): BinaryFormat[A] =
     BinaryFormat.id
       .encrypt(e)  // 3. Encryption is the very last step
-      .compress(c) // 2. Here we compress the binary *before* encrypting
+      .compress(c) // 2. Compress the binary *before* encrypting
       .pickle[A]   // 1. Generate binary first
 
 }

@@ -66,7 +66,6 @@ sealed abstract class TxnDsl[M <: TxnMode] {
     suspend {
       val as = fa
       val b = cbf.newBuilder(as)
-
       if (as.isEmpty)
         pure(b.result())
       else

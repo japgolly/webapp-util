@@ -8,7 +8,6 @@ import java.util.UUID
 
 object IDBExample {
 
-  // ===================================================================================
   // Firstly, let's setup our dependencies.
 
   // 1) We need an instance of `window.indexeddb`
@@ -25,9 +24,7 @@ object IDBExample {
   // 4) We need an encryption key
   val encKey = BinaryData.fromStringAsUtf8("!" * 32)
 
-  // ===================================================================================
-
-  // Now let's create same sample data to use
+  // Next, let's create same sample data to use
   val bobId  = PersonId(UUID.fromString("174b625b-9057-4d64-a92e-dee2fad89d27"))
   val bob    = Person(bobId, "Bob Loblaw", 100)
 
@@ -77,10 +74,10 @@ object IDBExample {
         for {
           pointsPending <- txn.objectStore(p.pointsPending)
           pointsEarned  <- txn.objectStore(p.pointsEarned)
-          m             <- pointsEarned .get(bobId).map(_.getOrElse(0))
-          n             <- pointsPending.get(bobId).map(_.getOrElse(0))
-          _             <- pointsEarned .put(bobId, m + n)
-          _             <- pointsPending.put(bobId, 0)
+          m             <- pointsEarned .get(bob.id).map(_.getOrElse(0))
+          n             <- pointsPending.get(bob.id).map(_.getOrElse(0))
+          _             <- pointsEarned .put(bob.id, m + n)
+          _             <- pointsPending.put(bob.id, 0)
         } yield ()
       }
 

@@ -181,7 +181,6 @@ object IndexedDbTest extends TestSuite {
     }
 
     "cas" - asyncTest() {
-
       val ids: Vector[Int] = {
         val quantity = 100
         val longest = 200
