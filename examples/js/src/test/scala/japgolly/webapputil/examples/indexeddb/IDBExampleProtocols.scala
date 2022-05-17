@@ -21,7 +21,7 @@ trait IDBExampleProtocols {
   // compression and encryption are async operations so we define an async object-store.
   val people: ObjectStoreDef.Async[PersonId, Person]
 
-  // We'll also create two seprate stores to later demonstrate how to use transactions
+  // We'll also create two separate stores to later demonstrate how to use transactions
   val pointsEarned : ObjectStoreDef.Sync[PersonId, Int]
   val pointsPending: ObjectStoreDef.Sync[PersonId, Int]
 }
@@ -35,7 +35,7 @@ object IDBExampleProtocols {
   // The version of our combined protocols for this IndexedDB database
   val version = 1
 
-  // Here we'll define how to covert from our data types to IndexedDB values and back.
+  // Here we'll define how to convert from our data types to IndexedDB values and back.
   // We'll just define the binary formats, compression and encryption come later.
   private[IDBExampleProtocols] object Picklers {
     import SafePickler.ConstructionHelperImplicits._
@@ -64,9 +64,9 @@ object IDBExampleProtocols {
     // webapp-util and provides some additional features.
     implicit def safePicklerPerson: SafePickler[Person] =
       picklerPerson
-        .asV1(0) // this is v1.0 of our data format
-        .withMagicNumbers(0x8CF0655B, 0x5A8218EB) // add some header/footer values for
-                                                  // a bit of extra integrity.
+        .asV1(0)                                  // This is v1.0 of our data format.
+        .withMagicNumbers(0x8CF0655B, 0x5A8218EB) // Add some header/footer values for
+                                                  //   a bit of extra integrity.
   }
 
   // This is how we create an instance.
@@ -79,7 +79,7 @@ object IDBExampleProtocols {
   //
   //   2) An instance of Pako, a JS zlib/compression library.
   //      We could've asked for a Compression instance instead but in this example,
-  //      we'll opt to configure the compression here in a static manner.
+  //      we'll opt to configure the compression from within, in a static manner.
   //
   def apply(encryption: Encryption)(implicit pako: Pako): IDBExampleProtocols =
     new IDBExampleProtocols {
@@ -128,7 +128,7 @@ object IDBExampleProtocols {
         ObjectStoreDef.Sync("pointsPending", keyCodec, ValueCodec.int)
 
       override protected def onUpgradeNeeded(c: IndexedDb.VersionChange): Callback =
-        // In this example it creates our people store when the DB is first created.
+        // This is where we initialise/migrate the database.
         //
         // This is standard logic for working with IndexedDb.
         // Please google "IndexedDb upgradeneeded" for more detail.
