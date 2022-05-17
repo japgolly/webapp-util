@@ -34,10 +34,11 @@ object Txn {
 
   @inline implicit final class InvariantOps[M <: TxnMode, A](private val self: Txn[M, A]) extends AnyVal {
     import TxnStep._
-    import self.step
 
-    def flatMap[B](f: A => Txn[M, B]): Txn[M, B] =
-      Txn(FlatMap(step, f.andThen(_.step)))
+    def flatMap[N <: TxnMode, B](f: A => Txn[N, B])(implicit m: TxnMode.Merge[M, N]): Txn[m.Mode, B] = {
+      val step = FlatMap[m.Mode, A, B](m.substM(self.step), a => m.substN(f(a).step))
+      Txn(step)
+    }
 
     @inline def unless(cond: Boolean)(implicit ev: TxnStep[RO, Option[Nothing]] => Txn[M, Option[Nothing]]): Txn[M, Option[A]] =
       when(!cond)
@@ -51,9 +52,10 @@ object Txn {
     def when_(cond: Boolean)(implicit ev: TxnStep[RO, Unit] => Txn[M, Unit]): Txn[M, Unit] =
       if (cond) self.void else TxnStep.unit
 
-    def >>[B](f: Txn[M, B]): Txn[M, B] = {
-      val next = f.step
-      Txn(FlatMap[M, A, B](step, _ => next))
+    def >>[N <: TxnMode, B](f: Txn[N, B])(implicit m: TxnMode.Merge[M, N]): Txn[m.Mode, B] = {
+      val next = m.substN(f.step)
+      val step = FlatMap[m.Mode, A, B](m.substM(self.step), _ => next)
+      Txn(step)
     }
   }
 
