@@ -32,8 +32,8 @@ object IDBExample {
   def examples: AsyncCallback[Unit] =
     for {
       enc  <- encryptionEngine(encKey) // initialise our encryption
-      p     = IDBExampleProtocols(enc) // initialise our protocols
-      db   <- p.open(idb)              // open and initialise the DB
+      s     = IDBExampleStores(enc)    // initialise our stores
+      db   <- s.open(idb)              // open and initialise the DB
 
       // ===============================================================================
       // Example 1: Simple usage
@@ -41,8 +41,8 @@ object IDBExample {
       // All encoding, data compression, and encryption is handled automatically via
       // the `people` store.
 
-      _    <- db.put(p.people)(bob.id, bob) // save a Person instance
-      bob2 <- db.get(p.people)(bob.id)      // load a Person instance
+      _    <- db.put(s.people)(bob.id, bob) // save a Person instance
+      bob2 <- db.get(s.people)(bob.id)      // load a Person instance
       _     = assert(bob2 == Some(bob))
 
       // ===============================================================================
@@ -67,7 +67,7 @@ object IDBExample {
       // occur, automatically retry, and only make changes when we've detected it's
       // safe to do so, and we know they're correct.
 
-      _ <- db.atomic(p.people).modify(bob.id)(x => x.copy(age = x.age + 1))
+      _ <- db.atomic(s.people).modify(bob.id)(x => x.copy(age = x.age + 1))
 
       // ===============================================================================
       // Example 3: Transaction
@@ -76,10 +76,10 @@ object IDBExample {
       // pending points into Bob's earned points.
 
       // The RW here means "Read/Write"
-      _ <- db.transactionRW(p.pointsEarned, p.pointsPending) { txn =>
+      _ <- db.transactionRW(s.pointsEarned, s.pointsPending) { txn =>
         for {
-          pending <- txn.objectStore(p.pointsPending)
-          earned  <- txn.objectStore(p.pointsEarned)
+          pending <- txn.objectStore(s.pointsPending)
+          earned  <- txn.objectStore(s.pointsEarned)
           m       <- earned .get(bob.id).map(_ getOrElse 0)
           n       <- pending.get(bob.id).map(_ getOrElse 0)
           _       <- earned .put(bob.id, m + n)

@@ -7,8 +7,8 @@ import japgolly.webapputil.boopickle._
 import japgolly.webapputil.indexeddb._
 
 // Our example IndexedDB's stores (like DB tables)
-trait IDBExampleProtocols {
-  import IDBExampleProtocols.{dbName, version}
+trait IDBExampleStores {
+  import IDBExampleStores.{dbName, version}
 
   // Initialises or upgrades the IndexedDB database
   protected def onUpgradeNeeded(c: IndexedDb.VersionChange): Callback
@@ -28,7 +28,7 @@ trait IDBExampleProtocols {
 }
 
 // =====================================================================================
-object IDBExampleProtocols {
+object IDBExampleStores {
 
   // The name of our IndexedDB database
   val dbName = IndexedDb.DatabaseName("demo")
@@ -38,7 +38,7 @@ object IDBExampleProtocols {
 
   // Here we'll define how to convert from our data types to IndexedDB values and back.
   // We'll just define the binary formats, compression and encryption come later.
-  private[IDBExampleProtocols] object Picklers {
+  private[IDBExampleStores] object Picklers {
     import SafePickler.ConstructionHelperImplicits._
 
     // This is a binary codec using the Boopickle library
@@ -70,7 +70,7 @@ object IDBExampleProtocols {
                                                   //   a bit of extra integrity.
   }
 
-  // This is how we finally create an IDBExampleProtocols instance.
+  // This is how we finally create an IDBExampleStores instance.
   //
   // @param encryption A means of binary encryption and decryption.
   //                   The encryption key isn't provided directly, it will be in the
@@ -78,8 +78,8 @@ object IDBExampleProtocols {
   //
   // @param pako An instance of Pako, a JS zlib/compression library.
   //
-  def apply(encryption: Encryption)(implicit pako: Pako): IDBExampleProtocols =
-    new IDBExampleProtocols {
+  def apply(encryption: Encryption)(implicit pako: Pako): IDBExampleStores =
+    new IDBExampleStores {
       import Picklers._
 
       // Here we configure our compression preferences:
