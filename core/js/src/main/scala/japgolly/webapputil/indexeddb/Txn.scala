@@ -47,10 +47,10 @@ object Txn {
       when_(!cond)
 
     def when(cond: Boolean)(implicit ev: TxnStep[RO, Option[Nothing]] => Txn[M, Option[Nothing]]): Txn[M, Option[A]] =
-      if (cond) self.map(Some(_)) else TxnStep.none
+      if (cond) self.map(Some(_)) else ev(none)
 
     def when_(cond: Boolean)(implicit ev: TxnStep[RO, Unit] => Txn[M, Unit]): Txn[M, Unit] =
-      if (cond) self.void else TxnStep.unit
+      if (cond) self.void else ev(unit)
 
     def >>[N <: TxnMode, B](f: Txn[N, B])(implicit m: TxnMode.Merge[M, N]): Txn[m.Mode, B] = {
       val next = m.substN(f.step)

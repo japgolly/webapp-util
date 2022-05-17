@@ -32,7 +32,7 @@ object KeyCodec {
     string.xmap(_.toLong)(_.toString)
 
   def primative[A](name: String)(implicit ev: A => IndexedDbKey.Typed, ct: ClassTag[A]): KeyCodec[A] =
-    apply[A](IndexedDbKey(_), k => CallbackTo(
+    apply[A](a => IndexedDbKey(ev(a)), k => CallbackTo(
       (k.value: Any) match {
         case a: A => a
         case x    => throw new js.JavaScriptException(s"Invalid IDB key found. $name expected, got: $x")
