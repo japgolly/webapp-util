@@ -260,6 +260,22 @@ object IndexedDb {
     def getAllValues: Txn[RO, Vector[V]] =
       TxnStep.StoreGetAllVals(this)
 
+    def modify(key: K)(f: V => V): Txn[RW, Option[V]] =
+      get(key).flatMap {
+        case Some(v1) =>
+          val v2 = f(v1)
+          put(key, v2).map(_ => Some(v2))
+        case None =>
+          TxnDslRW.none
+      }
+
+    def modifyOption(key: K)(f: Option[V] => Option[V]): Txn[RW, Option[V]] =
+      for {
+        o1 <- get(key)
+        o2  = f(o1)
+        _  <- putOrDelete(key, o2)
+      } yield o2
+
     /** aka upsert */
     def put(key: K, value: V): Txn[RW, Unit] = {
       val k = keyCodec.encode(key)
