@@ -113,7 +113,7 @@
 </span><span>  </span><span class="comment">// compression and encryption are async operations so we define an async object-store.
 </span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">people</span><span>: </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Async</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Person</span><span>]
 
-  </span><span class="comment">// We&#39;ll also create two seprate stores to later demonstrate how to use transactions
+  </span><span class="comment">// We&#39;ll also create two separate stores to later demonstrate how to use transactions
 </span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">pointsEarned</span><span> : </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Int</span><span>]
   </span><span class="keyword">val</span><span> </span><span class="identifier">pointsPending</span><span>: </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Int</span><span>]
 }
@@ -127,7 +127,7 @@
   </span><span class="comment">// The version of our combined protocols for this IndexedDB database
 </span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">version</span><span> = </span><span class="number-literal">1</span><span>
 
-  </span><span class="comment">// Here we&#39;ll define how to covert from our data types to IndexedDB values and back.
+  </span><span class="comment">// Here we&#39;ll define how to convert from our data types to IndexedDB values and back.
 </span><span>  </span><span class="comment">// We&#39;ll just define the binary formats, compression and encryption come later.
 </span><span>  </span><span class="keyword">private</span><span>[</span><span class="type-name">IDBExampleProtocols</span><span>] </span><span class="keyword">object</span><span> </span><span class="type-name">Picklers</span><span> {
     </span><span class="keyword">import</span><span> </span><span class="type-name">SafePickler</span><span>.</span><span class="type-name">ConstructionHelperImplicits</span><span>.</span><span class="identifier">_</span><span>
@@ -156,9 +156,9 @@
 </span><span>    </span><span class="comment">// webapp-util and provides some additional features.
 </span><span>    </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">safePicklerPerson</span><span>: </span><span class="type-name">SafePickler</span><span>[</span><span class="type-name">Person</span><span>] =
       </span><span class="identifier">picklerPerson</span><span>
-        .</span><span class="identifier">asV1</span><span>(</span><span class="number-literal">0</span><span>) </span><span class="comment">// this is v1.0 of our data format
-</span><span>        .</span><span class="identifier">withMagicNumbers</span><span>(</span><span class="number-literal">0x8CF0655B</span><span>, </span><span class="number-literal">0x5A8218EB</span><span>) </span><span class="comment">// add some header/footer values for
-</span><span>                                                  </span><span class="comment">// a bit of extra integrity.
+        .</span><span class="identifier">asV1</span><span>(</span><span class="number-literal">0</span><span>)                                  </span><span class="comment">// This is v1.0 of our data format.
+</span><span>        .</span><span class="identifier">withMagicNumbers</span><span>(</span><span class="number-literal">0x8CF0655B</span><span>, </span><span class="number-literal">0x5A8218EB</span><span>) </span><span class="comment">// Add some header/footer values for
+</span><span>                                                  </span><span class="comment">//   a bit of extra integrity.
 </span><span>  }
 
   </span><span class="comment">// This is how we create an instance.
@@ -171,7 +171,7 @@
 </span><span>  </span><span class="comment">//
 </span><span>  </span><span class="comment">//   2) An instance of Pako, a JS zlib/compression library.
 </span><span>  </span><span class="comment">//      We could&#39;ve asked for a Compression instance instead but in this example,
-</span><span>  </span><span class="comment">//      we&#39;ll opt to configure the compression here in a static manner.
+</span><span>  </span><span class="comment">//      we&#39;ll opt to configure the compression from within, in a static manner.
 </span><span>  </span><span class="comment">//
 </span><span>  </span><span class="keyword">def</span><span> </span><span class="declaration-name">apply</span><span>(</span><span class="identifier">encryption</span><span>: </span><span class="type-name">Encryption</span><span>)(</span><span class="keyword">implicit</span><span> </span><span class="identifier">pako</span><span>: </span><span class="type-name">Pako</span><span>): </span><span class="type-name">IDBExampleProtocols</span><span> =
     </span><span class="keyword">new</span><span> </span><span class="type-name">IDBExampleProtocols</span><span> {
@@ -220,7 +220,7 @@
         </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>(</span><span class="string-literal">&quot;pointsPending&quot;</span><span>, </span><span class="identifier">keyCodec</span><span>, </span><span class="type-name">ValueCodec</span><span>.</span><span class="identifier">int</span><span>)
 
       </span><span class="keyword">override</span><span> </span><span class="keyword">protected</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">onUpgradeNeeded</span><span>(</span><span class="identifier">c</span><span>: </span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">VersionChange</span><span>): </span><span class="type-name">Callback</span><span> =
-        </span><span class="comment">// In this example it creates our people store when the DB is first created.
+        </span><span class="comment">// This is where we initialise/migrate the database.
 </span><span>        </span><span class="comment">//
 </span><span>        </span><span class="comment">// This is standard logic for working with IndexedDb.
 </span><span>        </span><span class="comment">// Please google &quot;IndexedDb upgradeneeded&quot; for more detail.
