@@ -77,6 +77,7 @@ object Build {
     _.settings(
       scalaVersion                  := Ver.scala2,
       crossScalaVersions            := Seq(Ver.scala2, Ver.scala3),
+      libraryDependencies          ++= Seq(Dep.betterMonadicFor, Dep.kindProjector).filter(_ => scalaVersion.value startsWith "2"),
       scalacOptions                ++= scalacCommonFlags,
       scalacOptions                ++= scalac2Flags.filter(_ => scalaVersion.value.startsWith("2")),
       scalacOptions                ++= scalac3Flags.filter(_ => scalaVersion.value.startsWith("3")),
@@ -102,13 +103,15 @@ object Build {
     ))
     .jsConfigure(_.settings(
       libraryDependencies ++= Seq(
+        Dep.scalaJsJavaTime.value % Test,
         Dep.scalaJsReactTest.value % Test,
-        Dep.scalajsJavaTime.value % Test,
+        Dep.scalaJsSecureRandom.value % Test,
       ),
       Test / jsEnv := new AdvancedNodeJSEnv(
         AdvancedNodeJSEnv.Config().withEnv(Map(
-          "CI"       -> (if (inCI) "1" else "0"),
-          "SBT_ROOT" -> (ThisBuild / baseDirectory).value.getAbsolutePath,
+          "CI"        -> (if (inCI) "1" else "0"),
+          "SBT_ROOT"  -> (ThisBuild / baseDirectory).value.getAbsolutePath,
+          "SCALA_VER" -> scalaVersion.value,
         ))
       ),
     ))
@@ -349,10 +352,10 @@ object Build {
       coreBoopickle,
       coreCatsEffect,
       coreCirce,
-      testBoopickle,
-      testCatsEffect,
-      testCirce,
-      testCore,
+      testBoopickle % "compile->test",
+      testCatsEffect % "compile->test",
+      testCirce % "compile->test",
+      testCore % "compile->test",
     )
     .jvmConfigure(_.dependsOn(
       coreOkHttp4,
@@ -376,7 +379,7 @@ object Build {
     import laika.parse.code.languages._
     import laika.parse.code.SyntaxHighlighting
 
-    private val files = {
+    private def allSourceFiles() = {
       val cmd = "find examples/*/src -name '*.scala'"
       val out = sys.process.Process(List("bash", "-c", cmd)).!!
       out
@@ -396,6 +399,10 @@ object Build {
           case "scala" => ScalaSyntax
         }
 
+        // Notice we re-load all source files on-demand so that we don't have to restart
+        // sbt to detect changes at the file-system level.
+        val files = allSourceFiles()
+
         val candidates = files.filter(_.endsWith("/" + filename))
 
         val path =
@@ -411,7 +418,8 @@ object Build {
         val name      = path.replace("src/test/scala/japgolly/webapputil/examples", "...")
         val nameSpan  = Seq(InlineCode("text", Seq(CodeSpan(name))), Text(":"))
 
-        BlockSequence(Paragraph(nameSpan), codeBlock)
+        // BlockSequence(Paragraph(nameSpan), codeBlock)
+        codeBlock
       }
     }
 

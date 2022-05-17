@@ -4,11 +4,11 @@ import boopickle.DefaultBasic._
 import japgolly.microlibs.testutil.TestUtil._
 import japgolly.scalajs.react._
 import japgolly.webapputil.binary._
-import japgolly.webapputil.boopickle.BinaryFormatExt.Implicits._
 import japgolly.webapputil.boopickle.SafePickler.ConstructionHelperImplicits._
 import japgolly.webapputil.boopickle._
 import japgolly.webapputil.indexeddb._
 import japgolly.webapputil.test.node.TestNode.asyncTest
+import nyaya.gen.Gen
 import utest._
 
 object IndexedDbTest extends TestSuite {
@@ -31,7 +31,7 @@ object IndexedDbTest extends TestSuite {
 
   override def tests = Tests {
 
-    "basicSync" - asyncTest {
+    "basicSync" - asyncTest() {
       val store = ObjectStoreDef.Sync("test", KeyCodec.int, ValueCodec.string)
       for {
         db    <- TestIndexedDb(store)
@@ -56,38 +56,38 @@ object IndexedDbTest extends TestSuite {
       }
     }
 
-    "basicAsync" - asyncTest {
-      val store = ObjectStoreDef.Async("test", KeyCodec.int, ValueCodec.string.async)
+    "basicAsync" - asyncTest() {
+      val store = ObjectStoreDef.Async("test", KeyCodec.int, ValueCodec.double.async)
       for {
         db   <- TestIndexedDb(store)
-        _    <- db.add(store)(1, "hello")
+        _    <- db.add(store)(1, 123.45)
         get1 <- db.get(store)(1)
         get2 <- db.get(store)(2)
       } yield {
-        assertEq(get1, Some("hello"))
+        assertEq(get1, Some(123.45))
         assertEq(get2, None)
       }
     }
 
-    "put" - asyncTest {
-      val store = ObjectStoreDef.Sync("test", KeyCodec.int, ValueCodec.string)
+    "put" - asyncTest() {
+      val store = ObjectStoreDef.Sync("test", KeyCodec.int, ValueCodec.int)
       for {
         db    <- TestIndexedDb(store)
-        _     <- db.add(store)(1, "x1")
-        add2  <- db.add(store)(1, "x2").attempt
-        _     <- db.put(store)(2, "y1")
-        _     <- db.put(store)(2, "y2")
+        _     <- db.add(store)(1, 11)
+        add2  <- db.add(store)(1, 12).attempt
+        _     <- db.put(store)(2, 21)
+        _     <- db.put(store)(2, 22)
         get1  <- db.get(store)(1)
         get2  <- db.get(store)(2)
       } yield {
-        assertEq(get1, Some("x1"))
-        assertEq(get2, Some("y2"))
+        assertEq(get1, Some(11))
+        assertEq(get2, Some(22))
         assert(add2.isLeft)
         add2
       }
     }
 
-    "closeOnUpgrade" - asyncTest {
+    "closeOnUpgrade" - asyncTest() {
       val name = TestIndexedDb.freshDbName()
       val c = TestIndexedDb.unusedOpenCallbacks
       val store = ObjectStoreDef.Sync("test", KeyCodec.int, ValueCodec.string)
@@ -97,7 +97,7 @@ object IndexedDbTest extends TestSuite {
         closed <- AsyncCallback.barrier.asAsyncCallback
 
         db1    <- idb.open(name, 1)(c.copy(
-                    upgradeNeeded = _.createObjectStore(1, store),
+                    upgradeNeeded = _.createObjectStore(store, 1),
                     versionChange = _ => Callback.log("db1 verChg") >> verChg.complete,
                     closed        = Callback.log("db1 closing") >> closed.complete))
 
@@ -117,7 +117,7 @@ object IndexedDbTest extends TestSuite {
       }
     }
 
-    "pickleCompressEncrypt" - asyncTest {
+    "pickleCompressEncrypt" - asyncTest() {
       import SampleData._
       import TestEncryption.UnsafeTypes._
       import ValueCodec.Async.binary
@@ -165,5 +165,48 @@ object IndexedDbTest extends TestSuite {
       }
     }
 
+    "txn" - {
+      import TxnMode._
+
+      val rw: Txn[RW, Int] = TxnDslRW.pure(1)
+      val ro: Txn[RO, Int] = TxnDslRO.pure(1)
+
+      "rw≠ro" - { compileError("rw: Txn[RO, Int]") }
+      "ro=rw" - { ro: Txn[RW, Int] }
+
+      "rw+rw" - { (rw >> rw): Txn[RW, Int] }
+      "rw+ro" - { (rw >> ro): Txn[RW, Int] }
+      "ro+ro" - { (ro >> ro): Txn[RO, Int] }
+      "ro+rw" - { (ro >> rw): Txn[RW, Int] }
+    }
+
+    "cas" - asyncTest() {
+      val ids: Vector[Int] = {
+        val quantity = 100
+        val longest = 200
+        val step = longest.toDouble / quantity
+        Gen.shuffle((1 to quantity).iterator.map(_ * step).map(_.toInt).toVector).sample()
+      }
+
+      val store = ObjectStoreDef.Async("test", KeyCodec.int, ValueCodec.string.async)
+      val k = 1
+
+      def newTask(db: IndexedDb.Database, n: Int) = {
+        val blockOnce = AsyncCallback.unit.delayMs(n).memo()
+        db.atomic(store).modifyAsync(k)(s => blockOnce.map(_ => s + "," + n))
+      }
+
+      for {
+        db   <- TestIndexedDb(store)
+        _    <- db.add(store)(k, "")
+        _    <- AsyncCallback.traverse(ids)(newTask(db, _))
+        ov   <- db.get(store)(k)
+      } yield {
+        val v = ov.get.drop(1)
+        val results = v.split(',').toVector
+        assertSeqIgnoreOrder(results, ids.map(_.toString))
+        v
+      }
+    }
   }
 }

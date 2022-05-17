@@ -1,6 +1,7 @@
 package japgolly.webapputil.indexeddb
 
 import japgolly.scalajs.react.{AsyncCallback, CallbackTo}
+import japgolly.univeq.UnivEq
 import org.scalajs.dom.IDBValue
 
 sealed trait ObjectStoreDef[K, V] {
@@ -23,6 +24,8 @@ object ObjectStoreDef {
     override def sync: this.type =
       this
   }
+
+  // ===================================================================================================================
 
   final case class Async[K, V](name      : String,
                                keyCodec  : KeyCodec[K],
@@ -64,8 +67,20 @@ object ObjectStoreDef {
 
       final def decode: AsyncCallback[ValueType] =
         store.valueCodec.decode(value)
+
+      final override def hashCode =
+        store.name.hashCode * 29 + value.##
+
+      final override def equals(o: Any) =
+        o match {
+          case x: Value => store.name == x.store.name && value == x.value
+          case _        => false
+        }
     }
 
+    object Value {
+      implicit def univEq[V <: Value]: UnivEq[V] = UnivEq.force
+    }
   }
 
 }

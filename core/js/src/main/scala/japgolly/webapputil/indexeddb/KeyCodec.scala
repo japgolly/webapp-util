@@ -1,6 +1,8 @@
 package japgolly.webapputil.indexeddb
 
 import japgolly.scalajs.react.CallbackTo
+import java.util.UUID
+import scala.reflect.ClassTag
 import scala.scalajs.js
 
 final case class KeyCodec[A](encode: A => IndexedDbKey,
@@ -20,19 +22,27 @@ final case class KeyCodec[A](encode: A => IndexedDbKey,
 
 object KeyCodec {
 
+  lazy val double: KeyCodec[Double] =
+    primative("Double")
+
   lazy val int: KeyCodec[Int] =
-    apply(IndexedDbKey(_), k => CallbackTo(
+    primative("Int")
+
+  lazy val long: KeyCodec[Long] =
+    string.xmap(_.toLong)(_.toString)
+
+  def primative[A](name: String)(implicit ev: A => IndexedDbKey.Typed, ct: ClassTag[A]): KeyCodec[A] =
+    apply[A](a => IndexedDbKey(ev(a)), k => CallbackTo(
       (k.value: Any) match {
-        case i: Int => i
-        case _      => throw js.JavaScriptException(k.toString + " is not an int")
+        case a: A => a
+        case x    => throw new js.JavaScriptException(s"Invalid IDB key found. $name expected, got: $x")
       }
     ))
 
   lazy val string: KeyCodec[String] =
-    apply(IndexedDbKey(_), k => CallbackTo(
-      (k.value: Any) match {
-        case s: String => s
-        case _         => throw js.JavaScriptException(k.toString + " is not a str")
-      }
-    ))
+    primative("String")
+
+  lazy val uuid: KeyCodec[UUID] =
+    string.xmap(UUID.fromString)(_.toString)
+
 }

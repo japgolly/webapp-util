@@ -33,4 +33,9 @@ jobs:
 
       - name: Build and test
         shell: bash
-        run: sbt++field scala${{ matrix.scala }} -DCI=1 clean test ghpages/laikaSite
+        run: >-
+          sbt++field scala${{ matrix.scala }}
+          -J-Xmx3G
+          -J-XX:+UseG1GC
+          -DCI=1
+          clean test ghpages/laikaSite
