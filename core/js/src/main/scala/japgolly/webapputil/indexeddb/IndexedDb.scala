@@ -100,8 +100,8 @@ object IndexedDb {
    *         blocked until all they close".
    */
   final case class OpenCallbacks(upgradeNeeded: VersionChange => Callback,
-                                 versionChange: VersionChange => Callback,
-                                 closed       : Callback)
+                                 versionChange: VersionChange => Callback = _ => Callback.empty,
+                                 closed       : Callback                  = Callback.empty)
 
   final case class Error(event: ErrorEvent) extends RuntimeException(
     event.asInstanceOf[js.Dynamic].message.asInstanceOf[js.UndefOr[String]].getOrElse(null)
