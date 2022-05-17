@@ -103,8 +103,9 @@ object Build {
     ))
     .jsConfigure(_.settings(
       libraryDependencies ++= Seq(
-        Dep.scalaJsReactTest.value % Test,
         Dep.scalajsJavaTime.value % Test,
+        Dep.scalaJsReactTest.value % Test,
+        Dep.scalaJsSecureRandom.value % Test,
       ),
       Test / jsEnv := new AdvancedNodeJSEnv(
         AdvancedNodeJSEnv.Config().withEnv(Map(
@@ -351,10 +352,10 @@ object Build {
       coreBoopickle,
       coreCatsEffect,
       coreCirce,
-      testBoopickle,
-      testCatsEffect,
-      testCirce,
-      testCore,
+      testBoopickle % "compile->test",
+      testCatsEffect % "compile->test",
+      testCirce % "compile->test",
+      testCore % "compile->test",
     )
     .jvmConfigure(_.dependsOn(
       coreOkHttp4,

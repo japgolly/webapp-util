@@ -23,7 +23,7 @@ object IDBExample {
   implicit def pako: Pako = Pako.global
 
   // 4) We need an encryption key
-  val encKey = BinaryData.fromStringAsUtf8("this is my secret key, wow!")
+  val encKey = BinaryData.fromStringAsUtf8("!" * 32)
 
   // ===================================================================================
 
