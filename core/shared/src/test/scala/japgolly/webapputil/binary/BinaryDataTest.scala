@@ -6,11 +6,8 @@ import utest._
 
 object BinaryDataTest extends TestSuite {
 
-  private val bytes =
-    Gen.shuffle(Byte.MinValue.to(Byte.MaxValue).map(_.toByte).toList).sample()
-
-  private def bd =
-    BinaryData.fromArray(bytes.toArray)
+  private val bytes = Gen.shuffle(Byte.MinValue.to(Byte.MaxValue).map(_.toByte).toList).sample()
+  private def bd    = BinaryData.fromArray(bytes.toArray)
 
   override def tests = Tests {
 
@@ -66,6 +63,16 @@ object BinaryDataTest extends TestSuite {
           assertEq(BinaryData.fromBase64(sb.toString), bd)
         }
       }
+
+      "append" - {
+        "zn" - assertEq(BinaryData.empty ++ bd, bd)
+        "nz" - assertEq(bd ++ BinaryData.empty, bd)
+        "nn" - {
+          val a = BinaryData.fromStringAsUtf8("pineapple")
+          val b = BinaryData.fromStringAsUtf8("shite")
+          assertEq(a ++ b, BinaryData.fromStringAsUtf8("pineappleshite"))
+        }
+      }
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -116,6 +123,17 @@ object BinaryDataTest extends TestSuite {
         expected.hex)
 
       "overDrop" - assertEq(bd.drop(99999).length, 0)
+
+      "append" - {
+        val a = BinaryData.fromStringAsUtf8("unslimed").drop(3).take(4)
+        val b = BinaryData.fromStringAsUtf8("pruned").drop(1).take(4)
+        val z = a.drop(9)
+        "zn" - assertEq(z ++ bd, bd)
+        "nz" - assertEq(bd ++ z, bd)
+        "nn" - {
+          assertEq(a ++ b, BinaryData.fromStringAsUtf8("limerune"))
+        }
+      }
     }
   }
 }

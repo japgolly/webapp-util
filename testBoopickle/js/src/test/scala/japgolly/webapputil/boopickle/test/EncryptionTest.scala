@@ -10,7 +10,7 @@ object EncryptionTest extends TestSuite {
 
   override def tests = Tests {
 
-    "main" - asyncTest {
+    "main" - asyncTest() {
 
       val key1 = "x" * 32
       val key2 = "y" * 32

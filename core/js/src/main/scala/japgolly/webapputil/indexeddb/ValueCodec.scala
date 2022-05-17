@@ -2,7 +2,10 @@ package japgolly.webapputil.indexeddb
 
 import japgolly.scalajs.react.{AsyncCallback, CallbackTo}
 import japgolly.webapputil.binary._
+import java.util.UUID
 import org.scalajs.dom.IDBValue
+import scala.reflect.ClassTag
+import scala.scalajs.js
 import scala.scalajs.js.typedarray.ArrayBuffer
 
 final case class ValueCodec[A](encode: A => CallbackTo[IDBValue],
@@ -32,22 +35,40 @@ final case class ValueCodec[A](encode: A => CallbackTo[IDBValue],
 
 object ValueCodec {
 
-  val binary: ValueCodec[BinaryData] =
+  lazy val binary: ValueCodec[BinaryData] =
     apply(
       encode = b => CallbackTo.pure(b.unsafeArrayBuffer),
       decode = d => CallbackTo(BinaryData.unsafeFromArrayBuffer(d.asInstanceOf[ArrayBuffer]))
     )
 
-  lazy val string: ValueCodec[String] =
+  lazy val boolean: ValueCodec[Boolean] =
+    primative("Boolean")
+
+  lazy val double: ValueCodec[Double] =
+    primative("Double")
+
+  lazy val int: ValueCodec[Int] =
+    primative("Int")
+
+  lazy val long: ValueCodec[Long] =
+    string.xmap(_.toLong)(_.toString)
+
+  def primative[A: ClassTag](name: String): ValueCodec[A] =
     apply(
-      encode = s => CallbackTo.pure(s),
+      encode = a => CallbackTo.pure(a),
       decode = d => CallbackTo(
         (d: Any) match {
-          case s: String => s
-          case x         => throw new RuntimeException("String expected: " + x)
+          case a: A => a
+          case x    => throw new js.JavaScriptException(s"Invalid IDB value found. $name expected, got: $x")
         }
       )
     )
+
+  lazy val string: ValueCodec[String] =
+    primative("String")
+
+  lazy val uuid: ValueCodec[UUID] =
+    string.xmap(UUID.fromString)(_.toString)
 
   // ===================================================================================================================
 
@@ -72,6 +93,11 @@ object ValueCodec {
   }
 
   object Async {
-    val binary = ValueCodec.binary.async
+
+    lazy val binary: ValueCodec.Async[BinaryData] =
+      ValueCodec.binary.async
+
+    def binary[A](fmt: BinaryFormat[A]): ValueCodec.Async[A] =
+      binary.xmapBinaryFormat(fmt)
   }
 }

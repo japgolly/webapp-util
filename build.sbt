@@ -4,6 +4,7 @@ ThisBuild / organization  := "com.github.japgolly.webapp-util"
 ThisBuild / shellPrompt   := ((s: State) => Project.extract(s).currentRef.project + "> ")
 ThisBuild / startYear     := Some(2021)
 ThisBuild / versionScheme := Some("early-semver")
+sonatypeProfileName       := "com.github.japgolly"
 
 val root              = Build.root
 

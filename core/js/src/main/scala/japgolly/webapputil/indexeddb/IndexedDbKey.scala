@@ -9,7 +9,10 @@ final class IndexedDbKey private(val asJs: IDBKey) extends AnyVal {
 
 object IndexedDbKey {
 
-  type Typed = Int | String
+  // https://w3c.github.io/IndexedDB/#key-construct
+  // A key has an associated type which is one of: number, date, string, binary, or array.
+
+  type Typed = String | Double
 
   @inline def apply(t: Typed): IndexedDbKey =
     fromJs(t)
