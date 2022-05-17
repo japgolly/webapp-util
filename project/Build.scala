@@ -103,7 +103,7 @@ object Build {
     ))
     .jsConfigure(_.settings(
       libraryDependencies ++= Seq(
-        Dep.scalajsJavaTime.value % Test,
+        Dep.scalaJsJavaTime.value % Test,
         Dep.scalaJsReactTest.value % Test,
         Dep.scalaJsSecureRandom.value % Test,
       ),

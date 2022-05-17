@@ -37,7 +37,7 @@ object Dependencies {
     def kindProjector       = "0.13.2"
     def pako                = "2.0.4"
     def reactJs             = "17.0.2"
-    def scalajsJavaTime     = "1.0.0"
+    def scalaJsJavaTime     = "1.0.0"
     def scalaJsSecureRandom = "1.0.0"
     def utest               = "0.7.11"
   }
@@ -70,7 +70,7 @@ object Dependencies {
     val okHttp4             = Def.setting("com.squareup.okhttp3"                % "okhttp"                                  % Ver.okHttp4)
     val postgresql          = Def.setting("org.postgresql"                      % "postgresql"                              % Ver.postgresql)
     val scalaJsDom          = Def.setting("org.scala-js"                      %%% "scalajs-dom"                             % Ver.scalaJsDom)
-    val scalajsJavaTime     = Def.setting("org.scala-js"                      %%% "scalajs-java-time"                       % Ver.scalajsJavaTime cross CrossVersion.for3Use2_13)
+    val scalaJsJavaTime     = Def.setting("org.scala-js"                      %%% "scalajs-java-time"                       % Ver.scalaJsJavaTime cross CrossVersion.for3Use2_13)
     val scalaJsReactCore    = Def.setting("com.github.japgolly.scalajs-react" %%% "core"                                    % Ver.scalaJsReact)
     val scalaJsReactExtra   = Def.setting("com.github.japgolly.scalajs-react" %%% "extra"                                   % Ver.scalaJsReact)
     val scalaJsReactTest    = Def.setting("com.github.japgolly.scalajs-react" %%% "test"                                    % Ver.scalaJsReact)
