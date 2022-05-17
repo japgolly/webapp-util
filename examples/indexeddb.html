@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 0.18.2 + Helium Theme" />
+    <title>IndexedDB</title>
+    
+    
+      <meta name="description" content="ghpages"/>
+    
+    
+    
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+    
+    <link rel="stylesheet" type="text/css" href="../helium/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/laika-helium.css" />
+    <script src="../helium/laika-helium.js"></script>
+    
+    
+    <script> /* for avoiding page load transitions */ </script>
+  </head>
+
+  <body>
+
+    <header id="top-bar">
+
+      <div class="row">
+        <a id="nav-icon">
+          <i class="icofont-laika" title="Navigation">&#xefa2;</i>
+        </a>
+        
+      </div>
+  
+      <a class="icon-link" href="../index.html"><i class="icofont-laika" title="Home">&#xef47;</i></a>
+      
+      <span class="row links"></span>
+      
+    </header>
+
+    <nav id="sidebar">
+
+      <div class="row">
+        
+      </div>
+      
+      <ul class="nav-list">
+        <li class="level1 nav-header">Examples</li>
+        <li class="level2"><a href="ajax.html">AJAX</a></li>
+        <li class="level2 active"><a href="#">IndexedDB</a></li>
+      </ul>
+      
+    </nav>
+
+    <div id="container">
+
+      <nav id="page-nav">
+        <p class="header"><a href="#">IndexedDB</a></p>
+        
+        <ul class="nav-list">
+          <li class="level1"><a href="#models">Models</a></li>
+          <li class="level1"><a href="#protocols">Protocols</a></li>
+          <li class="level1"><a href="#usage">Usage</a></li>
+          <li class="level1"><a href="#testing">Testing</a></li>
+        </ul>
+        
+        <p class="footer"></p>
+      </nav>
+
+      <main class="content">
+
+        <h1 id="indexeddb-example" class="title">IndexedDb Example</h1>
+        <p>Below will demonstrate a few different ways of using the IndexedDB API.
+        If you&#39;re impatient feel free to jump straight to the <a href="#usage">Usage</a> section.</p>
+        
+        <h2 id="models" class="section"><a class="anchor-link left" href="#models"><i class="icofont-laika">&#xef71;</i></a>Models</h2>
+        <p>For our demo, we start with a few model classes.</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">indexeddb</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">java</span><span>.</span><span class="identifier">util</span><span>.</span><span class="type-name">UUID</span><span>
+
+</span><span class="comment">// Let&#39;s say these are the data types we want to store in IndexedDb...
+</span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">PersonId</span><span>(</span><span class="identifier">value</span><span>: </span><span class="type-name">UUID</span><span>)
+</span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Person</span><span>(</span><span class="identifier">id</span><span>: </span><span class="type-name">PersonId</span><span>, </span><span class="identifier">name</span><span>: </span><span class="type-name">String</span><span>, </span><span class="identifier">age</span><span>: </span><span class="type-name">Int</span><span>)
+</span></code></pre>
+        
+        <h2 id="protocols" class="section"><a class="anchor-link left" href="#protocols"><i class="icofont-laika">&#xef71;</i></a>Protocols</h2>
+        <p>Now we&#39;ll define our IndexedDB protocols and demonstrate some nice features like
+        easy-to-use data compression and encryption.</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">indexeddb</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">boopickle</span><span>.</span><span class="type-name">DefaultBasic</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.{</span><span class="type-name">AsyncCallback</span><span>, </span><span class="type-name">Callback</span><span>}
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">binary</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">boopickle</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">indexeddb</span><span>.</span><span class="identifier">_</span><span>
+
+</span><span class="keyword">trait</span><span> </span><span class="type-name">IDBExampleProtocols</span><span> {
+  </span><span class="keyword">import</span><span> </span><span class="type-name">IDBExampleProtocols</span><span>.{</span><span class="identifier">dbName</span><span>, </span><span class="identifier">version</span><span>}
+
+  </span><span class="comment">// Opens a connection to the IndexedDB database
+</span><span>  </span><span class="keyword">final</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">open</span><span>(</span><span class="identifier">idb</span><span>: </span><span class="type-name">IndexedDb</span><span>): </span><span class="type-name">AsyncCallback</span><span>[</span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">Database</span><span>] =
+    </span><span class="identifier">idb</span><span>.</span><span class="identifier">open</span><span>(</span><span class="identifier">dbName</span><span>, </span><span class="identifier">version</span><span>)(</span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">OpenCallbacks</span><span>(</span><span class="identifier">onUpgradeNeeded</span><span>))
+
+  </span><span class="comment">// Initialises or upgrades the IndexedDB database
+</span><span>  </span><span class="keyword">protected</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">onUpgradeNeeded</span><span>(</span><span class="identifier">c</span><span>: </span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">VersionChange</span><span>): </span><span class="type-name">Callback</span><span>
+
+  </span><span class="comment">// Our IndexedDB object-store for storing our people data.
+</span><span>  </span><span class="comment">// This is an async store because we&#39;ll compress and encrypt data before storing it;
+</span><span>  </span><span class="comment">// compression and encryption are async operations so we define an async object-store.
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">people</span><span>: </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Async</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Person</span><span>]
+
+  </span><span class="comment">// We&#39;ll also create two seprate stores to later demonstrate how to use transactions
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">pointsEarned</span><span> : </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Int</span><span>]
+  </span><span class="keyword">val</span><span> </span><span class="identifier">pointsPending</span><span>: </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Int</span><span>]
+}
+
+</span><span class="comment">// =====================================================================================
+</span><span class="keyword">object</span><span> </span><span class="type-name">IDBExampleProtocols</span><span> {
+
+  </span><span class="comment">// The name of our IndexedDB database
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">dbName</span><span> = </span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">DatabaseName</span><span>(</span><span class="string-literal">&quot;demo&quot;</span><span>)
+
+  </span><span class="comment">// The version of our combined protocols for this IndexedDB database
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">version</span><span> = </span><span class="number-literal">1</span><span>
+
+  </span><span class="comment">// Here we&#39;ll define how to covert from our data types to IndexedDB values and back.
+</span><span>  </span><span class="comment">// We&#39;ll just define the binary formats, compression and encryption come later.
+</span><span>  </span><span class="keyword">private</span><span>[</span><span class="type-name">IDBExampleProtocols</span><span>] </span><span class="keyword">object</span><span> </span><span class="type-name">Picklers</span><span> {
+    </span><span class="keyword">import</span><span> </span><span class="type-name">SafePickler</span><span>.</span><span class="type-name">ConstructionHelperImplicits</span><span>.</span><span class="identifier">_</span><span>
+
+    </span><span class="comment">// This is a binary codec using the Boopickle library
+</span><span>    </span><span class="keyword">private</span><span> </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">picklerPersonId</span><span>: </span><span class="type-name">Pickler</span><span>[</span><span class="type-name">PersonId</span><span>] =
+      </span><span class="identifier">transformPickler</span><span>(</span><span class="type-name">PersonId</span><span>.</span><span class="identifier">apply</span><span>)(</span><span class="identifier">_</span><span>.</span><span class="identifier">value</span><span>)
+
+    </span><span class="comment">// This is a binary codec using the Boopickle library
+</span><span>    </span><span class="keyword">private</span><span> </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">picklerPerson</span><span>: </span><span class="type-name">Pickler</span><span>[</span><span class="type-name">Person</span><span>] =
+      </span><span class="keyword">new</span><span> </span><span class="type-name">Pickler</span><span>[</span><span class="type-name">Person</span><span>] {
+        </span><span class="keyword">override</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">pickle</span><span>(</span><span class="identifier">a</span><span>: </span><span class="type-name">Person</span><span>)(</span><span class="keyword">implicit</span><span> </span><span class="identifier">state</span><span>: </span><span class="type-name">PickleState</span><span>): </span><span class="type-name">Unit</span><span> = {
+          </span><span class="identifier">state</span><span>.</span><span class="identifier">pickle</span><span>(</span><span class="identifier">a</span><span>.</span><span class="identifier">id</span><span>)
+          </span><span class="identifier">state</span><span>.</span><span class="identifier">pickle</span><span>(</span><span class="identifier">a</span><span>.</span><span class="identifier">name</span><span>)
+          </span><span class="identifier">state</span><span>.</span><span class="identifier">pickle</span><span>(</span><span class="identifier">a</span><span>.</span><span class="identifier">age</span><span>)
+        }
+        </span><span class="keyword">override</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">unpickle</span><span>(</span><span class="keyword">implicit</span><span> </span><span class="identifier">state</span><span>: </span><span class="type-name">UnpickleState</span><span>): </span><span class="type-name">Person</span><span> = {
+          </span><span class="keyword">val</span><span> </span><span class="identifier">id</span><span>   = </span><span class="identifier">state</span><span>.</span><span class="identifier">unpickle</span><span>[</span><span class="type-name">PersonId</span><span>]
+          </span><span class="keyword">val</span><span> </span><span class="identifier">name</span><span> = </span><span class="identifier">state</span><span>.</span><span class="identifier">unpickle</span><span>[</span><span class="type-name">String</span><span>]
+          </span><span class="keyword">val</span><span> </span><span class="identifier">age</span><span>  = </span><span class="identifier">state</span><span>.</span><span class="identifier">unpickle</span><span>[</span><span class="type-name">Int</span><span>]
+          </span><span class="type-name">Person</span><span>(</span><span class="identifier">id</span><span>, </span><span class="identifier">name</span><span>, </span><span class="identifier">age</span><span>)
+        }
+      }
+
+    </span><span class="comment">// Where `Pickler` comes from Boopickle, `SafePickler` is defined here in
+</span><span>    </span><span class="comment">// webapp-util and provides some additional features.
+</span><span>    </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">safePicklerPerson</span><span>: </span><span class="type-name">SafePickler</span><span>[</span><span class="type-name">Person</span><span>] =
+      </span><span class="identifier">picklerPerson</span><span>
+        .</span><span class="identifier">asV1</span><span>(</span><span class="number-literal">0</span><span>) </span><span class="comment">// this is v1.0 of our data format
+</span><span>        .</span><span class="identifier">withMagicNumbers</span><span>(</span><span class="number-literal">0x8CF0655B</span><span>, </span><span class="number-literal">0x5A8218EB</span><span>) </span><span class="comment">// add some header/footer values for
+</span><span>                                                  </span><span class="comment">// a bit of extra integrity.
+</span><span>  }
+
+  </span><span class="comment">// This is how we create an instance.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// We require two things to create an instance,
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">//   1) A means of binary encryption and decryption.
+</span><span>  </span><span class="comment">//      The encryption key isn&#39;t provided directly, it will be in the Encryption
+</span><span>  </span><span class="comment">//      instance.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">//   2) An instance of Pako, a JS zlib/compression library.
+</span><span>  </span><span class="comment">//      We could&#39;ve asked for a Compression instance instead but in this example,
+</span><span>  </span><span class="comment">//      we&#39;ll opt to configure the compression here in a static manner.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="keyword">def</span><span> </span><span class="declaration-name">apply</span><span>(</span><span class="identifier">encryption</span><span>: </span><span class="type-name">Encryption</span><span>)(</span><span class="keyword">implicit</span><span> </span><span class="identifier">pako</span><span>: </span><span class="type-name">Pako</span><span>): </span><span class="type-name">IDBExampleProtocols</span><span> =
+    </span><span class="keyword">new</span><span> </span><span class="type-name">IDBExampleProtocols</span><span> {
+      </span><span class="keyword">import</span><span> </span><span class="type-name">Picklers</span><span>.</span><span class="identifier">_</span><span>
+
+      </span><span class="comment">// Here we configure our compression preferences:
+</span><span>      </span><span class="comment">//   - maximum compression (i.e. set compression level to 9)
+</span><span>      </span><span class="comment">//   - opt-out of using zlib headers
+</span><span>      </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">compression</span><span>: </span><span class="type-name">Compression</span><span> =
+        </span><span class="type-name">Compression</span><span>.</span><span class="type-name">ViaPako</span><span>.</span><span class="identifier">maxWithoutHeaders</span><span>
+
+      </span><span class="comment">// Convert from PersonId to raw JS IndexedDB keys
+</span><span>      </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">keyCodec</span><span>: </span><span class="type-name">KeyCodec</span><span>[</span><span class="type-name">PersonId</span><span>] =
+        </span><span class="type-name">KeyCodec</span><span>.</span><span class="identifier">uuid</span><span>.</span><span class="identifier">xmap</span><span>(</span><span class="type-name">PersonId</span><span>.</span><span class="identifier">apply</span><span>)(</span><span class="identifier">_</span><span>.</span><span class="identifier">value</span><span>)
+
+      </span><span class="comment">// Here we define our ObjectStore for storing our collection of people.
+</span><span>      </span><span class="comment">// This ties everything together.
+</span><span>      </span><span class="keyword">override</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">people</span><span>: </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Async</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Person</span><span>] = {
+
+        </span><span class="comment">// Our all-things-considered binary format for storing Person instances
+</span><span>        </span><span class="keyword">def</span><span> </span><span class="declaration-name">valueFormat</span><span>: </span><span class="type-name">BinaryFormat</span><span>[</span><span class="type-name">Person</span><span>] =
+          </span><span class="comment">// Declare that we want to support binary format evolution.
+</span><span>          </span><span class="comment">// Eg. in the future if we were to add a new field to Person, we&#39;d need a new
+</span><span>          </span><span class="comment">// v1.1 format, but we&#39;d still need to support deserialising data stored with
+</span><span>          </span><span class="comment">// the v1.0 format.
+</span><span>          </span><span class="type-name">BinaryFormat</span><span>.</span><span class="identifier">versioned</span><span>(
+            </span><span class="comment">// v1.0: Use implicit SafePickler[Person] then compress &amp; encrypt the binary
+</span><span>            </span><span class="type-name">BinaryFormat</span><span>.</span><span class="identifier">pickleCompressEncrypt</span><span>[</span><span class="type-name">Person</span><span>](</span><span class="identifier">compression</span><span>, </span><span class="identifier">encryption</span><span>),
+            </span><span class="comment">// Our hypothetical future v1.1 protocol would be here
+</span><span>            </span><span class="comment">// Our hypothetical future v1.2 protocol would be here
+</span><span>            </span><span class="comment">// etc
+</span><span>          )
+
+        </span><span class="comment">// Convert from Person to raw JS IndexedDB values
+</span><span>        </span><span class="keyword">def</span><span> </span><span class="declaration-name">valueCodec</span><span>: </span><span class="type-name">ValueCodec</span><span>.</span><span class="type-name">Async</span><span>[</span><span class="type-name">Person</span><span>] =
+          </span><span class="type-name">ValueCodec</span><span>.</span><span class="type-name">Async</span><span>.</span><span class="identifier">binary</span><span>(</span><span class="identifier">valueFormat</span><span>)
+
+        </span><span class="comment">// Finally we create the store definition itself
+</span><span>        </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Async</span><span>(</span><span class="string-literal">&quot;people&quot;</span><span>, </span><span class="identifier">keyCodec</span><span>, </span><span class="identifier">valueCodec</span><span>)
+      }
+
+      </span><span class="keyword">override</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">pointsEarned</span><span>: </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Int</span><span>] =
+        </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>(</span><span class="string-literal">&quot;pointsEarned&quot;</span><span>, </span><span class="identifier">keyCodec</span><span>, </span><span class="type-name">ValueCodec</span><span>.</span><span class="identifier">int</span><span>)
+
+      </span><span class="keyword">override</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">pointsPending</span><span>: </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>[</span><span class="type-name">PersonId</span><span>, </span><span class="type-name">Int</span><span>] =
+        </span><span class="type-name">ObjectStoreDef</span><span>.</span><span class="type-name">Sync</span><span>(</span><span class="string-literal">&quot;pointsPending&quot;</span><span>, </span><span class="identifier">keyCodec</span><span>, </span><span class="type-name">ValueCodec</span><span>.</span><span class="identifier">int</span><span>)
+
+      </span><span class="keyword">override</span><span> </span><span class="keyword">protected</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">onUpgradeNeeded</span><span>(</span><span class="identifier">c</span><span>: </span><span class="type-name">IndexedDb</span><span>.</span><span class="type-name">VersionChange</span><span>): </span><span class="type-name">Callback</span><span> =
+        </span><span class="comment">// In this example it creates our people store when the DB is first created.
+</span><span>        </span><span class="comment">//
+</span><span>        </span><span class="comment">// This is standard logic for working with IndexedDb.
+</span><span>        </span><span class="comment">// Please google &quot;IndexedDb upgradeneeded&quot; for more detail.
+</span><span>        </span><span class="type-name">Callback</span><span>.</span><span class="identifier">runAll</span><span>(
+          </span><span class="identifier">c</span><span>.</span><span class="identifier">createObjectStore</span><span>(</span><span class="identifier">people</span><span>,        </span><span class="identifier">createdInDbVer</span><span> = </span><span class="number-literal">1</span><span>),
+          </span><span class="identifier">c</span><span>.</span><span class="identifier">createObjectStore</span><span>(</span><span class="identifier">pointsEarned</span><span>,  </span><span class="identifier">createdInDbVer</span><span> = </span><span class="number-literal">1</span><span>),
+          </span><span class="identifier">c</span><span>.</span><span class="identifier">createObjectStore</span><span>(</span><span class="identifier">pointsPending</span><span>, </span><span class="identifier">createdInDbVer</span><span> = </span><span class="number-literal">1</span><span>),
+        )
+    }
+}
+</span></code></pre>
+        
+        <h2 id="usage" class="section"><a class="anchor-link left" href="#usage"><i class="icofont-laika">&#xef71;</i></a>Usage</h2>
+        <p>Here we get to actual usage.</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">indexeddb</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="type-name">AsyncCallback</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">binary</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">boopickle</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">indexeddb</span><span>.</span><span class="type-name">IndexedDb</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">java</span><span>.</span><span class="identifier">util</span><span>.</span><span class="type-name">UUID</span><span>
+
+</span><span class="keyword">object</span><span> </span><span class="type-name">IDBExample</span><span> {
+
+  </span><span class="comment">// Firstly, let&#39;s setup our dependencies.
+</span><span>
+  </span><span class="comment">// 1) We need an instance of `window.indexeddb`
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">idb</span><span> = </span><span class="type-name">IndexedDb</span><span>.</span><span class="identifier">global</span><span>()
+    .</span><span class="identifier">getOrElse</span><span>(</span><span class="keyword">throw</span><span> </span><span class="keyword">new</span><span> </span><span class="type-name">RuntimeException</span><span>(</span><span class="string-literal">&quot;indexeddb is not available&quot;</span><span>))
+
+  </span><span class="comment">// 2) We need an instance of `window.crypto`
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">encryptionEngine</span><span> = </span><span class="type-name">EncryptionEngine</span><span>.</span><span class="identifier">global</span><span>
+    .</span><span class="identifier">getOrElse</span><span>(</span><span class="keyword">throw</span><span> </span><span class="keyword">new</span><span> </span><span class="type-name">RuntimeException</span><span>(</span><span class="string-literal">&quot;crypto is not available&quot;</span><span>))
+
+  </span><span class="comment">// 3) We need an instance of JS library `Pako` for compression
+</span><span>  </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">pako</span><span>: </span><span class="type-name">Pako</span><span> = </span><span class="type-name">Pako</span><span>.</span><span class="identifier">global</span><span>
+
+  </span><span class="comment">// 4) We need an encryption key
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">encKey</span><span> = </span><span class="type-name">BinaryData</span><span>.</span><span class="identifier">fromStringAsUtf8</span><span>(</span><span class="string-literal">&quot;!&quot;</span><span> * </span><span class="number-literal">32</span><span>)
+
+  </span><span class="comment">// Next, let&#39;s create same sample data to use
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">bobId</span><span>  = </span><span class="type-name">PersonId</span><span>(</span><span class="type-name">UUID</span><span>.</span><span class="identifier">fromString</span><span>(</span><span class="string-literal">&quot;174b625b-9057-4d64-a92e-dee2fad89d27&quot;</span><span>))
+  </span><span class="keyword">val</span><span> </span><span class="identifier">bob</span><span>    = </span><span class="type-name">Person</span><span>(</span><span class="identifier">bobId</span><span>, </span><span class="string-literal">&quot;Bob Loblaw&quot;</span><span>, </span><span class="number-literal">100</span><span>)
+
+  </span><span class="comment">// And now we arrive at our examples:
+</span><span>  </span><span class="keyword">def</span><span> </span><span class="declaration-name">examples</span><span>: </span><span class="type-name">AsyncCallback</span><span>[</span><span class="type-name">Unit</span><span>] =
+    </span><span class="keyword">for</span><span> {
+      </span><span class="identifier">enc</span><span>  &lt;- </span><span class="identifier">encryptionEngine</span><span>(</span><span class="identifier">encKey</span><span>) </span><span class="comment">// initialise our encryption
+</span><span>      </span><span class="identifier">p</span><span>     = </span><span class="type-name">IDBExampleProtocols</span><span>(</span><span class="identifier">enc</span><span>) </span><span class="comment">// initialise our protocols
+</span><span>      </span><span class="identifier">db</span><span>   &lt;- </span><span class="identifier">p</span><span>.</span><span class="identifier">open</span><span>(</span><span class="identifier">idb</span><span>)              </span><span class="comment">// open and initialise the DB
+</span><span>
+      </span><span class="comment">// ===============================================================================
+</span><span>      </span><span class="comment">// Example 1: Simple usage
+</span><span>      </span><span class="comment">//
+</span><span>      </span><span class="comment">// All encoding, data compression, and encryption is handled automatically via
+</span><span>      </span><span class="comment">// the `people` store.
+</span><span>
+      </span><span class="identifier">_</span><span>    &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">put</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="identifier">bob</span><span>) </span><span class="comment">// save a Person instance
+</span><span>      </span><span class="identifier">bob2</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">get</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>)      </span><span class="comment">// load a Person instance
+</span><span>      </span><span class="identifier">_</span><span>     = </span><span class="identifier">assert</span><span>(</span><span class="identifier">bob2</span><span> == </span><span class="type-name">Some</span><span>(</span><span class="identifier">bob</span><span>))
+
+      </span><span class="comment">// ===============================================================================
+</span><span>      </span><span class="comment">// Example 2: Atomic modification
+</span><span>      </span><span class="comment">//
+</span><span>      </span><span class="comment">// In the above example, both loading and saving occur in separate transactions.
+</span><span>      </span><span class="comment">// If one were to attempt to modify a stored Person via a get and then a set,
+</span><span>      </span><span class="comment">// it would similarly result in two separate transactions, which would in turn
+</span><span>      </span><span class="comment">// allow bugs if another instance of your app (eg. another browser tab or a web
+</span><span>      </span><span class="comment">// worker) changes the database between the two transactions.
+</span><span>      </span><span class="comment">//
+</span><span>      </span><span class="comment">// DSL exists for working within a transaction, however due to IndexedDB
+</span><span>      </span><span class="comment">// constraints no arbitrary async processing can occur mid-transaction.
+</span><span>      </span><span class="comment">// We&#39;re using compression and encryption in this demo, both of which are async
+</span><span>      </span><span class="comment">// and by necessity, must be performed outside of an IndexedDB transaction.
+</span><span>      </span><span class="comment">//
+</span><span>      </span><span class="comment">// Here we&#39;ll use db.atomic, which uses db.compareAndSet under-the-hood to
+</span><span>      </span><span class="comment">// perform our operation atomically, despite its cross-transactional nature.
+</span><span>
+      </span><span class="identifier">_</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">atomic</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>).</span><span class="identifier">modify</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>)(</span><span class="identifier">x</span><span> =&gt; </span><span class="identifier">x</span><span>.</span><span class="identifier">copy</span><span>(</span><span class="identifier">age</span><span> = </span><span class="identifier">x</span><span>.</span><span class="identifier">age</span><span> + </span><span class="number-literal">1</span><span>))
+
+      </span><span class="comment">// ===============================================================================
+</span><span>      </span><span class="comment">// Example 3: Transaction
+</span><span>      </span><span class="comment">//
+</span><span>      </span><span class="comment">// This example locks two stores into a single transaction. It atomically moves
+</span><span>      </span><span class="comment">// pending points into Bob&#39;s earned points.
+</span><span>
+      </span><span class="identifier">_</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">transactionRW</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">pointsEarned</span><span>, </span><span class="identifier">p</span><span>.</span><span class="identifier">pointsPending</span><span>) { </span><span class="identifier">txn</span><span> =&gt;
+        </span><span class="keyword">for</span><span> {
+          </span><span class="identifier">pointsPending</span><span> &lt;- </span><span class="identifier">txn</span><span>.</span><span class="identifier">objectStore</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">pointsPending</span><span>)
+          </span><span class="identifier">pointsEarned</span><span>  &lt;- </span><span class="identifier">txn</span><span>.</span><span class="identifier">objectStore</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">pointsEarned</span><span>)
+          </span><span class="identifier">m</span><span>             &lt;- </span><span class="identifier">pointsEarned</span><span> .</span><span class="identifier">get</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>).</span><span class="identifier">map</span><span>(</span><span class="identifier">_</span><span>.</span><span class="identifier">getOrElse</span><span>(</span><span class="number-literal">0</span><span>))
+          </span><span class="identifier">n</span><span>             &lt;- </span><span class="identifier">pointsPending</span><span>.</span><span class="identifier">get</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>).</span><span class="identifier">map</span><span>(</span><span class="identifier">_</span><span>.</span><span class="identifier">getOrElse</span><span>(</span><span class="number-literal">0</span><span>))
+          </span><span class="identifier">_</span><span>             &lt;- </span><span class="identifier">pointsEarned</span><span> .</span><span class="identifier">put</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="identifier">m</span><span> + </span><span class="identifier">n</span><span>)
+          </span><span class="identifier">_</span><span>             &lt;- </span><span class="identifier">pointsPending</span><span>.</span><span class="identifier">put</span><span>(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="number-literal">0</span><span>)
+        } </span><span class="keyword">yield</span><span> ()
+      }
+
+    } </span><span class="keyword">yield</span><span> ()
+}
+</span></code></pre>
+        
+        <h2 id="testing" class="section"><a class="anchor-link left" href="#testing"><i class="icofont-laika">&#xef71;</i></a>Testing</h2>
+        <p>Here&#39;s a quick test that demonstrates we can save and load a <code>Person</code>.</p>
+        <p>To test your <code>IndexedDb</code> code, you would typically:</p>
+        <ol class="arabic">
+          <li>Write your code in such a way that it asks for an <code>IndexedDb</code> instance as a normal function argument</li>
+          <li>Create a <code>FakeIndexedDb()</code> instance</li>
+          <li>Simply provide the <code>FakeIndexedDb()</code> to your main code</li>
+          <li>(Optionally) inspect the DB contents directly by using the <code>IndexedDb</code> API as normal</li>
+        </ol>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">indexeddb</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">binary</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">boopickle</span><span>.</span><span class="identifier">test</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">indexeddb</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">test</span><span>.</span><span class="identifier">node</span><span>.</span><span class="type-name">TestNode</span><span>.</span><span class="identifier">asyncTest</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">java</span><span>.</span><span class="identifier">util</span><span>.</span><span class="type-name">UUID</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">utest</span><span>.</span><span class="identifier">_</span><span>
+
+</span><span class="keyword">object</span><span> </span><span class="type-name">IDBExampleTest</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">TestSuite</span><span> {
+
+  </span><span class="keyword">private</span><span> </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">idb</span><span>: </span><span class="type-name">IndexedDb</span><span> = </span><span class="type-name">FakeIndexedDb</span><span>()
+  </span><span class="keyword">private</span><span> </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">pako</span><span>: </span><span class="type-name">Pako</span><span> = </span><span class="type-name">Pako</span><span>.</span><span class="identifier">global</span><span>
+
+  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">encKey</span><span>    = </span><span class="type-name">BinaryData</span><span>.</span><span class="identifier">fromStringAsUtf8</span><span>(</span><span class="string-literal">&quot;?&quot;</span><span> * </span><span class="number-literal">32</span><span>)
+  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">protocols</span><span> = </span><span class="type-name">TestEncryption</span><span>(</span><span class="identifier">encKey</span><span>).</span><span class="identifier">map</span><span>(</span><span class="type-name">IDBExampleProtocols</span><span>(</span><span class="identifier">_</span><span>))
+  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">bob</span><span>       = </span><span class="type-name">Person</span><span>(</span><span class="type-name">PersonId</span><span>(</span><span class="type-name">UUID</span><span>.</span><span class="identifier">randomUUID</span><span>()), </span><span class="string-literal">&quot;Bob Loblaw&quot;</span><span>, </span><span class="number-literal">100</span><span>)
+
+  </span><span class="keyword">override</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">tests</span><span> = </span><span class="type-name">Tests</span><span> {
+
+    </span><span class="string-literal">&quot;saveAndReload&quot;</span><span> - </span><span class="identifier">asyncTest</span><span>() {
+      </span><span class="keyword">for</span><span> {
+        </span><span class="identifier">p</span><span>    &lt;- </span><span class="identifier">protocols</span><span>
+        </span><span class="identifier">db</span><span>   &lt;- </span><span class="type-name">TestIndexedDb</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)
+        </span><span class="identifier">_</span><span>    &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">put</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>, </span><span class="identifier">bob</span><span>) </span><span class="comment">// save a Person instance
+</span><span>        </span><span class="identifier">bob2</span><span> &lt;- </span><span class="identifier">db</span><span>.</span><span class="identifier">get</span><span>(</span><span class="identifier">p</span><span>.</span><span class="identifier">people</span><span>)(</span><span class="identifier">bob</span><span>.</span><span class="identifier">id</span><span>)      </span><span class="comment">// load a Person instance
+</span><span>      } </span><span class="keyword">yield</span><span> {
+        </span><span class="identifier">assert</span><span>(</span><span class="identifier">bob2</span><span> == </span><span class="type-name">Some</span><span>(</span><span class="identifier">bob</span><span>))
+      }
+    }
+
+  }
+}
+</span></code></pre>
+
+      </main>
+
+    </div>
+
+  </body>
+</html>

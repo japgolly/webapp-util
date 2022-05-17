@@ -50,6 +50,7 @@
       <ul class="nav-list">
         <li class="level1 nav-header">Examples</li>
         <li class="level2 active"><a href="#">AJAX</a></li>
+        <li class="level2"><a href="indexeddb.html">IndexedDB</a></li>
       </ul>
       
     </nav>
@@ -76,7 +77,6 @@
         
         <h2 id="shared-code" class="section"><a class="anchor-link left" href="#shared-code"><i class="icofont-laika">&#xef71;</i></a>Shared Code</h2>
         <p>First we create a definition of our AJAX endpoint. This is cross-compiled for both JVM and JS.</p>
-        <p><code class="text"><span>examples/shared/.../ajax/AjaxExampleShared.scala</span></code>:</p>
         <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">ajax</span><span>
 
 </span><span class="keyword">import</span><span> </span><span class="identifier">io</span><span>.</span><span class="identifier">circe</span><span>.{</span><span class="type-name">Decoder</span><span>, </span><span class="type-name">Encoder</span><span>}
@@ -134,7 +134,6 @@
 </span></code></pre>
         
         <h2 id="backend" class="section"><a class="anchor-link left" href="#backend"><i class="icofont-laika">&#xef71;</i></a>Backend</h2>
-        <p><code class="text"><span>examples/jvm/.../ajax/AjaxExampleJvm.scala</span></code>:</p>
         <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">ajax</span><span>
 
 </span><span class="keyword">import</span><span> </span><span class="identifier">io</span><span>.</span><span class="identifier">circe</span><span>.{</span><span class="type-name">Decoder</span><span>, </span><span class="type-name">Json</span><span>}
@@ -160,7 +159,6 @@
 </span></code></pre>
         
         <h2 id="frontend" class="section"><a class="anchor-link left" href="#frontend"><i class="icofont-laika">&#xef71;</i></a>Frontend</h2>
-        <p><code class="text"><span>examples/js/.../ajax/AjaxExampleJs.scala</span></code>:</p>
         <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">ajax</span><span>
 
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="identifier">_</span><span>
@@ -308,7 +306,6 @@
 </span></code></pre>
         
         <h2 id="testing-the-frontend" class="section"><a class="anchor-link left" href="#testing-the-frontend"><i class="icofont-laika">&#xef71;</i></a>Testing the Frontend</h2>
-        <p><code class="text"><span>examples/js/.../ajax/AjaxExampleJsTest.scala</span></code>:</p>
         <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">ajax</span><span>
 
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">microlibs</span><span>.</span><span class="identifier">testutil</span><span>.</span><span class="type-name">TestUtil</span><span>.</span><span class="identifier">_</span><span>
