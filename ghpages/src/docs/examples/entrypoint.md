@@ -14,16 +14,18 @@ A typical webapp will be served like this:
   </script>
 ```
 
+## Why?
+
 Generating this stuff manually isn't a huge deal, but in this example we'll use the `Entrypoint` API
 for a few advantages:
 
   * Everything is DRY — no chance to accidentally call the wrong function
-  * The server can provide custom data to initialise our app — just need to provide a codec, ser/deser handled automatically
+  * The server can provide custom data to initialise our app — just need to provide a codec, ser/deser and JS plumbing handled automatically
   * HTML is generated for us — things like escaping handled automatically
 
 ## Shared Definition
 
-This is cross-compiled for JVM and JS.
+We'll start with our entrypoint definition, which is cross-compiled for JVM and JS.
 
 @:sourceFile(EntrypointExample.scala)
 
