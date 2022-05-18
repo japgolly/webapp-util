@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 0.18.2 + Helium Theme" />
+    <title>Entrypoints</title>
+    
+    
+      <meta name="description" content="ghpages"/>
+    
+    
+    
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+    
+    <link rel="stylesheet" type="text/css" href="../helium/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/laika-helium.css" />
+    <script src="../helium/laika-helium.js"></script>
+    
+    
+    <script> /* for avoiding page load transitions */ </script>
+  </head>
+
+  <body>
+
+    <header id="top-bar">
+
+      <div class="row">
+        <a id="nav-icon">
+          <i class="icofont-laika" title="Navigation">&#xefa2;</i>
+        </a>
+        
+      </div>
+  
+      <a class="icon-link" href="../index.html"><i class="icofont-laika" title="Home">&#xef47;</i></a>
+      
+      <span class="row links"></span>
+      
+    </header>
+
+    <nav id="sidebar">
+
+      <div class="row">
+        
+      </div>
+      
+      <ul class="nav-list">
+        <li class="level1 nav-header">Examples</li>
+        <li class="level2"><a href="ajax.html">AJAX</a></li>
+        <li class="level2 active"><a href="#">Entrypoints</a></li>
+        <li class="level2"><a href="indexeddb.html">IndexedDB</a></li>
+      </ul>
+      
+    </nav>
+
+    <div id="container">
+
+      <nav id="page-nav">
+        <p class="header"><a href="#">Entrypoints</a></p>
+        
+        <ul class="nav-list">
+          <li class="level1"><a href="#shared-definition">Shared Definition</a></li>
+          <li class="level1"><a href="#frontend">Frontend</a></li>
+          <li class="level1"><a href="#backend">Backend</a></li>
+          <li class="level1"><a href="#backend-test">Backend Test</a></li>
+        </ul>
+        
+        <p class="footer"></p>
+      </nav>
+
+      <main class="content">
+
+        <h1 id="entrypoint-example" class="title">Entrypoint Example</h1>
+        <p>An <code>Entrypoint</code> is a method on the client-side, that you must call in order to start your webapp.</p>
+        <p>A typical webapp will be served like this:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span>  </span><span class="tag-punctuation">&lt;</span><span class="tag-name">script</span><span class="tag-punctuation"> </span><span class="attribute-name">type</span><span class="tag-punctuation">=</span><span class="string-literal">&quot;text/javascript&quot;</span><span class="tag-punctuation"> </span><span class="attribute-name">src</span><span class="tag-punctuation">=</span><span class="string-literal">&quot;/my-app.js&quot;</span><span class="tag-punctuation">&gt;&lt;/</span><span class="tag-name">script</span><span class="tag-punctuation">&gt;</span><span>
+  </span><span class="tag-punctuation">&lt;</span><span class="tag-name">script</span><span class="tag-punctuation"> </span><span class="attribute-name">type</span><span class="tag-punctuation">=</span><span class="string-literal">&quot;text/javascript&quot;</span><span class="tag-punctuation">&gt;</span><span>
+    </span><span class="identifier">MyExampleApp</span><span>.</span><span class="identifier">start</span><span>();
+  </span><span class="tag-punctuation">&lt;/</span><span class="tag-name">script</span><span class="tag-punctuation">&gt;</span></code></pre>
+        <p>Generating this stuff manually isn&#39;t a huge deal, but in this example we&#39;ll use the <code>Entrypoint</code> API
+        for a few advantages:</p>
+        <ul>
+          <li>Everything is DRY — no chance to accidentally call the wrong function</li>
+        </ul>
+        <ul>
+          <li>The server can provide custom data to initialise our app — just need to provide a codec, ser/deser handled automatically</li>
+        </ul>
+        <ul>
+          <li>HTML is generated for us — things like escaping handled automatically</li>
+        </ul>
+        
+        <h2 id="shared-definition" class="section"><a class="anchor-link left" href="#shared-definition"><i class="icofont-laika">&#xef71;</i></a>Shared Definition</h2>
+        <p>This is cross-compiled for JVM and JS.</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">entrypoint</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">boopickle</span><span>.</span><span class="type-name">DefaultBasic</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">boopickle</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">entrypoint</span><span>.</span><span class="identifier">_</span><span>
+
+</span><span class="keyword">object</span><span> </span><span class="type-name">EntrypointExample</span><span> {
+
+  </span><span class="comment">// The name of our app, as it will appear in the JS global namespace when loaded.
+</span><span>  </span><span class="comment">// This is final because its referenced via @JSExportTopLevel on Frontend
+</span><span>  </span><span class="keyword">final</span><span> </span><span class="keyword">val</span><span> </span><span class="type-name">Name</span><span> = </span><span class="string-literal">&quot;MyExampleApp&quot;</span><span>
+
+  </span><span class="comment">// In this example, our app will request the user&#39;s username as soon as it starts up.
+</span><span>  </span><span class="comment">// The server will provide this to the client.
+</span><span>  </span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">InitialData</span><span>(</span><span class="identifier">username</span><span>: </span><span class="type-name">String</span><span>)
+
+  </span><span class="comment">// This is our codec typeclass from InitialData to binary and back
+</span><span>  </span><span class="keyword">implicit</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">picklerInitialData</span><span>: </span><span class="type-name">Pickler</span><span>[</span><span class="type-name">InitialData</span><span>] =
+    </span><span class="identifier">implicitly</span><span>[</span><span class="type-name">Pickler</span><span>[</span><span class="type-name">String</span><span>]].</span><span class="identifier">xmap</span><span>(</span><span class="type-name">InitialData</span><span>.</span><span class="identifier">apply</span><span>)(</span><span class="identifier">_</span><span>.</span><span class="identifier">username</span><span>)
+
+  </span><span class="comment">// Finally, our entrypoint definition.
+</span><span>  </span><span class="comment">// The Pickler[InitialData] we created above is pulled in implicitly.
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">defn</span><span> = </span><span class="type-name">EntrypointDef</span><span>[</span><span class="type-name">InitialData</span><span>](</span><span class="type-name">Name</span><span>)
+}
+</span></code></pre>
+        
+        <h2 id="frontend" class="section"><a class="anchor-link left" href="#frontend"><i class="icofont-laika">&#xef71;</i></a>Frontend</h2>
+        <p>Next we&#39;ll create our Scala.js frontend.</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">entrypoint</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="identifier">vdom</span><span>.</span><span class="identifier">html_</span><span>&lt;^.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">entrypoint</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">entrypoint</span><span>.</span><span class="type-name">EntrypointExample</span><span>.</span><span class="type-name">InitialData</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">scala</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">js</span><span>.</span><span class="identifier">annotation</span><span>.</span><span class="type-name">JSExportTopLevel</span><span>
+
+</span><span class="annotation">@JSExportTopLevel</span><span>(</span><span class="type-name">EntrypointExample</span><span>.</span><span class="type-name">Name</span><span>) </span><span class="comment">// Instruct Scala.js to make this available in
+</span><span>                                          </span><span class="comment">// the global JS namespace.
+</span><span class="keyword">object</span><span> </span><span class="type-name">Frontend</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">Entrypoint</span><span>(</span><span class="type-name">EntrypointExample</span><span>.</span><span class="identifier">defn</span><span>) {
+
+  </span><span class="comment">// Because the line above extends Entrypoint, all we need to do now is implement a
+</span><span>  </span><span class="comment">// run method that takes the decoded InitialData value.
+</span><span>  </span><span class="keyword">override</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">run</span><span>(</span><span class="identifier">i</span><span>: </span><span class="type-name">InitialData</span><span>): </span><span class="type-name">Unit</span><span> = {
+    </span><span class="comment">// Render a simple React component
+</span><span>    </span><span class="keyword">val</span><span> </span><span class="identifier">reactApp</span><span> = </span><span class="type-name">Component</span><span>(</span><span class="identifier">i</span><span>)
+    </span><span class="identifier">reactApp</span><span>.</span><span class="identifier">renderIntoDOM</span><span>(</span><span class="identifier">`#root`</span><span>) </span><span class="comment">// `#root` is a helper to find DOM with id=root
+</span><span>  }
+
+  </span><span class="keyword">val</span><span> </span><span class="type-name">Component</span><span> = </span><span class="type-name">ScalaComponent</span><span>.</span><span class="identifier">builder</span><span>[</span><span class="type-name">InitialData</span><span>]
+    .</span><span class="identifier">render_P</span><span> { </span><span class="identifier">i</span><span> =&gt; &lt;.</span><span class="identifier">div</span><span>(</span><span class="string-literal">s&quot;Hello @</span><span class="substitution">${i.username}</span><span class="string-literal"> and nice to meet you!&quot;</span><span>) }
+    .</span><span class="identifier">build</span><span>
+}
+</span></code></pre>
+        
+        <h2 id="backend" class="section"><a class="anchor-link left" href="#backend"><i class="icofont-laika">&#xef71;</i></a>Backend</h2>
+        <p>Because we initialise our webapp with a username, the backend server needs to generate different HTML depending on who
+        the request is for.</p>
+        <p>A few important things are out of scope for this demo:</p>
+        <ul>
+          <li>how to retrieve a username depends on your app</li>
+        </ul>
+        <ul>
+          <li>how to serve HTML depends on your choice of web server</li>
+        </ul>
+        <ul>
+          <li>how to serve the frontend JS depends on your app and your choice of web server!</li>
+        </ul>
+        <p>In our example below we simply focus on <code>InitialData =&gt; Html</code>.</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">entrypoint</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">entrypoint</span><span>.</span><span class="identifier">_</span><span>
+
+</span><span class="comment">// Here we demonstrate how a backend web server can generate HTML to have the client
+// invoke the entrypoint and start the app.
+</span><span class="keyword">object</span><span> </span><span class="type-name">Backend</span><span> {
+
+  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">invoker</span><span> = </span><span class="type-name">EntrypointInvoker</span><span>(</span><span class="type-name">EntrypointExample</span><span>.</span><span class="identifier">defn</span><span>)
+
+  </span><span class="comment">// It&#39;s as simple as this: provide an input value, get HTML.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// You can expect to see something like this:
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// &lt;script type=&quot;text/javascript&quot; src=&quot;data:application/javascript;base64,…&quot;&gt;&lt;/script&gt;
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// which is morally equivalent to:
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// &lt;script&gt;
+</span><span>  </span><span class="comment">//   MyExampleApp(encoded(initialData))
+</span><span>  </span><span class="comment">// &lt;/script&gt;
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// We&#39;ll look at this in more detail in the next section.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="keyword">def</span><span> </span><span class="declaration-name">generateHtml</span><span>(</span><span class="identifier">i</span><span>: </span><span class="type-name">EntrypointExample</span><span>.</span><span class="type-name">InitialData</span><span>): </span><span class="type-name">Html</span><span> =
+    </span><span class="identifier">invoker</span><span>(</span><span class="identifier">i</span><span>).</span><span class="identifier">toHtmlScriptTag</span><span>
+
+  </span><span class="comment">// The same as above, except instead of having the invocation occur immediately,
+</span><span>  </span><span class="comment">// it schedules it to run on window.onload.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// This is morally equivalent to:
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// &lt;script&gt;
+</span><span>  </span><span class="comment">//   window.onload = function() {
+</span><span>  </span><span class="comment">//     MyExampleApp(encoded(initialData))
+</span><span>  </span><span class="comment">//   }
+</span><span>  </span><span class="comment">// &lt;/script&gt;
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="comment">// We&#39;ll look at this in more detail in the next section, too.
+</span><span>  </span><span class="comment">//
+</span><span>  </span><span class="keyword">def</span><span> </span><span class="declaration-name">generateHtmlToRunOnWindowLoad</span><span>(</span><span class="identifier">i</span><span>: </span><span class="type-name">EntrypointExample</span><span>.</span><span class="type-name">InitialData</span><span>): </span><span class="type-name">Html</span><span> =
+    </span><span class="identifier">invoker</span><span>(</span><span class="type-name">Js</span><span>.</span><span class="type-name">Wrapper</span><span>.</span><span class="identifier">windowOnLoad</span><span>, </span><span class="identifier">i</span><span>).</span><span class="identifier">toHtmlScriptTag</span><span>
+}
+</span></code></pre>
+        
+        <h2 id="backend-test" class="section"><a class="anchor-link left" href="#backend-test"><i class="icofont-laika">&#xef71;</i></a>Backend Test</h2>
+        <p>The only real value in this test is that our <code>Pickler[InitialData]</code> serialises and deserialises correctly.
+        Everything else is just to demonstrate how exactly how the generated HTML works.</p>
+        <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">entrypoint</span><span>
+
+</span><span class="keyword">import</span><span> </span><span class="identifier">boopickle</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">microlibs</span><span>.</span><span class="identifier">testutil</span><span>.</span><span class="type-name">TestUtil</span><span>.</span><span class="identifier">_</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">univeq</span><span>.</span><span class="type-name">UnivEq</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">binary</span><span>.</span><span class="type-name">BinaryData</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">utest</span><span>.</span><span class="identifier">_</span><span>
+
+</span><span class="keyword">object</span><span> </span><span class="type-name">BackendTest</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">TestSuite</span><span> {
+  </span><span class="keyword">import</span><span> </span><span class="type-name">EntrypointExample</span><span>.</span><span class="type-name">InitialData</span><span>
+
+  </span><span class="comment">// Declare that == is fine for testing equality of InitialData instances
+</span><span>  </span><span class="keyword">private</span><span> </span><span class="keyword">implicit</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">univEqInitialData</span><span>: </span><span class="type-name">UnivEq</span><span>[</span><span class="type-name">InitialData</span><span>] = </span><span class="type-name">UnivEq</span><span>.</span><span class="identifier">derive</span><span>
+
+  </span><span class="comment">// Sample data
+</span><span>  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">initData</span><span> = </span><span class="type-name">InitialData</span><span>(</span><span class="identifier">username</span><span> = </span><span class="string-literal">&quot;someone123&quot;</span><span>)
+
+  </span><span class="comment">// The base64 encoding of `initData` after binary serialisation
+</span><span>  </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">initData64</span><span> = </span><span class="string-literal">&quot;CnNvbWVvbmUxMjM=&quot;</span><span>
+
+  </span><span class="comment">// Helper to parse BinaryData into InitialData
+</span><span>  </span><span class="keyword">private</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">deserialiseInitialData</span><span>(</span><span class="identifier">b</span><span>: </span><span class="type-name">BinaryData</span><span>): </span><span class="type-name">InitialData</span><span> =
+    </span><span class="type-name">UnpickleImpl</span><span>(</span><span class="type-name">EntrypointExample</span><span>.</span><span class="identifier">picklerInitialData</span><span>).</span><span class="identifier">fromBytes</span><span>(</span><span class="identifier">b</span><span>.</span><span class="identifier">unsafeByteBuffer</span><span>)
+
+  </span><span class="keyword">override</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">tests</span><span> = </span><span class="type-name">Tests</span><span> {
+
+    </span><span class="comment">// =================================================================================
+</span><span>    </span><span class="comment">// Verify the initData64 deserialises to initData
+</span><span>    </span><span class="string-literal">&quot;pickler&quot;</span><span> - </span><span class="identifier">assertEq</span><span>(
+      </span><span class="identifier">deserialiseInitialData</span><span>(</span><span class="type-name">BinaryData</span><span>.</span><span class="identifier">fromBase64</span><span>(</span><span class="identifier">initData64</span><span>)),
+      </span><span class="identifier">initData</span><span>)
+
+    </span><span class="comment">// =================================================================================
+</span><span>    </span><span class="comment">// Let&#39;s start with our Backend.generateHtml() method
+</span><span>    </span><span class="string-literal">&quot;generateHtml&quot;</span><span> - {
+
+      </span><span class="comment">// Verify the total HTML output
+</span><span>      </span><span class="keyword">val</span><span> </span><span class="identifier">js64</span><span> = </span><span class="string-literal">&quot;TXlFeGFtcGxlQXBwLm0oIkNuTnZiV1Z2Ym1VeE1qTT0iKQ==&quot;</span><span>
+      </span><span class="identifier">assertEq</span><span>(
+        </span><span class="type-name">Backend</span><span>.</span><span class="identifier">generateHtml</span><span>(</span><span class="identifier">initData</span><span>).</span><span class="identifier">asString</span><span>,
+        </span><span class="string-literal">s&quot;&quot;&quot;&lt;script type=&quot;text/javascript&quot; src=&quot;data:application/javascript;base64,</span><span class="substitution">$js64</span><span class="string-literal">&quot;&gt;&lt;/script&gt;&quot;&quot;&quot;</span><span>)
+
+      </span><span class="comment">// Verify the JS after base64 decoding
+</span><span>      </span><span class="identifier">assertEq</span><span>(
+        </span><span class="type-name">BinaryData</span><span>.</span><span class="identifier">fromBase64</span><span>(</span><span class="identifier">js64</span><span>).</span><span class="identifier">toStringAsUtf8</span><span>,
+        </span><span class="string-literal">s&quot;&quot;&quot;MyExampleApp.m(&quot;</span><span class="substitution">$initData64</span><span class="string-literal">&quot;)&quot;&quot;&quot;</span><span>)
+    }
+
+    </span><span class="comment">// =================================================================================
+</span><span>    </span><span class="comment">// As above, but the RunOnWindowLoad variant
+</span><span>    </span><span class="string-literal">&quot;generateHtmlToRunOnWindowLoad&quot;</span><span> - {
+
+      </span><span class="comment">// Verify the total HTML output
+</span><span>      </span><span class="keyword">val</span><span> </span><span class="identifier">js64</span><span> = </span><span class="string-literal">&quot;d2luZG93Lm9ubG9hZD1mdW5jdGlvbigpe015RXhhbXBsZUFwcC5tKCJDbk52YldWdmJtVXhNak09Iil9Ow==&quot;</span><span>
+      </span><span class="identifier">assertEq</span><span>(
+        </span><span class="type-name">Backend</span><span>.</span><span class="identifier">generateHtmlToRunOnWindowLoad</span><span>(</span><span class="identifier">initData</span><span>).</span><span class="identifier">asString</span><span>,
+        </span><span class="string-literal">s&quot;&quot;&quot;&lt;script type=&quot;text/javascript&quot; src=&quot;data:application/javascript;base64,</span><span class="substitution">$js64</span><span class="string-literal">&quot;&gt;&lt;/script&gt;&quot;&quot;&quot;</span><span>)
+
+      </span><span class="comment">// Verify the JS after base64 decoding
+</span><span>      </span><span class="identifier">assertEq</span><span>(
+        </span><span class="type-name">BinaryData</span><span>.</span><span class="identifier">fromBase64</span><span>(</span><span class="identifier">js64</span><span>).</span><span class="identifier">toStringAsUtf8</span><span>,
+        </span><span class="string-literal">s&quot;&quot;&quot;window.onload=function(){MyExampleApp.m(&quot;</span><span class="substitution">$initData64</span><span class="string-literal">&quot;)};&quot;&quot;&quot;</span><span>)
+    }
+  }
+}
+</span></code></pre>
+
+      </main>
+
+    </div>
+
+  </body>
+</html>
