@@ -19,6 +19,9 @@ object EntrypointExample {
     implicitly[Pickler[String]].xmap(InitialData.apply)(_.username)
 
   // Finally, our entrypoint definition.
+  //
   // The Pickler[InitialData] we created above is pulled in implicitly.
+  // (Note: Binary is just one supported format, and not at all a necessity.)
+  //
   val defn = EntrypointDef[InitialData](Name)
 }
