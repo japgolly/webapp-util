@@ -413,7 +413,9 @@ object Build {
           }
 
         var source    = IO.read(file(path))
-        val parsed    = syntax.rootParser.parse(source).toEither.fold(sys.error, identity)
+     // val content   = source.replaceFirst("^package .+", "").trim // good enough lol
+        val content   = source.trim
+        val parsed    = syntax.rootParser.parse(content).toEither.fold(sys.error, identity)
         val codeBlock = CodeBlock(language = ext, content = parsed)
         val name      = path.replace("src/test/scala/japgolly/webapputil/examples", "...")
         val nameSpan  = Seq(InlineCode("text", Seq(CodeSpan(name))), Text(":"))

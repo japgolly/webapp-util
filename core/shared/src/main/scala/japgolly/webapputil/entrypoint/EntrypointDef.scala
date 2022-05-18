@@ -54,6 +54,13 @@ object EntrypointDef {
         override val escapeEncodedString = false
       }
 
+    implicit lazy val binary: Codec[BinaryData] =
+      new Codec[BinaryData] {
+        override val decodeOrThrow       = BinaryData.fromBase64
+        override val encode              = _.toBase64
+        override val escapeEncodedString = false
+      }
+
     object ClearText {
       implicit lazy val int: Codec[Int] =
         new Codec[Int] {
