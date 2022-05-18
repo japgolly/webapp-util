@@ -62,6 +62,7 @@
         <p class="header"><a href="#">Entrypoints</a></p>
         
         <ul class="nav-list">
+          <li class="level1"><a href="#why">Why?</a></li>
           <li class="level1"><a href="#shared-definition">Shared Definition</a></li>
           <li class="level1"><a href="#frontend">Frontend</a></li>
           <li class="level1"><a href="#backend">Backend</a></li>
@@ -80,20 +81,22 @@
   </span><span class="tag-punctuation">&lt;</span><span class="tag-name">script</span><span class="tag-punctuation"> </span><span class="attribute-name">type</span><span class="tag-punctuation">=</span><span class="string-literal">&quot;text/javascript&quot;</span><span class="tag-punctuation">&gt;</span><span>
     </span><span class="identifier">MyExampleApp</span><span>.</span><span class="identifier">start</span><span>();
   </span><span class="tag-punctuation">&lt;/</span><span class="tag-name">script</span><span class="tag-punctuation">&gt;</span></code></pre>
+        
+        <h2 id="why" class="section"><a class="anchor-link left" href="#why"><i class="icofont-laika">&#xef71;</i></a>Why?</h2>
         <p>Generating this stuff manually isn&#39;t a huge deal, but in this example we&#39;ll use the <code>Entrypoint</code> API
         for a few advantages:</p>
         <ul>
           <li>Everything is DRY — no chance to accidentally call the wrong function</li>
         </ul>
         <ul>
-          <li>The server can provide custom data to initialise our app — just need to provide a codec, ser/deser handled automatically</li>
+          <li>The server can provide custom data to initialise our app — just need to provide a codec, ser/deser and JS plumbing handled automatically</li>
         </ul>
         <ul>
           <li>HTML is generated for us — things like escaping handled automatically</li>
         </ul>
         
         <h2 id="shared-definition" class="section"><a class="anchor-link left" href="#shared-definition"><i class="icofont-laika">&#xef71;</i></a>Shared Definition</h2>
-        <p>This is cross-compiled for JVM and JS.</p>
+        <p>We&#39;ll start with our entrypoint definition, which is cross-compiled for JVM and JS.</p>
         <pre><code class="nohighlight"><span class="keyword">package</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">examples</span><span>.</span><span class="identifier">entrypoint</span><span>
 
 </span><span class="keyword">import</span><span> </span><span class="identifier">boopickle</span><span>.</span><span class="type-name">DefaultBasic</span><span>.</span><span class="identifier">_</span><span>
@@ -115,7 +118,10 @@
     </span><span class="identifier">implicitly</span><span>[</span><span class="type-name">Pickler</span><span>[</span><span class="type-name">String</span><span>]].</span><span class="identifier">xmap</span><span>(</span><span class="type-name">InitialData</span><span>.</span><span class="identifier">apply</span><span>)(</span><span class="identifier">_</span><span>.</span><span class="identifier">username</span><span>)
 
   </span><span class="comment">// Finally, our entrypoint definition.
+</span><span>  </span><span class="comment">//
 </span><span>  </span><span class="comment">// The Pickler[InitialData] we created above is pulled in implicitly.
+</span><span>  </span><span class="comment">// (Note: Binary is just one supported format, and not at all a necessity.)
+</span><span>  </span><span class="comment">//
 </span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">defn</span><span> = </span><span class="type-name">EntrypointDef</span><span>[</span><span class="type-name">InitialData</span><span>](</span><span class="type-name">Name</span><span>)
 }
 </span></code></pre>
