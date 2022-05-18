@@ -149,6 +149,7 @@ val WebappUtilVer = "<version>"
   * [`BoopickleCodecEngine`](./coreBoopickle/shared/src/main/scala/japgolly/webapputil/boopickle/BoopickleCodecEngine.scala) - implementation of `CodecEngine` for boopickle
   * [`BoopickleWebSocketClient`](./coreBoopickle/js/src/main/scala/japgolly/webapputil/boopickle/BoopickleWebSocketClient.scala) - implementation of `WebSocketClient` that uses boopickle for message encoding *(JS only)*
   * [`EncryptionEngine`](./coreBoopickle/js/src/main/scala/japgolly/webapputil/boopickle/EncryptionEngine.scala) - implementation of `Encryption.Engine` *(JS only)*
+  * [`EntrypointDefExt`](./coreBoopickle/shared/src/main/scala/japgolly/webapputil/boopickle/EntrypointDefExt.scala) - additional functionality around `EntrypointDef`
   * [`IndexedDbExt`](./coreBoopickle/js/src/main/scala/japgolly/webapputil/boopickle/IndexedDbExt.scala) - additional functionality around IndexedDb *(JS only)*
   * [`PicklerUtil`](./coreBoopickle/shared/src/main/scala/japgolly/webapputil/boopickle/PicklerUtil.scala) - util around, and implementations of, Boopickle `Pickler`s
   * [`SafePickler`](./coreBoopickle/shared/src/main/scala/japgolly/webapputil/boopickle/SafePickler.scala) - safer version of a Boopickle `Pickler` with versioning support
