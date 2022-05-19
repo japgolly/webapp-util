@@ -21,6 +21,7 @@ for a few advantages:
 
   * Everything is DRY — no chance to accidentally call the wrong function
   * The server can provide custom data to initialise our app — just need to provide a codec, ser/deser and JS plumbing handled automatically
+  * We avoid a typical AJAX call to initialise our app — faster and better experience for users
   * HTML is generated for us — things like escaping handled automatically
 
 ## Shared Definition
