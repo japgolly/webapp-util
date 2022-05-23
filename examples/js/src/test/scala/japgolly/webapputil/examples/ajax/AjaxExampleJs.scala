@@ -22,8 +22,7 @@ object AjaxExampleJs {
   //   - has automatic retries built-in by default
   //   - successful results are wrapped in Either[ErrorMsg, _]
   //   - out-of-protocol errors (eg. client lost connectivity) are caught and converted
-  //     into a Left[ErrorMsg].
-  //     (see AsyncFunction.throwableToErrorMsg for details)
+  //     into a Left[ErrorMsg]. (see AsyncFunction.throwableToErrorMsg for details)
 
   val asyncFunction: AsyncFunction[Request, ErrorMsg, Response] =
     JsonAjaxClient.asyncFunction(protocol)
@@ -62,8 +61,7 @@ object AjaxExampleJs {
         for {
           _      <- $.setStateAsync(State.Pending)
           p      <- $.props.asAsyncCallback
-          result <- p.addInts(req) // no need to catch errors here,
-                                   // as per the AsyncFunction contract
+          result <- p.addInts(req) // no need to catch errors here
           _      <- $.setStateAsync(State.Finished(result))
         } yield ()
 
@@ -117,8 +115,7 @@ object AjaxExampleJs {
           p      <- $.props.asAsyncCallback
           fn      = p.ajaxClient.asyncFunction(protocol) // create a means to make the
                                                          // AJAX call
-          result <- fn(req) // again: no need to catch errors here, as per the
-                            // AsyncFunction contract
+          result <- fn(req) // no need to catch errors here
           _      <- $.setStateAsync(State.Finished(result))
         } yield ()
 
