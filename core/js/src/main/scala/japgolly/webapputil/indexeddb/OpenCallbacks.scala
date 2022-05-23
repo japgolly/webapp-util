@@ -24,10 +24,8 @@ final case class VersionChange(db: DatabaseInVersionChange, oldVersion: Int, new
 }
 
 /** Provides legal DB methods available during a version-change callback. */
-final class DatabaseInVersionChange(raw: IDBDatabase) {
+@inline final case class DatabaseInVersionChange(raw: IDBDatabase) extends AnyVal {
 
   def createObjectStore[K, V](defn: ObjectStoreDef[K, V]): Callback =
-    Callback {
-      raw.createObjectStore(defn.name)
-    }
+    Callback { raw.createObjectStore(defn.name) }
 }

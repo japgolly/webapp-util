@@ -5,7 +5,7 @@ import japgolly.webapputil.indexeddb.TxnMode._
 import japgolly.webapputil.indexeddb.dsl._
 import org.scalajs.dom._
 
-final class Database(raw: IDBDatabase, onClose: Callback) {
+final class Database(val raw: IDBDatabase, onClose: Callback) {
 
   def atomic[K, V](store: ObjectStoreDef.Async[K, V]): AtomicAsyncDsl[K, V] =
     new AtomicAsyncDsl(this, store)

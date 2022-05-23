@@ -20,7 +20,7 @@ object IndexedDb {
 
 // =====================================================================================================================
 
-final class IndexedDb(raw: IDBFactory) {
+final class IndexedDb(val raw: IDBFactory) {
   import IndexedDb._
   import InternalUtil._
 
