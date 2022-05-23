@@ -30,11 +30,10 @@ trait MergeErrors2 extends MergeErrors1 {
 }
 
 trait MergeErrors1 {
-
   @nowarn("msg=match may not be exhaustive")
   transparent inline implicit def derive[A, B]: MergeErrors[A, B] =
     summonFrom {
       case ev: (A =:= B) => MergeErrors[A, B, B](_.fold(ev, identity))
-      case _ => MergeErrors[A, B, Either[A, B]](identity)
+      case _             => MergeErrors[A, B, Either[A, B]](identity)
     }
 }
