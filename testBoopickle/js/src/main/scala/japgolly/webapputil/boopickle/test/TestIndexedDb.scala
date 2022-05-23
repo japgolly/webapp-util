@@ -1,7 +1,6 @@
 package japgolly.webapputil.boopickle.test
 
 import japgolly.scalajs.react.{AsyncCallback, Callback}
-import japgolly.webapputil.indexeddb.IndexedDb._
 import japgolly.webapputil.indexeddb._
 import japgolly.webapputil.test.node.TestNode
 import org.scalajs.dom.window

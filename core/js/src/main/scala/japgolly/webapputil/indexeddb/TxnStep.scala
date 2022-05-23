@@ -1,8 +1,8 @@
 package japgolly.webapputil.indexeddb
 
 import japgolly.scalajs.react._
-import japgolly.webapputil.indexeddb.IndexedDb.ObjectStore
 import org.scalajs.dom._
+import scala.scalajs.js
 
 /** Embedded language for safely working with(in) an IndexedDB transaction.
   *
@@ -50,4 +50,100 @@ object TxnStep {
 
   val unit: TxnStep[RO, Unit] =
     Eval(Callback.empty)
+
+  // ===================================================================================================================
+
+  def interpretTxn[M <: TxnMode, A](txn: IDBTransaction, dsl: Txn[M, A]): AsyncCallback[A] =
+    AsyncCallback.suspend {
+      import InternalUtil._
+
+      val stores = js.Dynamic.literal().asInstanceOf[js.Dictionary[IDBObjectStore]]
+
+      def getStore(s: ObjectStore[_, _]) =
+        AsyncCallback.delay(stores.get(s.defn.name).get)
+
+      def interpret[B](step: TxnStep[TxnMode, B]): AsyncCallback[B] = {
+        step match {
+
+          case FlatMap(fa, f) =>
+            interpret(fa).flatMap(a => interpret(f(a)))
+
+          case StoreGet(s, k) =>
+            getStore(s).flatMap { store =>
+              asyncRequest(store.get(k.asJs))(_.result).flatMapSync { result =>
+                if (js.isUndefined(result))
+                  CallbackTo.pure(None)
+                else
+                  s.defn.valueCodec.decode(result).map(Some(_))
+              }
+            }
+
+          case Eval(c) =>
+            c.asAsyncCallback
+
+          case Suspend(s) =>
+            s.asAsyncCallback.flatMap(interpret(_))
+
+          case GetStore(sd) =>
+            AsyncCallback.delay {
+              val s = txn.objectStore(sd.name)
+              stores.put(sd.name, s)
+              new ObjectStore(sd)
+            }
+
+          case StoreAdd(s, k, v) =>
+            getStore(s).flatMap { store =>
+              asyncRequest_(store.add(v, k.asJs))
+            }
+
+          case StorePut(s, k, v) =>
+            getStore(s).flatMap { store =>
+              asyncRequest_(store.put(v, k.asJs))
+            }
+
+          case Map(fa, f) =>
+            interpret(fa).map(f)
+
+          case StoreDelete(s, k) =>
+            getStore(s).flatMap { store =>
+              asyncRequest_(store.delete(k.asJs))
+            }
+
+          case StoreGetAllKeys(s) =>
+            import s.defn.keyCodec
+            getStore(s).flatMap { store =>
+              asyncRequest(store.getAllKeys()) { req =>
+                val rawKeys = req.result
+                Vector.tabulate(rawKeys.length) { i =>
+                  val rawKey = rawKeys(i)
+                  keyCodec.decode(IndexedDbKey.fromJs(rawKey)).runNow() // safe in asyncRequest onSuccess
+                }
+              }
+            }
+
+          case StoreGetAllVals(s) =>
+            import s.defn.valueCodec
+            getStore(s).flatMap { store =>
+              asyncRequest(store.getAll()) { req =>
+                val rawVals = req.result
+                Vector.tabulate(rawVals.length) { i =>
+                  val rawVal = rawVals(i)
+                  valueCodec.decode(rawVal).runNow() // safe in asyncRequest onSuccess
+                }
+              }
+            }
+
+          case StoreClear(s) =>
+            getStore(s).flatMap { store =>
+              asyncRequest_(store.clear())
+            }
+
+          case TailRec(z, f) =>
+            AsyncCallback.tailrec(z)(a => interpret(f(a)))
+        }
+      }
+
+      interpret(dsl.step)
+    }
+
 }

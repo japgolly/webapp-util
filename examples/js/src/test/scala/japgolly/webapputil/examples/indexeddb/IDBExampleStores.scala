@@ -11,7 +11,7 @@ trait IDBExampleStores {
   import IDBExampleStores.{dbName, version}
 
   // Initialises or upgrades the IndexedDB database
-  protected def onUpgradeNeeded(c: IndexedDb.VersionChange): Callback
+  protected def onUpgradeNeeded(c: VersionChange): Callback
 
   // Our IndexedDB object-store for storing our people data.
   // This is an async store because we'll compress and encrypt data before storing it;
@@ -23,15 +23,15 @@ trait IDBExampleStores {
   val pointsPending: ObjectStoreDef.Sync[PersonId, Int]
 
   // Convenience function to open a connection to the IndexedDB database
-  final def open(idb: IndexedDb): AsyncCallback[IndexedDb.Database] =
-    idb.open(dbName, version)(IndexedDb.OpenCallbacks(onUpgradeNeeded))
+  final def open(idb: IndexedDb): AsyncCallback[Database] =
+    idb.open(dbName, version)(OpenCallbacks(onUpgradeNeeded))
 }
 
 // =====================================================================================
 object IDBExampleStores {
 
   // The name of our IndexedDB database
-  val dbName = IndexedDb.DatabaseName("demo")
+  val dbName = DatabaseName("demo")
 
   // The version of our combined protocols for this IndexedDB database
   val version = 1
@@ -124,7 +124,7 @@ object IDBExampleStores {
       override val pointsPending: ObjectStoreDef.Sync[PersonId, Int] =
         ObjectStoreDef.Sync("pointsPending", keyCodec, ValueCodec.int)
 
-      override protected def onUpgradeNeeded(c: IndexedDb.VersionChange): Callback =
+      override protected def onUpgradeNeeded(c: VersionChange): Callback =
         // This is where we initialise/migrate the database.
         //
         // This is standard logic for working with IndexedDb.
