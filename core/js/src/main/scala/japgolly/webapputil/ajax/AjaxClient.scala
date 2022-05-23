@@ -1,7 +1,7 @@
 package japgolly.webapputil.ajax
 
+import japgolly.scalajs.react.AsyncCallback
 import japgolly.scalajs.react.extra.Ajax
-import japgolly.scalajs.react.{AsyncCallback, CallbackTo}
 import japgolly.webapputil.binary.BinaryData
 import japgolly.webapputil.general._
 import org.scalajs.dom.XMLHttpRequest
@@ -70,8 +70,8 @@ object AjaxClient {
 
     override def asyncFunction(p: AjaxProtocol[P]): AsyncFunction[p.protocol.RequestType, ErrorMsg, p.protocol.ResponseType] =
       AsyncFunction
-        .fromSimple((req: p.protocol.RequestType) => CallbackTo(callWithRetry(p)(req).map(_.result)))
-        .mergeFailure
+        .simple((req: p.protocol.RequestType) => callWithRetry(p)(req).map(_.result))
+        .extractErrorFromOutput
   }
 
   trait Binary[P[_]] extends WithRetries[P] {

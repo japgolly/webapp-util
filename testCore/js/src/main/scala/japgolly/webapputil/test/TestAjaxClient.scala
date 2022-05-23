@@ -148,9 +148,9 @@ class TestAjaxClient[F[_]](autoRespondInitially: Boolean) extends AjaxClient[F] 
     res.result
 
   override def asyncFunction(p: AjaxProtocol[F]): AsyncFunction[p.protocol.RequestType, ErrorMsg, p.protocol.ResponseType] =
-    AsyncFunction.fromSimple { (req: p.protocol.RequestType) =>
-      apply(p)(req).map(_.map(processsResponse(p)(req, _)))
-    }.mergeFailure
+    AsyncFunction.simple { (req: p.protocol.RequestType) =>
+      apply(p)(req).asAsyncCallback.flatMap(_.map(processsResponse(p)(req, _)))
+    }.extractErrorFromOutput
 
   protected def onReq(req: Req): Req =
     req

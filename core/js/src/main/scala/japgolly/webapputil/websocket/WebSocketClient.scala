@@ -446,7 +446,7 @@ object WebSocketClient {
       }
 
     override def asyncFunction(p: ReqRes): AsyncFunction[p.RequestType, ErrorMsg, p.ResponseType] =
-      AsyncFunction.fromSimple(send(p)(_))
+      AsyncFunction.simple(send(p)(_).asAsyncCallback.flatten)
   }
 
   private val errorClosing      = js.JavaScriptException("Connection is closing.")
