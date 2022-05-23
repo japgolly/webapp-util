@@ -4,7 +4,7 @@ import japgolly.scalajs.react._
 import japgolly.webapputil.ajax.AjaxException
 import japgolly.webapputil.general.CallbackHelpers._
 
-final class AsyncFunction[-I, E, O](private[AsyncFunction] val run: I => AsyncCallback[Either[E, O]]) {
+final class AsyncFunction[-I, +E, +O](private[AsyncFunction] val run: I => AsyncCallback[Either[E, O]]) {
 
   def apply(input: I): AsyncCallback[Either[E, O]] =
     run(input)
@@ -35,18 +35,24 @@ final class AsyncFunction[-I, E, O](private[AsyncFunction] val run: I => AsyncCa
 
   def emapA[A](f: E => AsyncCallback[A]): AsyncFunction[I, A, O] =
     new AsyncFunction[I, A, O](run(_).leftFlatMap(f))
-
-  def mergeFailure(implicit ev: AsyncFunction.MergeFailure[E, O]): AsyncFunction[I, E, ev.A] = {
-    val run2 = ev.apply(this).run
-    new AsyncFunction[I, E, ev.A](run2(_).map {
-      case Right(r@ Right(_)) => r
-      case Right(l@ Left(_))  => l
-      case l@ Left(_)         => l.widen
-    })
-  }
 }
 
 object AsyncFunction {
+
+  @inline implicit final class InvariantOps[I, E, O](private val self: AsyncFunction[I, E, O]) extends AnyVal {
+
+    def mergeFailure(implicit ev: AsyncFunction.MergeFailure[E, O]): AsyncFunction[I, E, ev.NewOutput] = {
+      val run2 = ev.apply(self).run
+      new AsyncFunction[I, E, ev.NewOutput](run2(_).map {
+        case Right(r@ Right(_)) => r
+        case Right(l@ Left(_))  => l
+        case l@ Left(_)         => l.widen
+      })
+    }
+  }
+
+  // ===================================================================================================================
+  // Static methods
 
   def apply[I, E, O](run: I => AsyncCallback[Either[E, O]]): AsyncFunction[I, E, O] =
     new AsyncFunction(run)
@@ -65,25 +71,8 @@ object AsyncFunction {
       }
     }
 
-  /** Working around crappy type inference */
-  trait MergeFailure[E, O] {
-    type A
-    def apply[I]: AsyncFunction[I, E, O] => AsyncFunction[I, E, Either[E, A]]
-  }
-  object MergeFailure {
-    implicit def a[E, _A]: MergeFailure[E, Either[E, _A]] { type A = _A } =
-      new MergeFailure[E, Either[E, _A]] {
-        override type A = _A
-        override def apply[I] = identity
-      }
-  }
-
   implicit def reusability[I, E, O]: Reusability[AsyncFunction[I, E, O]] =
     Reusability((a, b) => a.run eq b.run)
-
-  // TODO: variance
-  implicit def variance[I, E, O, II <: I, EE >: E, OO >: O](a: AsyncFunction[I, E, O]): AsyncFunction[II, EE, OO] =
-    new AsyncFunction(a.run)
 
   def throwableToErrorMsg(t: Throwable): ErrorMsg =
     t match {
@@ -92,4 +81,20 @@ object AsyncFunction {
       case AjaxException(_)                    => ErrorMsg.ClientSide.errorContactingServer
       case _                                   => ErrorMsg.errorOccurred(t)
     }
+
+  // ===================================================================================================================
+  // Typeclasses
+
+  trait MergeFailure[E, -O] {
+    type NewOutput
+    def apply[I]: AsyncFunction[I, E, O] => AsyncFunction[I, E, Either[E, NewOutput]]
+  }
+
+  object MergeFailure {
+    implicit def default[E, A]: MergeFailure[E, Either[E, A]] { type NewOutput = A } =
+      new MergeFailure[E, Either[E, A]] {
+        override type NewOutput = A
+        override def apply[I] = identity
+      }
+  }
 }
