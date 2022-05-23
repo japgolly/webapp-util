@@ -40,7 +40,7 @@ final class RunTxnDsl2[M <: TxnMode] (raw: IDBDatabase, txnDsl: TxnDsl[M], mode:
 
       result <- AsyncCallback.suspend {
         val txn = startRawTxn(complete)
-        TxnStep.interpretTxn(txn, dsl)
+        TxnStep.interpret(txn, dsl.step)
       }
 
       _ <- awaitTxnCompletion

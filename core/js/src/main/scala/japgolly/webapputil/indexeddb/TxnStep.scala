@@ -53,7 +53,7 @@ object TxnStep {
 
   // ===================================================================================================================
 
-  def interpretTxn[M <: TxnMode, A](txn: IDBTransaction, dsl: Txn[M, A]): AsyncCallback[A] =
+  def interpret[A](txn: IDBTransaction, step: TxnStep[TxnMode, A]): AsyncCallback[A] =
     AsyncCallback.suspend {
       import InternalUtil._
 
@@ -143,7 +143,7 @@ object TxnStep {
         }
       }
 
-      interpret(dsl.step)
+      interpret(step)
     }
 
 }
