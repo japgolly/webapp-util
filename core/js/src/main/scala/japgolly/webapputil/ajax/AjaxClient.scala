@@ -8,10 +8,10 @@ import org.scalajs.dom.XMLHttpRequest
 import scala.scalajs.js.typedarray.ArrayBuffer
 
 trait AjaxClient[P[_]] {
-  def invoker(p: AjaxProtocol[P]): ServerSideProcInvoker[
-                                     p.protocol.RequestType,
-                                     ErrorMsg,
-                                     p.protocol.ResponseType]
+  def asyncFunction(p: AjaxProtocol[P]): AsyncFunction[
+                                           p.protocol.RequestType,
+                                           ErrorMsg,
+                                           p.protocol.ResponseType]
 }
 
 object AjaxClient {
@@ -19,8 +19,8 @@ object AjaxClient {
   /** Calls are never made. AsyncCallbacks never complete. */
   def never[P[_]]: AjaxClient[P] =
     new AjaxClient[P] {
-      override def invoker(p: AjaxProtocol[P]) =
-        ServerSideProcInvoker.const(AsyncCallback.never[Either[ErrorMsg, p.protocol.ResponseType]])
+      override def asyncFunction(p: AjaxProtocol[P]) =
+        AsyncFunction.const(AsyncCallback.never[Either[ErrorMsg, p.protocol.ResponseType]])
     }
 
   trait Response[+A] {
@@ -68,8 +68,8 @@ object AjaxClient {
       }
     }
 
-    override def invoker(p: AjaxProtocol[P]): ServerSideProcInvoker[p.protocol.RequestType, ErrorMsg, p.protocol.ResponseType] =
-      ServerSideProcInvoker
+    override def asyncFunction(p: AjaxProtocol[P]): AsyncFunction[p.protocol.RequestType, ErrorMsg, p.protocol.ResponseType] =
+      AsyncFunction
         .fromSimple((req: p.protocol.RequestType) => CallbackTo(callWithRetry(p)(req).map(_.result)))
         .mergeFailure
   }

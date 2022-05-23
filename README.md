@@ -43,6 +43,7 @@ val WebappUtilVer = "<version>"
 ## The `core` module:
 
 * `japgolly.webapputil.general`
+  * [`AsyncFunction`](./core/js/src/main/scala/japgolly/webapputil/general/AsyncFunction.scala) - an async, failable function *(JS only)*
   * [`Enabled`](./core/shared/src/main/scala/japgolly/webapputil/general/Enabled.scala) - type-safe union of `Enabled | Disabled`
   * [`ErrorMsg`](./core/shared/src/main/scala/japgolly/webapputil/general/ErrorMsg.scala) - typed error message, with some util and predefined cases
   * [`JsExt`](./core/js/src/main/scala/japgolly/webapputil/general/JsExt.scala) - JS-only implicit extensions *(JS only)*
@@ -51,7 +52,6 @@ val WebappUtilVer = "<version>"
   * [`Permission`](./core/shared/src/main/scala/japgolly/webapputil/general/Permission.scala) - type-safe union of `Allow | Deny`
   * [`Protocol`](./core/shared/src/main/scala/japgolly/webapputil/general/Protocol.scala) - abstract definitions of protocols
   * [`Retries`](./core/shared/src/main/scala/japgolly/webapputil/general/Retries.scala) - immutable retry policy
-  * [`ServerSideProcInvoker`](./core/js/src/main/scala/japgolly/webapputil/general/ServerSideProcInvoker.scala) - abstract and invokable representation of a server-side procedure *(JS only)*
   * [`ThreadUtils`](./core/jvm/src/main/scala/japgolly/webapputil/general/ThreadUtils.scala) - thread groups, thread pools, `ExecutionContext` util, shutdown hooks  *(JVM only)*
   * [`TimersJs`](./core/js/src/main/scala/japgolly/webapputil/general/TimersJs.scala) - API over JS timers *(JS only)*
   * [`Url`](./core/shared/src/main/scala/japgolly/webapputil/general/Url.scala) - types for URLs

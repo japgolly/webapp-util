@@ -4,7 +4,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.webapputil.ajax.AjaxClient
 import japgolly.webapputil.circe.JsonAjaxClient
-import japgolly.webapputil.general.{ErrorMsg, ServerSideProcInvoker}
+import japgolly.webapputil.general.{AsyncFunction, ErrorMsg}
 
 object AjaxExampleJs {
   import AjaxExampleShared.AddInts.{protocol, Request, Response}
@@ -23,20 +23,20 @@ object AjaxExampleJs {
   //   - successful results are wrapped in Either[ErrorMsg, _]
   //   - out-of-protocol errors (eg. client lost connectivity) are caught and converted
   //     into a Left[ErrorMsg].
-  //     (see ServerSideProcInvoker.throwableToErrorMsg for details)
+  //     (see AsyncFunction.throwableToErrorMsg for details)
 
-  val invoker: ServerSideProcInvoker[Request, ErrorMsg, Response] =
-    JsonAjaxClient.invoker(protocol)
+  val asyncFunction: AsyncFunction[Request, ErrorMsg, Response] =
+    JsonAjaxClient.asyncFunction(protocol)
 
   def betterExample(): AsyncCallback[Either[ErrorMsg, Response]] =
-    invoker(Request(3, 8))
+    asyncFunction(Request(3, 8))
 
   // ===================================================================================
   // Here is an example of making AJAX calls from a React component.
 
   object ExampleComponent {
 
-    // Notice how we just ask for a ServerSideProcInvoker here, which is effectively a
+    // Notice how we just ask for a AsyncFunction here, which is effectively a
     //   Request => AsyncCallback[Either[ErrorMsg, Response]]
     //
     // The component doesn't care about the details of how call is made, which makes it
@@ -44,7 +44,7 @@ object AjaxExampleJs {
     // websocket call, a webworker call, etc. Whoever uses the component gets to decide,
     // no changes here are necessary.
     //
-    final case class Props(addInts: ServerSideProcInvoker[Request, ErrorMsg, Response])
+    final case class Props(addInts: AsyncFunction[Request, ErrorMsg, Response])
 
     sealed trait State
     object State {
@@ -63,7 +63,7 @@ object AjaxExampleJs {
           _      <- $.setStateAsync(State.Pending)
           p      <- $.props.asAsyncCallback
           result <- p.addInts(req) // no need to catch errors here,
-                                   // as per the ServerSideProcInvoker contract
+                                   // as per the AsyncFunction contract
           _      <- $.setStateAsync(State.Finished(result))
         } yield ()
 
@@ -95,7 +95,7 @@ object AjaxExampleJs {
 
   object ExampleComponent2 {
 
-    // Notice we request a JsonAjaxClient and not a ServerSideProcInvoker here.
+    // Notice we request a JsonAjaxClient and not a AsyncFunction here.
     // The JsonAjaxClient could be a real one that makes real calls, or an in-memory
     // instance for lower-level testing.
     final case class Props(ajaxClient: JsonAjaxClient)
@@ -115,10 +115,10 @@ object AjaxExampleJs {
         for {
           _      <- $.setStateAsync(State.Pending)
           p      <- $.props.asAsyncCallback
-          invoker = p.ajaxClient.invoker(protocol) // create our own invoker using the
-                                                   // provided AjaxClient
-          result <- invoker(req) // again: no need to catch errors here,
-                                 // as per the ServerSideProcInvoker contract
+          fn      = p.ajaxClient.asyncFunction(protocol) // create a means to make the
+                                                         // AJAX call
+          result <- fn(req) // again: no need to catch errors here, as per the
+                            // AsyncFunction contract
           _      <- $.setStateAsync(State.Finished(result))
         } yield ()
 
