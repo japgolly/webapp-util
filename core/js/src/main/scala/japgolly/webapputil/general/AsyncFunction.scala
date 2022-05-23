@@ -12,28 +12,28 @@ final class AsyncFunction[-I, +E, +O](private[AsyncFunction] val run: I => Async
   def contramap[A](f: A => I): AsyncFunction[A, E, O] =
     new AsyncFunction[A, E, O](run compose f)
 
-  def contramapC[A, II <: I](f: A => CallbackTo[II]): AsyncFunction[A, E, O] =
-    contramapA(f(_).asAsyncCallback)
+  def contramapSync[A, II <: I](f: A => CallbackTo[II]): AsyncFunction[A, E, O] =
+    contramapAsync(f(_).asAsyncCallback)
 
-  def contramapA[A, II <: I](f: A => AsyncCallback[II]): AsyncFunction[A, E, O] =
+  def contramapAsync[A, II <: I](f: A => AsyncCallback[II]): AsyncFunction[A, E, O] =
     new AsyncFunction[A, E, O](f(_).flatMap(run))
 
   def map[A](f: O => A): AsyncFunction[I, E, A] =
     new AsyncFunction[I, E, A](run(_).map(_.map(f)))
 
-  def mapC[A](f: O => CallbackTo[A]): AsyncFunction[I, E, A] =
-    mapA(f(_).asAsyncCallback)
+  def mapSync[A](f: O => CallbackTo[A]): AsyncFunction[I, E, A] =
+    mapAsync(f(_).asAsyncCallback)
 
-  def mapA[A](f: O => AsyncCallback[A]): AsyncFunction[I, E, A] =
+  def mapAsync[A](f: O => AsyncCallback[A]): AsyncFunction[I, E, A] =
     new AsyncFunction[I, E, A](run(_).rightFlatMap(f))
 
   def emap[A](f: E => A): AsyncFunction[I, A, O] =
     new AsyncFunction[I, A, O](run(_).map(_.leftMap(f)))
 
-  def emapC[A](f: E => CallbackTo[A]): AsyncFunction[I, A, O] =
-    emapA(f(_).asAsyncCallback)
+  def emapSync[A](f: E => CallbackTo[A]): AsyncFunction[I, A, O] =
+    emapAsync(f(_).asAsyncCallback)
 
-  def emapA[A](f: E => AsyncCallback[A]): AsyncFunction[I, A, O] =
+  def emapAsync[A](f: E => AsyncCallback[A]): AsyncFunction[I, A, O] =
     new AsyncFunction[I, A, O](run(_).leftFlatMap(f))
 }
 
