@@ -114,13 +114,13 @@ class WebSocketClientTester {
       timers        = timers,
       logger        = LoggerJs.on) // don't turn this off - it being on, has caught bugs before
 
-  val invoker = client.invoker(P.ReqRes)
+  val asyncFunction = client.asyncFunction(P.ReqRes)
 
   def sendMsg(): Unit = {
     val reqId = sendResults.length
     sendResults :+= Vector.empty
     debugPrintln(s"Sending ReqMsg($reqId)")
-    invoker(ReqMsg(reqId)).attempt.map { r =>
+    asyncFunction(ReqMsg(reqId)).attempt.map { r =>
       debugPrintln(s"Received response for $reqId: $r")
       sendResults = sendResults.updated(reqId, sendResults(reqId) :+ r)
     }.toCallback.runNow()

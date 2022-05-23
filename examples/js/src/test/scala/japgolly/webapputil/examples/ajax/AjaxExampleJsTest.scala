@@ -5,7 +5,7 @@ import japgolly.scalajs.react.AsyncCallback
 import japgolly.scalajs.react.test._
 import japgolly.webapputil.ajax.AjaxClient
 import japgolly.webapputil.circe.test.TestJsonAjaxClient
-import japgolly.webapputil.general.{ErrorMsg, ServerSideProcInvoker}
+import japgolly.webapputil.general.{AsyncFunction, ErrorMsg}
 import org.scalajs.dom.HTMLButtonElement
 import utest._
 
@@ -23,9 +23,9 @@ object AjaxExampleJsTest extends TestSuite {
   private def testExampleComponent1Success() = {
     import AjaxExampleJs.ExampleComponent._
 
-    // Here we provide our own ServerSideProcInvoker that provides an answer in-memory
+    // Here we provide our own AsyncFunction that provides an answer in-memory
     // immediately
-    val props = Props(ServerSideProcInvoker { req =>
+    val props = Props(AsyncFunction { req =>
       val result = AjaxExampleShared.AddInts.logic(req)
       AsyncCallback.pure(Right(result))
     })
@@ -49,7 +49,7 @@ object AjaxExampleJsTest extends TestSuite {
 
     // Let's simulate a connectivity error
     val error = ErrorMsg("No internet connectivity")
-    val props = Props(ServerSideProcInvoker.const(Left(error)))
+    val props = Props(AsyncFunction.const(Left(error)))
 
     // Mount the component for testing...
     ReactTestUtils.withRenderedIntoBody(Component(props)) { m =>

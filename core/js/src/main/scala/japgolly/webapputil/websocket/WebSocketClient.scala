@@ -19,7 +19,7 @@ trait WebSocketClient[Codec[_], ReqRes <: Protocol.RequestResponse[Codec]] {
   val readyState: CallbackTo[Option[ReadyState]]
   val keepAlive: Callback
   def send(p: ReqRes)(request: p.RequestType): CallbackTo[AsyncCallback[p.ResponseType]]
-  def invoker(p: ReqRes): ServerSideProcInvoker[p.RequestType, ErrorMsg, p.ResponseType]
+  def asyncFunction(p: ReqRes): AsyncFunction[p.RequestType, ErrorMsg, p.ResponseType]
   def connect: Callback
   val close: Callback
 }
@@ -445,8 +445,8 @@ object WebSocketClient {
         promise.map(_.unsafeForceType[request.p.ResponseType].value)
       }
 
-    override def invoker(p: ReqRes): ServerSideProcInvoker[p.RequestType, ErrorMsg, p.ResponseType] =
-      ServerSideProcInvoker.fromSimple(send(p)(_))
+    override def asyncFunction(p: ReqRes): AsyncFunction[p.RequestType, ErrorMsg, p.ResponseType] =
+      AsyncFunction.simple(send(p)(_).asAsyncCallback.flatten)
   }
 
   private val errorClosing      = js.JavaScriptException("Connection is closing.")
