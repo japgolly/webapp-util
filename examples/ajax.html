@@ -166,7 +166,7 @@
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="identifier">vdom</span><span>.</span><span class="identifier">html_</span><span>&lt;^.</span><span class="identifier">_</span><span>
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">ajax</span><span>.</span><span class="type-name">AjaxClient</span><span>
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">circe</span><span>.</span><span class="type-name">JsonAjaxClient</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">general</span><span>.{</span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">ServerSideProcInvoker</span><span>}
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">general</span><span>.{</span><span class="type-name">AsyncFunction</span><span>, </span><span class="type-name">ErrorMsg</span><span>}
 
 </span><span class="keyword">object</span><span> </span><span class="type-name">AjaxExampleJs</span><span> {
   </span><span class="keyword">import</span><span> </span><span class="type-name">AjaxExampleShared</span><span>.</span><span class="type-name">AddInts</span><span>.{</span><span class="identifier">protocol</span><span>, </span><span class="type-name">Request</span><span>, </span><span class="type-name">Response</span><span>}
@@ -184,21 +184,20 @@
 </span><span>  </span><span class="comment">//   - has automatic retries built-in by default
 </span><span>  </span><span class="comment">//   - successful results are wrapped in Either[ErrorMsg, _]
 </span><span>  </span><span class="comment">//   - out-of-protocol errors (eg. client lost connectivity) are caught and converted
-</span><span>  </span><span class="comment">//     into a Left[ErrorMsg].
-</span><span>  </span><span class="comment">//     (see ServerSideProcInvoker.throwableToErrorMsg for details)
+</span><span>  </span><span class="comment">//     into a Left[ErrorMsg]. (see AsyncFunction.throwableToErrorMsg for details)
 </span><span>
-  </span><span class="keyword">val</span><span> </span><span class="identifier">invoker</span><span>: </span><span class="type-name">ServerSideProcInvoker</span><span>[</span><span class="type-name">Request</span><span>, </span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>] =
-    </span><span class="type-name">JsonAjaxClient</span><span>.</span><span class="identifier">invoker</span><span>(</span><span class="identifier">protocol</span><span>)
+  </span><span class="keyword">val</span><span> </span><span class="identifier">asyncFunction</span><span>: </span><span class="type-name">AsyncFunction</span><span>[</span><span class="type-name">Request</span><span>, </span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>] =
+    </span><span class="type-name">JsonAjaxClient</span><span>.</span><span class="identifier">asyncFunction</span><span>(</span><span class="identifier">protocol</span><span>)
 
   </span><span class="keyword">def</span><span> </span><span class="declaration-name">betterExample</span><span>(): </span><span class="type-name">AsyncCallback</span><span>[</span><span class="type-name">Either</span><span>[</span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>]] =
-    </span><span class="identifier">invoker</span><span>(</span><span class="type-name">Request</span><span>(</span><span class="number-literal">3</span><span>, </span><span class="number-literal">8</span><span>))
+    </span><span class="identifier">asyncFunction</span><span>(</span><span class="type-name">Request</span><span>(</span><span class="number-literal">3</span><span>, </span><span class="number-literal">8</span><span>))
 
   </span><span class="comment">// ===================================================================================
 </span><span>  </span><span class="comment">// Here is an example of making AJAX calls from a React component.
 </span><span>
   </span><span class="keyword">object</span><span> </span><span class="type-name">ExampleComponent</span><span> {
 
-    </span><span class="comment">// Notice how we just ask for a ServerSideProcInvoker here, which is effectively a
+    </span><span class="comment">// Notice how we just ask for a AsyncFunction here, which is effectively a
 </span><span>    </span><span class="comment">//   Request =&gt; AsyncCallback[Either[ErrorMsg, Response]]
 </span><span>    </span><span class="comment">//
 </span><span>    </span><span class="comment">// The component doesn&#39;t care about the details of how call is made, which makes it
@@ -206,7 +205,7 @@
 </span><span>    </span><span class="comment">// websocket call, a webworker call, etc. Whoever uses the component gets to decide,
 </span><span>    </span><span class="comment">// no changes here are necessary.
 </span><span>    </span><span class="comment">//
-</span><span>    </span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Props</span><span>(</span><span class="identifier">addInts</span><span>: </span><span class="type-name">ServerSideProcInvoker</span><span>[</span><span class="type-name">Request</span><span>, </span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>])
+</span><span>    </span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Props</span><span>(</span><span class="identifier">addInts</span><span>: </span><span class="type-name">AsyncFunction</span><span>[</span><span class="type-name">Request</span><span>, </span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">Response</span><span>])
 
     </span><span class="keyword">sealed</span><span> </span><span class="keyword">trait</span><span> </span><span class="type-name">State</span><span>
     </span><span class="keyword">object</span><span> </span><span class="type-name">State</span><span> {
@@ -224,8 +223,7 @@
         </span><span class="keyword">for</span><span> {
           </span><span class="identifier">_</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">setStateAsync</span><span>(</span><span class="type-name">State</span><span>.</span><span class="type-name">Pending</span><span>)
           </span><span class="identifier">p</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">props</span><span>.</span><span class="identifier">asAsyncCallback</span><span>
-          </span><span class="identifier">result</span><span> &lt;- </span><span class="identifier">p</span><span>.</span><span class="identifier">addInts</span><span>(</span><span class="identifier">req</span><span>) </span><span class="comment">// no need to catch errors here,
-</span><span>                                   </span><span class="comment">// as per the ServerSideProcInvoker contract
+          </span><span class="identifier">result</span><span> &lt;- </span><span class="identifier">p</span><span>.</span><span class="identifier">addInts</span><span>(</span><span class="identifier">req</span><span>) </span><span class="comment">// no need to catch errors here
 </span><span>          </span><span class="identifier">_</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">setStateAsync</span><span>(</span><span class="type-name">State</span><span>.</span><span class="type-name">Finished</span><span>(</span><span class="identifier">result</span><span>))
         } </span><span class="keyword">yield</span><span> ()
 
@@ -257,7 +255,7 @@
 </span><span>
   </span><span class="keyword">object</span><span> </span><span class="type-name">ExampleComponent2</span><span> {
 
-    </span><span class="comment">// Notice we request a JsonAjaxClient and not a ServerSideProcInvoker here.
+    </span><span class="comment">// Notice we request a JsonAjaxClient and not a AsyncFunction here.
 </span><span>    </span><span class="comment">// The JsonAjaxClient could be a real one that makes real calls, or an in-memory
 </span><span>    </span><span class="comment">// instance for lower-level testing.
 </span><span>    </span><span class="keyword">final</span><span> </span><span class="keyword">case</span><span> </span><span class="keyword">class</span><span> </span><span class="type-name">Props</span><span>(</span><span class="identifier">ajaxClient</span><span>: </span><span class="type-name">JsonAjaxClient</span><span>)
@@ -277,10 +275,9 @@
         </span><span class="keyword">for</span><span> {
           </span><span class="identifier">_</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">setStateAsync</span><span>(</span><span class="type-name">State</span><span>.</span><span class="type-name">Pending</span><span>)
           </span><span class="identifier">p</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">props</span><span>.</span><span class="identifier">asAsyncCallback</span><span>
-          </span><span class="identifier">invoker</span><span> = </span><span class="identifier">p</span><span>.</span><span class="identifier">ajaxClient</span><span>.</span><span class="identifier">invoker</span><span>(</span><span class="identifier">protocol</span><span>) </span><span class="comment">// create our own invoker using the
-</span><span>                                                   </span><span class="comment">// provided AjaxClient
-</span><span>          </span><span class="identifier">result</span><span> &lt;- </span><span class="identifier">invoker</span><span>(</span><span class="identifier">req</span><span>) </span><span class="comment">// again: no need to catch errors here,
-</span><span>                                 </span><span class="comment">// as per the ServerSideProcInvoker contract
+          </span><span class="identifier">fn</span><span>      = </span><span class="identifier">p</span><span>.</span><span class="identifier">ajaxClient</span><span>.</span><span class="identifier">asyncFunction</span><span>(</span><span class="identifier">protocol</span><span>) </span><span class="comment">// create a means to make the
+</span><span>                                                         </span><span class="comment">// AJAX call
+</span><span>          </span><span class="identifier">result</span><span> &lt;- </span><span class="identifier">fn</span><span>(</span><span class="identifier">req</span><span>) </span><span class="comment">// no need to catch errors here
 </span><span>          </span><span class="identifier">_</span><span>      &lt;- </span><span class="identifier">$</span><span>.</span><span class="identifier">setStateAsync</span><span>(</span><span class="type-name">State</span><span>.</span><span class="type-name">Finished</span><span>(</span><span class="identifier">result</span><span>))
         } </span><span class="keyword">yield</span><span> ()
 
@@ -314,7 +311,7 @@
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">react</span><span>.</span><span class="identifier">test</span><span>.</span><span class="identifier">_</span><span>
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">ajax</span><span>.</span><span class="type-name">AjaxClient</span><span>
 </span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">circe</span><span>.</span><span class="identifier">test</span><span>.</span><span class="type-name">TestJsonAjaxClient</span><span>
-</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">general</span><span>.{</span><span class="type-name">ErrorMsg</span><span>, </span><span class="type-name">ServerSideProcInvoker</span><span>}
+</span><span class="keyword">import</span><span> </span><span class="identifier">japgolly</span><span>.</span><span class="identifier">webapputil</span><span>.</span><span class="identifier">general</span><span>.{</span><span class="type-name">AsyncFunction</span><span>, </span><span class="type-name">ErrorMsg</span><span>}
 </span><span class="keyword">import</span><span> </span><span class="identifier">org</span><span>.</span><span class="identifier">scalajs</span><span>.</span><span class="identifier">dom</span><span>.</span><span class="type-name">HTMLButtonElement</span><span>
 </span><span class="keyword">import</span><span> </span><span class="identifier">utest</span><span>.</span><span class="identifier">_</span><span>
 
@@ -332,9 +329,9 @@
 </span><span>  </span><span class="keyword">private</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">testExampleComponent1Success</span><span>() = {
     </span><span class="keyword">import</span><span> </span><span class="type-name">AjaxExampleJs</span><span>.</span><span class="type-name">ExampleComponent</span><span>.</span><span class="identifier">_</span><span>
 
-    </span><span class="comment">// Here we provide our own ServerSideProcInvoker that provides an answer in-memory
+    </span><span class="comment">// Here we provide our own AsyncFunction that provides an answer in-memory
 </span><span>    </span><span class="comment">// immediately
-</span><span>    </span><span class="keyword">val</span><span> </span><span class="identifier">props</span><span> = </span><span class="type-name">Props</span><span>(</span><span class="type-name">ServerSideProcInvoker</span><span> { </span><span class="identifier">req</span><span> =&gt;
+</span><span>    </span><span class="keyword">val</span><span> </span><span class="identifier">props</span><span> = </span><span class="type-name">Props</span><span>(</span><span class="type-name">AsyncFunction</span><span> { </span><span class="identifier">req</span><span> =&gt;
       </span><span class="keyword">val</span><span> </span><span class="identifier">result</span><span> = </span><span class="type-name">AjaxExampleShared</span><span>.</span><span class="type-name">AddInts</span><span>.</span><span class="identifier">logic</span><span>(</span><span class="identifier">req</span><span>)
       </span><span class="type-name">AsyncCallback</span><span>.</span><span class="identifier">pure</span><span>(</span><span class="type-name">Right</span><span>(</span><span class="identifier">result</span><span>))
     })
@@ -358,7 +355,7 @@
 
     </span><span class="comment">// Let&#39;s simulate a connectivity error
 </span><span>    </span><span class="keyword">val</span><span> </span><span class="identifier">error</span><span> = </span><span class="type-name">ErrorMsg</span><span>(</span><span class="string-literal">&quot;No internet connectivity&quot;</span><span>)
-    </span><span class="keyword">val</span><span> </span><span class="identifier">props</span><span> = </span><span class="type-name">Props</span><span>(</span><span class="type-name">ServerSideProcInvoker</span><span>.</span><span class="identifier">const</span><span>(</span><span class="type-name">Left</span><span>(</span><span class="identifier">error</span><span>)))
+    </span><span class="keyword">val</span><span> </span><span class="identifier">props</span><span> = </span><span class="type-name">Props</span><span>(</span><span class="type-name">AsyncFunction</span><span>.</span><span class="identifier">const</span><span>(</span><span class="type-name">Left</span><span>(</span><span class="identifier">error</span><span>)))
 
     </span><span class="comment">// Mount the component for testing...
 </span><span>    </span><span class="type-name">ReactTestUtils</span><span>.</span><span class="identifier">withRenderedIntoBody</span><span>(</span><span class="type-name">Component</span><span>(</span><span class="identifier">props</span><span>)) { </span><span class="identifier">m</span><span> =&gt;
