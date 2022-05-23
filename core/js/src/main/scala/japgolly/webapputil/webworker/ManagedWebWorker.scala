@@ -3,7 +3,7 @@ package japgolly.webapputil.webworker
 import japgolly.microlibs.stdlib_ext.EscapeUtils
 import japgolly.scalajs.react._
 import japgolly.univeq._
-import japgolly.webapputil.general.{ErrorMsg, LoggerJs}
+import japgolly.webapputil.general.{AsyncFunction, ErrorMsg, LoggerJs}
 import scala.scalajs.js
 import scala.scalajs.js.isUndefined
 import scala.util.{Failure, Success, Try}
@@ -12,19 +12,22 @@ object ManagedWebWorker {
 
   trait Client[Req[_], Push, R[_], Enc] {
 
-    final def send[A](req: Req[A])(implicit readResult: R[A]): AsyncCallback[A] =
-      postEnc(req, encode(req))
+    def close: Callback
 
     def encode[A](req: Req[A]): Enc
 
-    def postEnc[A](req: Req[A], enc: Enc)(implicit readResult: R[A]): AsyncCallback[A]
-
     def modOnPush(f: (Push => Callback) => (Push => Callback)): Callback
+
+    def postEncoded[A](req: Req[A], enc: Enc)(implicit readResult: R[A]): AsyncCallback[A]
+
+    def asyncFunction[A](implicit readResult: R[A]): AsyncFunction[Req[A], ErrorMsg, A] =
+      AsyncFunction.simple((r: Req[A]) => send(r))
 
     final def replaceOnPush(f: Push => Callback): Callback =
       modOnPush(_ => f)
 
-    def close: Callback
+    final def send[A](req: Req[A])(implicit readResult: R[A]): AsyncCallback[A] =
+      postEncoded(req, encode(req))
   }
 
   object Client {
@@ -93,7 +96,7 @@ object ManagedWebWorker {
         override def encode[A](req: Req[A]): Encoded =
           protocol.encode(req.asInstanceOf[Req[Any]])
 
-        override def postEnc[A](req: Req[A], enc: Encoded)(implicit readResult: Decoder[A]): AsyncCallback[A] =
+        override def postEncoded[A](req: Req[A], enc: Encoded)(implicit readResult: Decoder[A]): AsyncCallback[A] =
           preSend >> AsyncCallback.promise[A].map { case (result, complete) =>
             lastPromiseId += 1
             val id = lastPromiseId
