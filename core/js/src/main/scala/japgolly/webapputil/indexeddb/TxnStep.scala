@@ -140,16 +140,14 @@ object TxnStep {
           case Map(fa, f) =>
             interpret(fa).map(f)
 
-          case step: OpenKeyCursor[_] =>
-            def typed[K](x: OpenKeyCursor[K]) =
-              getStore(x.store).flatMap { store =>
-                asyncRequest(store.openKeyCursor(x.range, x.dir)) { req =>
-                  val raw = req.result
-                  val kc = Option(raw).map(new KeyCursor(_, x.store.defn.keyCodec))
-                  x.use(kc).runNow()
-                }
+          case OpenKeyCursor(s, range, dir, use) =>
+            getStore(s).flatMap { store =>
+              asyncRequest(store.openKeyCursor(range, dir)) { req =>
+                val raw = req.result
+                val kc = Option(raw).map(new KeyCursor(_, s.defn.keyCodec))
+                use(kc).runNow()
               }
-            typed(step.asInstanceOf[OpenKeyCursor[Any]])
+            }
 
           case StoreDelete(s, k) =>
             getStore(s).flatMap { store =>
