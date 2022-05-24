@@ -4,6 +4,7 @@ import japgolly.scalajs.react._
 import japgolly.webapputil.indexeddb.TxnMode._
 import japgolly.webapputil.indexeddb.dsl._
 import org.scalajs.dom._
+import scala.scalajs.js
 
 final class Database(val raw: IDBDatabase, onClose: Callback) {
 
@@ -68,6 +69,15 @@ final class Database(val raw: IDBDatabase, onClose: Callback) {
 
   def getAllValues[K, V](store: ObjectStoreDef.Sync[K, V]): AsyncCallback[Vector[V]] =
     transactionRO(store)(_.objectStore(store).flatMap(_.getAllValues))
+
+  def openKeyCursor[K, V](store: ObjectStoreDef.Sync[K, V])
+                         (use: KeyCursor.ForStore[K] => Callback): AsyncCallback[Unit] =
+    transactionRO(store)(_.objectStore(store).flatMap(_.openKeyCursor(use)))
+
+  def openKeyCursorWithRange[K, V](store: ObjectStoreDef.Sync[K, V])
+                                  (keyRange: KeyRange.Dsl[K] => KeyRange, dir: js.UndefOr[IDBCursorDirection] = ())
+                                  (use: KeyCursor.ForStore[K] => Callback): AsyncCallback[Unit] =
+    transactionRO(store)(_.objectStore(store).flatMap(_.openKeyCursorWithRange(keyRange, dir)(use)))
 
   /** aka upsert */
   def put[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: V): AsyncCallback[Unit] =

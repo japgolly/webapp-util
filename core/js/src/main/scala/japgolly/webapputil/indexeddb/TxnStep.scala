@@ -3,6 +3,7 @@ package japgolly.webapputil.indexeddb
 import japgolly.scalajs.react._
 import org.scalajs.dom._
 import scala.scalajs.js
+import scala.scalajs.js.|
 
 /** Embedded language for safely working with(in) an IndexedDB transaction.
   *
@@ -26,21 +27,58 @@ sealed trait TxnStep[+M <: TxnMode, +A]
 object TxnStep {
   import TxnMode._
 
-  final case class FlatMap        [M <: TxnMode, A, B](from: TxnStep[M, A], f: A => TxnStep[M, B])                   extends TxnStep[M, B]
-  final case class Map            [M <: TxnMode, A, B](from: TxnStep[M, A], f: A => B)                               extends TxnStep[M, B]
-  final case class Suspend        [M <: TxnMode, A]   (body: CallbackTo[TxnStep[M, A]])                              extends TxnStep[M, A]
-  final case class TailRec        [M <: TxnMode, A, B](a: A, f: A => TxnStep[M, Either[A, B]])                       extends TxnStep[M, B]
+  // Composite steps
 
-  final case class Eval           [A]                 (body: CallbackTo[A])                                          extends TxnStep[RO, A]
-  final case class GetStore       [K, V]              (defn: ObjectStoreDef.Sync[K, V])                              extends TxnStep[RO, ObjectStore[K, V]]
-  final case class StoreGet       [K, V]              (store: ObjectStore[K, V], key: IndexedDbKey)                  extends TxnStep[RO, Option[V]]
-  final case class StoreGetAllKeys[K, V]              (store: ObjectStore[K, V])                                     extends TxnStep[RO, Vector[K]]
-  final case class StoreGetAllVals[K, V]              (store: ObjectStore[K, V])                                     extends TxnStep[RO, Vector[V]]
+  final case class FlatMap[M <: TxnMode, A, B](from: TxnStep[M, A], f: A => TxnStep[M, B])
+    extends TxnStep[M, B]
 
-  final case class StoreAdd                           (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends TxnStep[RW, Unit]
-  final case class StoreClear                         (store: ObjectStore[_, _])                                     extends TxnStep[RW, Unit]
-  final case class StoreDelete    [K, V]              (store: ObjectStore[K, V], key: IndexedDbKey)                  extends TxnStep[RW, Unit]
-  final case class StorePut                           (store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue) extends TxnStep[RW, Unit]
+  final case class Map[M <: TxnMode, A, B](from: TxnStep[M, A], f: A => B)
+    extends TxnStep[M, B]
+
+  final case class Suspend[M <: TxnMode, A](body: CallbackTo[TxnStep[M, A]])
+    extends TxnStep[M, A]
+
+  final case class TailRec[M <: TxnMode, A, B](a: A, f: A => TxnStep[M, Either[A, B]])
+    extends TxnStep[M, B]
+
+  // RO steps
+
+  final case class Eval[A](body: CallbackTo[A])
+    extends TxnStep[RO, A]
+
+  final case class GetStore[K, V](defn: ObjectStoreDef.Sync[K, V])
+    extends TxnStep[RO, ObjectStore[K, V]]
+
+  final case class StoreGet[K, V](store: ObjectStore[K, V], key: IndexedDbKey)
+    extends TxnStep[RO, Option[V]]
+
+  final case class StoreGetAllKeys[K, V](store: ObjectStore[K, V])
+    extends TxnStep[RO, Vector[K]]
+
+  final case class StoreGetAllVals[K, V](store: ObjectStore[K, V])
+    extends TxnStep[RO, Vector[V]]
+
+  final case class OpenKeyCursor[K](store: ObjectStore[K, _],
+                                    range: js.UndefOr[IDBKeyRange | IDBKey],
+                                    dir  : js.UndefOr[IDBCursorDirection],
+                                    use  : KeyCursor.ForStore[K] => Callback)
+    extends TxnStep[RO, Unit]
+
+  // RW steps
+
+  final case class StoreAdd(store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue)
+    extends TxnStep[RW, Unit]
+
+  final case class StoreClear(store: ObjectStore[_, _])
+    extends TxnStep[RW, Unit]
+
+  final case class StoreDelete[K, V](store: ObjectStore[K, V], key: IndexedDbKey)
+    extends TxnStep[RW, Unit]
+
+  final case class StorePut(store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue)
+    extends TxnStep[RW, Unit]
+
+  // ===================================================================================================================
 
   val none: TxnStep[RO, Option[Nothing]] =
     pure(None)
@@ -50,8 +88,6 @@ object TxnStep {
 
   val unit: TxnStep[RO, Unit] =
     Eval(Callback.empty)
-
-  // ===================================================================================================================
 
   def interpret[A](txn: IDBTransaction, step: TxnStep[TxnMode, A]): AsyncCallback[A] =
     AsyncCallback.suspend {
@@ -103,6 +139,17 @@ object TxnStep {
 
           case Map(fa, f) =>
             interpret(fa).map(f)
+
+          case step: OpenKeyCursor[_] =>
+            def typed[K](x: OpenKeyCursor[K]) =
+              getStore(x.store).flatMap { store =>
+                asyncRequest(store.openKeyCursor(x.range, x.dir)) { req =>
+                  val raw = req.result
+                  val kc = Option(raw).map(new KeyCursor(_, x.store.defn.keyCodec))
+                  x.use(kc).runNow()
+                }
+              }
+            typed(step.asInstanceOf[OpenKeyCursor[Any]])
 
           case StoreDelete(s, k) =>
             getStore(s).flatMap { store =>

@@ -208,5 +208,61 @@ object IndexedDbTest extends TestSuite {
         v
       }
     }
+
+    "openKeyCursor" - asyncTest() {
+      val store = ObjectStoreDef.Sync("test", KeyCodec.int.xmap(_+1000)(_-1000), ValueCodec.string)
+      var results1 = List.empty[Int]
+      var results2 = List.empty[Int]
+      var results3 = List.empty[Int]
+      var results4 = List.empty[Int]
+      var results5 = List.empty[Int]
+      var results6 = List.empty[Int]
+      for {
+        db <- TestIndexedDb(store)
+        _  <- db.add(store)(456, "wow")
+        _  <- db.add(store)(123, "hehe")
+
+        _  <- db.openKeyCursor(store) {
+                case Some(c) => Callback { results1 ::= c.key } >> c.continue
+                case None    => Callback { results1 ::= 1 }
+              }
+
+        _  <- db.openKeyCursor(store) {
+                case Some(c) => Callback { results2 ::= c.key } // no `continue` here
+                case None    => Callback { results2 ::= 2 }
+              }
+
+        _  <- db.openKeyCursorWithRange(store)(_ >= 200) {
+                case Some(c) => Callback { results3 ::= c.key } >> c.continue
+                case None    => Callback { results3 ::= 3 }
+              }
+
+        _  <- db.openKeyCursorWithRange(store)(_ <= 200) {
+                case Some(c) => Callback { results4 ::= c.key } >> c.continue
+                case None    => Callback { results4 ::= 4 }
+              }
+
+        _  <- db.openKeyCursorWithRange(store)(_ only 123) {
+                case Some(c) => Callback { results5 ::= c.key } >> c.continue
+                case None    => Callback { results5 ::= 5 }
+              }
+
+        _  <- db.openKeyCursorWithRange(store)(_ > 400 < 500) {
+                case Some(c) => Callback { results6 ::= c.key } >> c.continue
+                case None    => Callback { results6 ::= 6 }
+              }
+
+      } yield {
+        assertSeqIgnoreOrder(results1)(123, 456, 1)
+        assertSeqIgnoreOrder(results3)(456, 3)
+        assertSeqIgnoreOrder(results4)(123, 4)
+        assertSeqIgnoreOrder(results5)(123, 5)
+        assertSeqIgnoreOrder(results6)(456, 6)
+
+        val result2Expect = List(List(123), List(456))
+        assert(result2Expect contains results2)
+      }
+    }
+
   }
 }

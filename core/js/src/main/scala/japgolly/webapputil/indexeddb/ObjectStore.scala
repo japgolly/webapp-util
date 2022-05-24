@@ -1,7 +1,9 @@
 package japgolly.webapputil.indexeddb
 
+import japgolly.scalajs.react.Callback
 import japgolly.webapputil.indexeddb.TxnMode._
-
+import org.scalajs.dom.IDBCursorDirection
+import scala.scalajs.js
 
 final class ObjectStore[K, V](val defn: ObjectStoreDef.Sync[K, V]) {
   import defn.{keyCodec, valueCodec}
@@ -38,7 +40,7 @@ final class ObjectStore[K, V](val defn: ObjectStoreDef.Sync[K, V]) {
     get(key).flatMap {
       case Some(v1) =>
         val v2 = f(v1)
-        put(key, v2).map(_ => Some(v2))
+        put(key, v2).map(_ => Some(v2)) // thread-safe cos we're in a locked txn
       case None =>
         TxnDslRW.none
     }
@@ -49,6 +51,15 @@ final class ObjectStore[K, V](val defn: ObjectStoreDef.Sync[K, V]) {
       o2  = f(o1)
       _  <- putOrDelete(key, o2)
     } yield o2
+
+  def openKeyCursor(use: KeyCursor.ForStore[K] => Callback): Txn[RO, Unit] =
+    TxnStep.OpenKeyCursor(this, (), (), use)
+
+  def openKeyCursorWithRange(keyRange: KeyRange.Dsl[K] => KeyRange, dir: js.UndefOr[IDBCursorDirection] = ())
+                            (use: KeyCursor.ForStore[K] => Callback): Txn[RO, Unit] = {
+    val r = keyRange(new KeyRange.Dsl(defn.keyCodec)).raw
+    TxnStep.OpenKeyCursor(this, r, dir, use)
+  }
 
   /** aka upsert */
   def put(key: K, value: V): Txn[RW, Unit] = {
