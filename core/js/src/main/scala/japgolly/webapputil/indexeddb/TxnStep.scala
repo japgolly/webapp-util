@@ -27,7 +27,7 @@ sealed trait TxnStep[+M <: TxnMode, +A]
 object TxnStep {
   import TxnMode._
 
-  // Composite steps
+  // Generic steps
 
   final case class FlatMap[M <: TxnMode, A, B](from: TxnStep[M, A], f: A => TxnStep[M, B])
     extends TxnStep[M, B]
@@ -41,6 +41,9 @@ object TxnStep {
   final case class TailRec[M <: TxnMode, A, B](a: A, f: A => TxnStep[M, Either[A, B]])
     extends TxnStep[M, B]
 
+  final case class RawCall[M <: TxnMode, R <: IDBRequest[Any, _], A](act: () => R, onSuccess: R => A)
+    extends TxnStep[M, A]
+
   // RO steps
 
   final case class Eval[A](body: CallbackTo[A])
@@ -48,6 +51,12 @@ object TxnStep {
 
   final case class GetStore[K, V](defn: ObjectStoreDef.Sync[K, V])
     extends TxnStep[RO, ObjectStore[K, V]]
+
+  final case class OpenKeyCursorRO[K](store: ObjectStore[K, _],
+                                      range: js.UndefOr[IDBKeyRange | IDBKey],
+                                      dir  : js.UndefOr[IDBCursorDirection],
+                                      use  : KeyCursor.ForStoreRO[K] => TxnStep[RO, Any])
+    extends TxnStep[RO, Unit]
 
   final case class StoreGet[K, V](store: ObjectStore[K, V], key: IndexedDbKey)
     extends TxnStep[RO, Option[V]]
@@ -58,13 +67,13 @@ object TxnStep {
   final case class StoreGetAllVals[K, V](store: ObjectStore[K, V])
     extends TxnStep[RO, Vector[V]]
 
-  final case class OpenKeyCursor[K](store: ObjectStore[K, _],
-                                    range: js.UndefOr[IDBKeyRange | IDBKey],
-                                    dir  : js.UndefOr[IDBCursorDirection],
-                                    use  : KeyCursor.ForStore[K] => Callback)
-    extends TxnStep[RO, Unit]
-
   // RW steps
+
+  final case class OpenKeyCursorRW[K, V](store: ObjectStore[K, V],
+                                         range: js.UndefOr[IDBKeyRange | IDBKey],
+                                         dir  : js.UndefOr[IDBCursorDirection],
+                                         use  : KeyCursor.ForStoreRW[K, V] => TxnStep[RW, Any])
+    extends TxnStep[RW, Unit]
 
   final case class StoreAdd(store: ObjectStore[_, _], key: IndexedDbKey, value: IDBValue)
     extends TxnStep[RW, Unit]
@@ -80,6 +89,11 @@ object TxnStep {
 
   // ===================================================================================================================
 
+  @inline final implicit class ReadOnlyOps[M <: TxnMode, A](private val self: TxnStep[M, A]) extends AnyVal {
+    @inline final def castRO: TxnStep[Nothing, A] =
+      self.asInstanceOf[TxnStep[Nothing, A]]
+  }
+
   val none: TxnStep[RO, Option[Nothing]] =
     pure(None)
 
@@ -88,6 +102,21 @@ object TxnStep {
 
   val unit: TxnStep[RO, Unit] =
     Eval(Callback.empty)
+
+  def rawCall[M <: TxnMode]: RawCallDsl[M] =
+    RawCallDsl
+
+  private val RawCallDsl =
+    new RawCallDsl[Nothing]
+
+  final class RawCallDsl[+M <: TxnMode] {
+
+    def apply[R <: IDBRequest[Any, _], A](act: => R)(onSuccess: R => A): TxnStep[M, A] =
+      RawCall(() => act, onSuccess)
+
+    def unit[R <: IDBRequest[Any, _]](act: => R): TxnStep[M, Unit] =
+      apply(act)(_ => ())
+  }
 
   def interpret[A](txn: IDBTransaction, step: TxnStep[TxnMode, A]): AsyncCallback[A] =
     AsyncCallback.suspend {
@@ -140,14 +169,27 @@ object TxnStep {
           case Map(fa, f) =>
             interpret(fa).map(f)
 
-          case OpenKeyCursor(s, range, dir, use) =>
+          case OpenKeyCursorRO(s, range, dir, use) =>
             getStore(s).flatMap { store =>
               asyncRequest(store.openKeyCursor(range, dir)) { req =>
                 val raw = req.result
-                val kc = Option(raw).map(new KeyCursor(_, s.defn.keyCodec))
-                use(kc).runNow()
+                val c = Option(raw).map(KeyCursor.ro(_, s.defn.keyCodec))
+                interpret(use(c)).runNow()
               }
             }
+
+          case OpenKeyCursorRW(s, range, dir, use) =>
+            getStore(s).flatMap { store =>
+              asyncRequest(store.openKeyCursor(range, dir)) { req =>
+                val raw0 = req.result
+                val raw = (raw0: IDBCursorReadOnly[IDBObjectStore]).asInstanceOf[IDBCursor[IDBObjectStore]] // TODO: https://github.com/scala-js/scala-js-dom/pull/705
+                val c = Option(raw).map(KeyCursor.rw(_, s.defn))
+                interpret(use(c)).runNow()
+              }
+            }
+
+          case RawCall(act, onSuccess) =>
+            asyncRequest(act())(onSuccess)
 
           case StoreDelete(s, k) =>
             getStore(s).flatMap { store =>

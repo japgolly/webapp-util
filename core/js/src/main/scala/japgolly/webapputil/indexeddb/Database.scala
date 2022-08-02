@@ -70,14 +70,23 @@ final class Database(val raw: IDBDatabase, onClose: Callback) {
   def getAllValues[K, V](store: ObjectStoreDef.Sync[K, V]): AsyncCallback[Vector[V]] =
     transactionRO(store)(_.objectStore(store).flatMap(_.getAllValues))
 
-  def openKeyCursor[K, V](store: ObjectStoreDef.Sync[K, V])
-                         (use: KeyCursor.ForStore[K] => Callback): AsyncCallback[Unit] =
-    transactionRO(store)(_.objectStore(store).flatMap(_.openKeyCursor(use)))
+  def openKeyCursorRO[K, V](store: ObjectStoreDef.Sync[K, V])
+                           (use: TxnDsl[RO] => KeyCursor.ForStoreRO[K] => Txn[RO, Any]): AsyncCallback[Unit] =
+    transactionRO(store)(_.objectStore(store).flatMap(_.openKeyCursorRO(use)))
 
-  def openKeyCursorWithRange[K, V](store: ObjectStoreDef.Sync[K, V])
-                                  (keyRange: KeyRange.Dsl[K] => KeyRange, dir: js.UndefOr[IDBCursorDirection] = ())
-                                  (use: KeyCursor.ForStore[K] => Callback): AsyncCallback[Unit] =
-    transactionRO(store)(_.objectStore(store).flatMap(_.openKeyCursorWithRange(keyRange, dir)(use)))
+  def openKeyCursorWithRangeRO[K, V](store: ObjectStoreDef.Sync[K, V])
+                                    (keyRange: KeyRange.Dsl[K] => KeyRange, dir: js.UndefOr[IDBCursorDirection] = ())
+                                    (use: TxnDsl[RO] => KeyCursor.ForStoreRO[K] => Txn[RO, Any]): AsyncCallback[Unit] =
+    transactionRO(store)(_.objectStore(store).flatMap(_.openKeyCursorWithRangeRO(keyRange, dir)(use)))
+
+  def openKeyCursorRW[K, V](store: ObjectStoreDef.Sync[K, V])
+                           (use: TxnDsl[RW] => KeyCursor.ForStoreRW[K, V] => Txn[RW, Any]): AsyncCallback[Unit] =
+    transactionRW(store)(_.objectStore(store).flatMap(_.openKeyCursorRW(use)))
+
+  def openKeyCursorWithRangeRW[K, V](store: ObjectStoreDef.Sync[K, V])
+                                    (keyRange: KeyRange.Dsl[K] => KeyRange, dir: js.UndefOr[IDBCursorDirection] = ())
+                                    (use: TxnDsl[RW] => KeyCursor.ForStoreRW[K, V] => Txn[RW, Any]): AsyncCallback[Unit] =
+    transactionRW(store)(_.objectStore(store).flatMap(_.openKeyCursorWithRangeRW(keyRange, dir)(use)))
 
   /** aka upsert */
   def put[K, V](store: ObjectStoreDef.Async[K, V])(key: K, value: V): AsyncCallback[Unit] =

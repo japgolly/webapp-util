@@ -1,6 +1,5 @@
 package japgolly.webapputil.indexeddb
 
-import japgolly.scalajs.react.Callback
 import japgolly.webapputil.indexeddb.TxnMode._
 import org.scalajs.dom.IDBCursorDirection
 import scala.scalajs.js
@@ -52,13 +51,22 @@ final class ObjectStore[K, V](val defn: ObjectStoreDef.Sync[K, V]) {
       _  <- putOrDelete(key, o2)
     } yield o2
 
-  def openKeyCursor(use: KeyCursor.ForStore[K] => Callback): Txn[RO, Unit] =
-    TxnStep.OpenKeyCursor(this, (), (), use)
+  def openKeyCursorRO(use: TxnDsl[RO] => KeyCursor.ForStoreRO[K] => Txn[RO, Any]): Txn[RO, Unit] =
+    TxnStep.OpenKeyCursorRO(this, (), (), use(TxnDsl.RO).andThen(_.step))
 
-  def openKeyCursorWithRange(keyRange: KeyRange.Dsl[K] => KeyRange, dir: js.UndefOr[IDBCursorDirection] = ())
-                            (use: KeyCursor.ForStore[K] => Callback): Txn[RO, Unit] = {
+  def openKeyCursorWithRangeRO(keyRange: KeyRange.Dsl[K] => KeyRange, dir: js.UndefOr[IDBCursorDirection] = ())
+                              (use: TxnDsl[RO] => KeyCursor.ForStoreRO[K] => Txn[RO, Any]): Txn[RO, Unit] = {
     val r = keyRange(new KeyRange.Dsl(defn.keyCodec)).raw
-    TxnStep.OpenKeyCursor(this, r, dir, use)
+    TxnStep.OpenKeyCursorRO(this, r, dir, use(TxnDsl.RO).andThen(_.step))
+  }
+
+  def openKeyCursorRW(use: TxnDsl[RW] => KeyCursor.ForStoreRW[K, V] => Txn[RW, Any]): Txn[RW, Unit] =
+    TxnStep.OpenKeyCursorRW(this, (), (), use(TxnDsl.RW).andThen(_.step))
+
+  def openKeyCursorWithRangeRW(keyRange: KeyRange.Dsl[K] => KeyRange, dir: js.UndefOr[IDBCursorDirection] = ())
+                              (use: TxnDsl[RW] => KeyCursor.ForStoreRW[K, V] => Txn[RW, Any]): Txn[RW, Unit] = {
+    val r = keyRange(new KeyRange.Dsl(defn.keyCodec)).raw
+    TxnStep.OpenKeyCursorRW(this, r, dir, use(TxnDsl.RW).andThen(_.step))
   }
 
   /** aka upsert */

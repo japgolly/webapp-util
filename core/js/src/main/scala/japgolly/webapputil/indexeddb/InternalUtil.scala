@@ -33,4 +33,20 @@ private[indexeddb] object InternalUtil {
     a
   }
 
+  def dispatchRequest[R <: IDBRequest[Any, _], A](raw: R)(onSuccess: R => A): Unit = {
+    raw.onerror = event => {
+      complete(Failure(IndexedDbError(event))).runNow()
+    }
+
+    raw.onsuccess = _ => {
+      complete(Try(onSuccess(raw))).runNow()
+    }
+  }
+    AsyncCallback.promise[A].asAsyncCallback.flatMap { case (promise, complete) =>
+      val raw = act
+
+
+      promise
+    }
+
 }

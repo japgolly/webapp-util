@@ -32,6 +32,9 @@ final case class Txn[+M <: TxnMode, +A](step: TxnStep[M, A]) { self =>
 
 object Txn {
 
+  def none = Txn(TxnStep.none.castRO)
+  def unit = Txn(TxnStep.unit.castRO)
+
   @inline implicit final class InvariantOps[M <: TxnMode, A](private val self: Txn[M, A]) extends AnyVal {
     import TxnStep._
 
@@ -40,17 +43,17 @@ object Txn {
       Txn(step)
     }
 
-    @inline def unless(cond: Boolean)(implicit ev: TxnStep[RO, Option[Nothing]] => Txn[M, Option[Nothing]]): Txn[M, Option[A]] =
+    @inline def unless(cond: Boolean): Txn[M, Option[A]] =
       when(!cond)
 
-    @inline def unless_(cond: Boolean)(implicit ev: TxnStep[RO, Unit] => Txn[M, Unit]): Txn[M, Unit] =
+    @inline def unless_(cond: Boolean): Txn[M, Unit] =
       when_(!cond)
 
-    def when(cond: Boolean)(implicit ev: TxnStep[RO, Option[Nothing]] => Txn[M, Option[Nothing]]): Txn[M, Option[A]] =
-      if (cond) self.map(Some(_)) else ev(none)
+    def when(cond: Boolean): Txn[M, Option[A]] =
+      if (cond) self.map(Some(_)) else Txn.none
 
-    def when_(cond: Boolean)(implicit ev: TxnStep[RO, Unit] => Txn[M, Unit]): Txn[M, Unit] =
-      if (cond) self.void else ev(unit)
+    def when_(cond: Boolean): Txn[M, Unit] =
+      if (cond) self.void else Txn.unit
 
     def >>[N <: TxnMode, B](f: Txn[N, B])(implicit m: TxnMode.Merge[M, N]): Txn[m.Mode, B] = {
       val next = m.substN(f.step)

@@ -209,7 +209,7 @@ object IndexedDbTest extends TestSuite {
       }
     }
 
-    "openKeyCursor" - asyncTest() {
+    "openKeyCursorRO" - asyncTest() {
       val store = ObjectStoreDef.Sync("test", KeyCodec.int.xmap(_+1000)(_-1000), ValueCodec.string)
       var results1 = List.empty[Int]
       var results2 = List.empty[Int]
@@ -222,45 +222,89 @@ object IndexedDbTest extends TestSuite {
         _  <- db.add(store)(456, "wow")
         _  <- db.add(store)(123, "hehe")
 
-        _  <- db.openKeyCursor(store) {
-                case Some(c) => Callback { results1 ::= c.key } >> c.continue
-                case None    => Callback { results1 ::= 1 }
-              }
+        _  <- db.openKeyCursorRO(store) { txn => {
+                case Some(c) => c.key.map(results1 ::= _) >> c.continue
+                case None    => txn.delay { results1 ::= 1 }
+              }}
 
-        _  <- db.openKeyCursor(store) {
-                case Some(c) => Callback { results2 ::= c.key } // no `continue` here
-                case None    => Callback { results2 ::= 2 }
-              }
+        _  <- db.openKeyCursorRO(store) { txn => {
+                case Some(c) => c.key.map(results2 ::= _) // no `continue` here
+                case None    => txn.delay { results2 ::= 2 }
+              }}
 
-        _  <- db.openKeyCursorWithRange(store)(_ >= 200) {
-                case Some(c) => Callback { results3 ::= c.key } >> c.continue
-                case None    => Callback { results3 ::= 3 }
-              }
+        _  <- db.openKeyCursorWithRangeRO(store)(_ >= 200) { txn => {
+                case Some(c) => c.key.map(results3 ::= _) >> c.continue
+                case None    => txn.delay { results3 ::= 3 }
+              }}
 
-        _  <- db.openKeyCursorWithRange(store)(_ <= 200) {
-                case Some(c) => Callback { results4 ::= c.key } >> c.continue
-                case None    => Callback { results4 ::= 4 }
-              }
+        _  <- db.openKeyCursorWithRangeRO(store)(_ <= 200) { txn => {
+                case Some(c) => c.key.map(results4 ::= _) >> c.key.map(results4 ::= _) >> c.continue
+                case None    => txn.delay { results4 ::= 4 }
+              }}
 
-        _  <- db.openKeyCursorWithRange(store)(_ only 123) {
-                case Some(c) => Callback { results5 ::= c.key } >> c.continue
-                case None    => Callback { results5 ::= 5 }
-              }
+        _  <- db.openKeyCursorWithRangeRO(store)(_ only 123) { txn => {
+                case Some(c) => c.key.map(results5 ::= _) >> c.continue
+                case None    => txn.delay { results5 ::= 5 }
+              }}
 
-        _  <- db.openKeyCursorWithRange(store)(_ > 400 < 500) {
-                case Some(c) => Callback { results6 ::= c.key } >> c.continue
-                case None    => Callback { results6 ::= 6 }
-              }
+        _  <- db.openKeyCursorWithRangeRO(store)(_ > 400 < 500) { txn => {
+                case Some(c) => c.key.map(results6 ::= _) >> c.continue
+                case None    => txn.delay { results6 ::= 6 }
+              }}
 
       } yield {
         assertSeqIgnoreOrder(results1)(123, 456, 1)
         assertSeqIgnoreOrder(results3)(456, 3)
-        assertSeqIgnoreOrder(results4)(123, 4)
+        assertSeqIgnoreOrder(results4)(123, 123, 4)
         assertSeqIgnoreOrder(results5)(123, 5)
         assertSeqIgnoreOrder(results6)(456, 6)
 
         val result2Expect = List(List(123), List(456))
         assert(result2Expect contains results2)
+      }
+    }
+
+    "openKeyCursorRW" - asyncTest() {
+      val store = ObjectStoreDef.Sync("test", KeyCodec.int.xmap(_+1000)(_-1000), ValueCodec.string)
+      // var results = List.empty[Int]
+      // var results2 = List.empty[Int]
+      // var results3 = List.empty[Int]
+      // var results4 = List.empty[Int]
+      // var results5 = List.empty[Int]
+      // var results6 = List.empty[Int]
+      for {
+
+        barrier <- AsyncCallback.barrier.asAsyncCallback
+
+        db <- TestIndexedDb(store)
+
+        _  <- db.transactionRW(store) { txn =>
+                txn.objectStore(store).flatMap { s =>
+                  txn.traverseIterable_((100 to 400).by(50).toList) { n =>
+                    s.add(n, n.toString)
+                  }
+                }
+              }
+
+        _  <- db.openKeyCursorRW(store) { txn => {
+                case Some(c) =>
+                  println("xxxxxxxx"*5)
+                  for {
+                    k <- c.key
+                    _ <- c.delete.when_((k % 100) == 50)
+                    _ <- c.continue
+                  } yield ()
+                case None =>
+                  println("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
+                  txn.eval(barrier.complete)
+              }}
+
+        _ <- barrier.await
+
+        results <- db.getAllKeys(store)
+
+      } yield {
+        assertSeqIgnoreOrder(results)(100, 200, 300, 400)
       }
     }
 
