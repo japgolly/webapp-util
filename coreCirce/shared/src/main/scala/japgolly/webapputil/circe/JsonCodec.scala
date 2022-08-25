@@ -2,16 +2,35 @@ package japgolly.webapputil.circe
 
 import cats.Traverse
 import cats.instances.all._
+import cats.syntax.either._
 import io.circe._
 import japgolly.microlibs.adt_macros.AdtMacros
 import japgolly.microlibs.recursion._
 import japgolly.univeq.UnivEq
+import japgolly.webapputil.general.ErrorMsg
 import scala.reflect.ClassTag
 
 final case class JsonCodec[A](encoder: Encoder[A], decoder: Decoder[A]) {
 
   def xmap[B](f: A => B)(g: B => A): JsonCodec[B] =
     JsonCodec(encoder.contramap(g), decoder.map(f))
+
+  @deprecated("Use .flatXmap", "2.0.0-RC3")
+  def xemap[B](f: A => Decoder.Result[B])(g: B => A): JsonCodec[B] =
+    flatXmap(f)(g)
+
+  def flatXmap[B](f: A => Decoder.Result[B])(g: B => A): JsonCodec[B] =
+    JsonCodec(
+      encoder.contramap(g),
+      Decoder.instance(decoder(_).flatMap(f)))
+
+  def xmapOrStr[B](f: A => Either[String, B])(g: B => A): JsonCodec[B] =
+    JsonCodec(
+      encoder.contramap(g),
+      Decoder.instance(c => decoder(c).flatMap(f(_).leftMap(DecodingFailure(_, c.history)))))
+
+  def xmapOrErrMsg[B](f: A => Either[ErrorMsg, B])(g: B => A): JsonCodec[B] =
+    xmapOrStr(f(_).leftMap(_.value))(g)
 
   def narrow[B <: A: ClassTag]: JsonCodec[B] =
     xmap[B]({
@@ -28,12 +47,17 @@ final case class JsonCodec[A](encoder: Encoder[A], decoder: Decoder[A]) {
 
 object JsonCodec {
 
+  @inline def apply[A](implicit j: JsonCodec[A]): JsonCodec[A] =
+    j
+
   def summon[A](implicit encoder: Encoder[A], decoder: Decoder[A]): JsonCodec[A] =
     apply(encoder, decoder)
 
+  @deprecated("Use JsonCodec.summon[A].xmap", "2.0.0-RC3")
   def xmap[A, B](r: A => B)(w: B => A)(implicit encoder: Encoder[A], decoder: Decoder[A]): JsonCodec[B] =
     summon[A].xmap(r)(w)
 
+  @deprecated("Use JsonCodec.summon[A].flatXmap", "2.0.0-RC3")
   def xemap[A, B](w: B => A)(r: A => Decoder.Result[B])(implicit encoder: Encoder[A], decoder: Decoder[A]): JsonCodec[B] =
     apply(
       encoder.contramap(w),
