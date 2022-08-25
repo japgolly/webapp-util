@@ -10,24 +10,24 @@ object Dependencies {
 
     // Exported
     def boopickle         = "1.4.0"
-    def catsEffect        = "3.3.11"
+    def catsEffect        = "3.3.14"
     def catsRetry         = "3.1.0"
-    def circe             = "0.14.1"
+    def circe             = "0.14.2"
     def clearConfig       = "3.0.0"
     def doobie            = "1.0.0-RC2"
-    def flyway            = "8.0.5"
-    def hikariCP          = "4.0.3"
-    def izumiReflect      = "2.1.0"
+    def flyway            = "9.1.6"
+    def hikariCP          = "5.0.1"
+    def izumiReflect      = "2.1.6"
     def javaxWebsocketApi = "1.0"
     def microlibs         = "4.1.0"
     def nyaya             = "1.0.0"
     def okHttp4           = "4.9.3"
-    def postgresql        = "42.3.5"
+    def postgresql        = "42.5.0"
     def scala2            = "2.13.8"
-    def scala3            = "3.1.2"
-    def scalaJsDom        = "2.1.0"
+    def scala3            = "3.1.3"
+    def scalaJsDom        = "2.2.0"
     def scalaJsReact      = "2.1.1"
-    def scalaLogging      = "3.9.4"
+    def scalaLogging      = "3.9.5"
     def testState         = "3.0.0"
     def univEq            = "2.0.0"
 
@@ -39,7 +39,7 @@ object Dependencies {
     def reactJs             = "17.0.2"
     def scalaJsJavaTime     = "1.0.0"
     def scalaJsSecureRandom = "1.0.0"
-    def utest               = "0.7.11"
+    def utest               = "0.8.0"
   }
 
   object Dep {
