@@ -23,7 +23,7 @@ object EntrypointInvokerTest extends TestSuite {
           s"""<script type="text/javascript" src="data:application/javascript;base64,$b64"></script>""")
 
         assertEq(
-          BinaryData.fromBase64(b64).toStringAsUtf8,
+          BinaryData.fromBase64OrThrow(b64).toStringAsUtf8,
           """XX.m("console.log('</script>')")""")
       }
 

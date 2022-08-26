@@ -27,7 +27,7 @@ object BackendTest extends TestSuite {
     // =================================================================================
     // Verify the initData64 deserialises to initData
     "pickler" - assertEq(
-      deserialiseInitialData(BinaryData.fromBase64(initData64)),
+      deserialiseInitialData(BinaryData.fromBase64OrThrow(initData64)),
       initData)
 
     // =================================================================================
@@ -42,7 +42,7 @@ object BackendTest extends TestSuite {
 
       // Verify the JS after base64 decoding
       assertEq(
-        BinaryData.fromBase64(js64).toStringAsUtf8,
+        BinaryData.fromBase64OrThrow(js64).toStringAsUtf8,
         s"""MyExampleApp.m("$initData64")""")
     }
 
@@ -58,7 +58,7 @@ object BackendTest extends TestSuite {
 
       // Verify the JS after base64 decoding
       assertEq(
-        BinaryData.fromBase64(js64).toStringAsUtf8,
+        BinaryData.fromBase64OrThrow(js64).toStringAsUtf8,
         s"""window.onload=function(){MyExampleApp.m("$initData64")};""")
     }
   }

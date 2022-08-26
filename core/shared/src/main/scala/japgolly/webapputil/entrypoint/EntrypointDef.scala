@@ -41,7 +41,7 @@ object EntrypointDef {
     def base64: Codec[A] =
       xmapEncoded(
         onEncode            = BinaryData.fromStringAsUtf8(_).toBase64,
-        onDecode            = BinaryData.fromBase64(_).toStringAsUtf8,
+        onDecode            = BinaryData.fromBase64OrThrow(_).toStringAsUtf8,
         escapeEncodedString = false,
       )
   }
@@ -56,7 +56,7 @@ object EntrypointDef {
 
     implicit lazy val binary: Codec[BinaryData] =
       new Codec[BinaryData] {
-        override val decodeOrThrow       = BinaryData.fromBase64
+        override val decodeOrThrow       = BinaryData.fromBase64OrThrow
         override val encode              = _.toBase64
         override val escapeEncodedString = false
       }

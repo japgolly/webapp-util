@@ -1,6 +1,7 @@
 package japgolly.webapputil.binary
 
 import japgolly.univeq.UnivEq
+import japgolly.webapputil.general.ErrorMsg
 import java.io.OutputStream
 import java.lang.{StringBuilder => JStringBuilder}
 import java.nio.ByteBuffer
@@ -32,7 +33,15 @@ object BinaryData extends BinaryData_PlatformSpecific_Object {
   def fromArraySeq(a: ArraySeq[Byte]): BinaryData =
     unsafeFromArray(a.unsafeArray.asInstanceOf[Array[Byte]])
 
-  def fromBase64(base64: String): BinaryData =
+  def fromBase64(base64: String): Either[ErrorMsg, BinaryData] =
+    try
+      Right(fromBase64OrThrow(base64))
+    catch {
+      case e: IllegalArgumentException =>
+        Left(ErrorMsg("Invalid base64 data: " + e.getMessage))
+    }
+
+  def fromBase64OrThrow(base64: String): BinaryData =
     unsafeFromArray(Base64.getDecoder.decode(base64))
 
   def fromByteBuffer(bb: ByteBuffer): BinaryData =
