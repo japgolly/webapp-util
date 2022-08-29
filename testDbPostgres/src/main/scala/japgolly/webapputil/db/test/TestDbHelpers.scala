@@ -16,7 +16,7 @@ import sourcecode.Line
 object TestDbHelpers {
 
   var timeLimitCI = 60.seconds
-  var timeLimitNonCI = 4.seconds
+  var timeLimitNonCI = 8.seconds
   var timeLimitOverride = Option.empty[FiniteDuration]
 
   private def sysPropOrEnvVar(name: String): String =
@@ -32,7 +32,7 @@ object TestDbHelpers {
     timeLimitOverride.getOrElse(if (inCI) timeLimitCI else timeLimitNonCI)
 
   implicit val runtime: IORuntime =
-    ThreadUtilsIO.newDefaultRuntime("TestDb")
+    ThreadUtilsIO.newDefaultRuntime("TestDbHelpers")
 
   final implicit class TestDbIOExt[A](private val self: IO[A]) extends AnyVal {
     def unsafeRun(): A = {

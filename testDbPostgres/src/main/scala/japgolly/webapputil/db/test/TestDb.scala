@@ -14,21 +14,23 @@ import japgolly.microlibs.testutil.TestUtil._
 import japgolly.webapputil.cats.effect._
 import japgolly.webapputil.db._
 import japgolly.webapputil.db.test.TestDbHelpers._
+import japgolly.webapputil.general.ThreadUtils
 import japgolly.webapputil.locks.SharedLock
 import java.sql.Connection
 import java.util.concurrent.atomic.AtomicReference
 import scala.concurrent.ExecutionContext
 import sourcecode.Line
 
-object TestDb {
+abstract class TestDb(cfg: DbConfig) {
 
-  private val logger: Logger =
-    Logger[TestDb.type]
+  protected def addShutdownHook =
+    true
+
+  protected val logger: Logger =
+    Logger(getClass)
 
   private def load(): Db = {
     logger.info("Creating Test Db...")
-
-    val cfg = TestConfig.db
 
     val poolSize = if (cfg.poolSize == -1) 4 else cfg.poolSize
     assert(poolSize >= 1, s"DB pool size = $poolSize ?!")
@@ -44,7 +46,7 @@ object TestDb {
       if (sync)
         Resource.pure[IO, ExecutionContext](ExecutionContexts.synchronous)
       else
-        ThreadUtilsIO.threadPool("DB", logger)(_.withThreads(poolSize))
+        ThreadUtilsIO.threadPool("TestDb", logger)(_.withThreads(poolSize))
 
     val create =
       Db.generic(
@@ -58,7 +60,7 @@ object TestDb {
     create.unsafeRun()
   }
 
-  final private case class State(db: Db, xa: XA, shutdown: IO[Unit])
+  private case class State(db: Db, xa: XA, shutdown: IO[Unit])
 
   @volatile private[this] var _state: Option[State] =
     None
@@ -75,7 +77,8 @@ object TestDb {
           val db            = load()
           val (xa, release) = db.xa.allocated.unsafeRun()
           _state = Some(State(db, xa, release))
-          // ThreadUtils.runOnShutdown("TestDb", shutdown()) // no need, sbt is configured to do this
+          if (addShutdownHook)
+            ThreadUtils.runOnShutdown("TestDb")(shutdown())
           try {
             db.migration.migrate.unsafeRun()
           } catch {
