@@ -37,7 +37,7 @@ trait TestDbConfig {
   protected def dbConfig: ConfigDef[DbConfig] =
     DbConfig.config.withPrefix(propsPrefixDb)
 
-  protected def loadDbConfigOrThrow(): DbConfig
+  protected def loadDbConfigOrThrow(): DbConfig =
     loadDbConfig(dbConfig)
 
   lazy val db: DbConfig =
