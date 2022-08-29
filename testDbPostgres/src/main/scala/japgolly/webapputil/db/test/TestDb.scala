@@ -21,7 +21,22 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.concurrent.ExecutionContext
 import sourcecode.Line
 
-abstract class TestDb(cfg: DbConfig) {
+/** Extend this to create your own:
+ *
+ * {{{
+ *   object TestDb extends japgolly.webapputil.db.test.TestDb {
+ *
+ *     override protected def cfg: DbConfig =
+ *       xxx
+ *
+ *     onlyAllowDropSchemaWhenDatabaseNameEndsWith("_test")
+ *
+ *   }
+ * }}}
+ */
+abstract class TestDb {
+
+  protected def cfg: DbConfig
 
   protected def addShutdownHook =
     true
@@ -128,13 +143,33 @@ abstract class TestDb(cfg: DbConfig) {
   val onDropSchemaAttempt: AtomicReference[Db => Unit] =
     new AtomicReference(_ => ())
 
-  def onlyAllowDropSchemaWhenDatabaseNameIs(expected: String): Unit =
+  def onlyAllowDropSchemaWhenDatabaseNameWhen(allow: String => Boolean, errMsg: String => String): Unit =
     onDropSchemaAttempt.updateAndGet { prevHandler => db =>
       val dbName = db.databaseName
-      if (dbName != expected)
-        sys.error(s"You're trying to wipe $dbName. Only $expected is allowed to be dropped.")
+      if (!allow(dbName))
+        sys.error(errMsg(dbName))
       prevHandler(db)
     }
+
+  def onlyAllowDropSchemaWhenDatabaseNameIs(expected: String): Unit =
+    onlyAllowDropSchemaWhenDatabaseNameWhen(
+      _ == expected,
+      name => s"You're trying to wipe $name. Only $expected is allowed to be dropped.")
+
+  def onlyAllowDropSchemaWhenDatabaseNameContains(expected: String): Unit =
+    onlyAllowDropSchemaWhenDatabaseNameWhen(
+      _ contains expected,
+      name => s"You're trying to wipe $name, which is not allowed because it doesn't contain [$expected].")
+
+  def onlyAllowDropSchemaWhenDatabaseNameEndsWith(suffix: String): Unit =
+    onlyAllowDropSchemaWhenDatabaseNameWhen(
+      _ endsWith suffix,
+      name => s"You're trying to wipe $name, which is not allowed because it doesn't end with [$suffix].")
+
+  def onlyAllowDropSchemaWhenDatabaseNameStartsWith(prefix: String): Unit =
+    onlyAllowDropSchemaWhenDatabaseNameWhen(
+      _ startsWith prefix,
+      name => s"You're trying to wipe $name, which is not allowed because it doesn't start with [$prefix].")
 
   /** Drops all objects (tables, views, procedures, triggers, ...) in the configured schemas. */
   def dropSchema(): Unit = {
