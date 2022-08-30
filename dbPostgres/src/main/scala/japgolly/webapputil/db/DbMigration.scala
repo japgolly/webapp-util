@@ -13,7 +13,7 @@ object DbMigration {
            ): DbMigration = {
     var cfg = flyway(Flyway.configure).dataSource(ds)
     schema.foreach(s => cfg = cfg.schemas(s))
-    new DbMigration(cfg.load())
+    new DbMigration(cfg)
   }
 
   type FlywayConfig = FluentConfiguration => FluentConfiguration
@@ -25,7 +25,13 @@ object DbMigration {
   }
 }
 
-final class DbMigration(private val flyway: Flyway) {
+final class DbMigration(private val flywayCfg: FluentConfiguration) {
+
+  private val flyway: Flyway =
+    flywayCfg.load()
+
+  def withFlywayConfig(f: DbMigration.FlywayConfig): DbMigration =
+    new DbMigration(f(flywayCfg))
 
   def migrate: IO[Unit] =
     IO(flyway.migrate())

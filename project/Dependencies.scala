@@ -15,7 +15,7 @@ object Dependencies {
     def circe             = "0.14.2"
     def clearConfig       = "3.0.0"
     def doobie            = "1.0.0-RC2"
-    def flyway            = "9.1.6"
+    def flyway            = "9.2.0"
     def hikariCP          = "5.0.1"
     def izumiReflect      = "2.1.6"
     def javaxWebsocketApi = "1.0"

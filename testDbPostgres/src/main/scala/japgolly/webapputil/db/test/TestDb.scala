@@ -179,7 +179,8 @@ abstract class TestDb {
       val dbName = db.databaseName
       onDropSchemaAttempt.get()(db)
       logger.info(s"Dropping schema in: $dbName")
-      db.migration.drop.unsafeRun()
+      val migration = db.migration.withFlywayConfig(_.cleanDisabled(false))
+      migration.drop.unsafeRun()
     }
   }
 
