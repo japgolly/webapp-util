@@ -204,6 +204,8 @@ val WebappUtilVer = "<version>"
   * [`DbMigration`](./dbPostgres/src/main/scala/japgolly/webapputil/db/DbMigration.scala) - manages DB schema migrations (via [Flyway](https://flywaydb.org))
   * [`DoobieCodecs`](./dbPostgres/src/main/scala/japgolly/webapputil/db/DoobieCodecs.scala) - a few generic codecs for Doobie
   * [`DoobieHelpers`](./dbPostgres/src/main/scala/japgolly/webapputil/db/DoobieHelpers.scala) - helpers for Doobie
+  * [`JdbcLogging`](./dbPostgres/src/main/scala/japgolly/webapputil/db/JdbcLogging.scala) - times and logs JDBC calls
+  * [`SqlTracer`](./dbPostgres/src/main/scala/japgolly/webapputil/db/SqlTracer.scala) - modularised behaviour around JDBC calls
   * [`XA`](./dbPostgres/src/main/scala/japgolly/webapputil/db/XA.scala) - wrapper around `Transactor[IO]` (used to be more and may again)
 
 ## The `test-db-postgres` module: *(JVM only)*
