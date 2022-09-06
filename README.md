@@ -212,7 +212,10 @@ val WebappUtilVer = "<version>"
 
 * `japgolly.webapputil.db.test`
   * [`DbTable`](./testDbPostgres/src/main/scala/japgolly/webapputil/db/test/DbTable.scala) - util around DB tables and row counting
+  * [`DelegateConnection`](./testDbPostgres/src/main/scala/japgolly/webapputil/db/test/DelegateConnection.scala) - `java.sql.Connection` instance that routes all calls to a delegated connection
   * [`TestDb`](./testDbPostgres/src/main/scala/japgolly/webapputil/db/test/TestDb.scala) - provides access to a test DB, manages things like migration, and util
+  * [`TestDbConfig`](./testDbPostgres/src/main/scala/japgolly/webapputil/db/test/TestDbConfig.scala) - easily load DB config from tests
+  * [`TestDbHelpers`](./testDbPostgres/src/main/scala/japgolly/webapputil/db/test/TestDbHelpers.scala) - DB util helpful during testing
   * [`TestXA`](./testDbPostgres/src/main/scala/japgolly/webapputil/db/test/TestXA.scala) - a live connection to the DB, and util to make testing as easy as possible
 
 
