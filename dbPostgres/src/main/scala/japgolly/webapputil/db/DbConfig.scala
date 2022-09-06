@@ -6,7 +6,10 @@ import japgolly.clearconfig._
 import javax.sql.DataSource
 import org.postgresql.ds.PGSimpleDataSource
 
-final case class DbConfig(pgDataSource: PGSimpleDataSource, hikariConfig: HikariConfig, schema: Option[String]) {
+final case class DbConfig(pgDataSource: PGSimpleDataSource,
+                          hikariConfig: HikariConfig,
+                          schema      : Option[String],
+                          sqlTracer   : Option[SqlTracer]) {
 
   def poolSize: Int =
     hikariConfig.getMaximumPoolSize
@@ -110,11 +113,17 @@ object DbConfig {
           hcfg
         }
 
-    (pgdsCfg, hikariCfg, schemaCfg).mapN { (pgds, hcfg, schema) =>
+    val otherCfg =
+      ConfigDef.getOrUse("log.sql", true).map(Option.when[SqlTracer](_)(JdbcLogging))
+
+    (pgdsCfg, hikariCfg, schemaCfg, otherCfg).mapN { (pgds, hcfg, schema, sqlTracer) =>
       hcfg.setDataSource(pgds)
       hcfg.setUsername(pgds.getUser)
       hcfg.setPassword(pgds.getPassword)
-      DbConfig(pgds, hcfg, schema)
+      val cfg = DbConfig(pgds, hcfg, schema, sqlTracer)
+      for (t <- sqlTracer)
+        cfg.modifyHikariDataSource(t.inject)
+      cfg
     }
   }
 

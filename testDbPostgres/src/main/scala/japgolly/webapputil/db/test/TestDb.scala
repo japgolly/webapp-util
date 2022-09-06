@@ -18,6 +18,7 @@ import japgolly.webapputil.general.ThreadUtils
 import japgolly.webapputil.locks.SharedLock
 import java.sql.Connection
 import java.util.concurrent.atomic.AtomicReference
+import javax.sql.DataSource
 import scala.concurrent.ExecutionContext
 import sourcecode.Line
 
@@ -50,7 +51,9 @@ abstract class TestDb {
     val poolSize = if (cfg.poolSize == -1) 4 else cfg.poolSize
     assert(poolSize >= 1, s"DB pool size = $poolSize ?!")
 
-    val dataSrc = cfg.pgDataSource
+    var dataSrc: DataSource = cfg.pgDataSource
+    for (t <- cfg.sqlTracer)
+      dataSrc = t.inject(dataSrc)
 
     /** Rollback everything */
     val txnStrategy = Strategy(C.setAutoCommit(false), C.rollback, C.rollback, C.unit)
@@ -67,7 +70,7 @@ abstract class TestDb {
       Db.generic(
         cfg         = cfg,
         dsMain      = dataSrc,
-        dsMigration = cfg.pgDataSource,
+        dsMigration = dataSrc,
         connectEC   = executionContext,
         transactor  = Transactor.fromDataSource[IO](dataSrc, _).copy(strategy0 = txnStrategy),
       )
