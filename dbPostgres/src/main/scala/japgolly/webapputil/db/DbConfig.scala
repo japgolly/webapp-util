@@ -101,15 +101,15 @@ object DbConfig {
           _.get("minimumIdle", _.setMinimumIdle),
           _.get("poolName", _.setPoolName),
           _.get("registerMbeans", _.setRegisterMbeans),
-          _.get("transactionIsolation", _.setTransactionIsolation),
+          _.getOrUse("transactionIsolation", _.setTransactionIsolation)("TRANSACTION_REPEATABLE_READ"),
           _.get("validationTimeout", _.setValidationTimeout),
         )
         .withPrefix("pool.")
         .map { fn =>
           val hcfg = new HikariConfig
-          hcfg.setTransactionIsolation("TRANSACTION_READ_COMMITTED") // Shouldn't be doing repeated-reads anyway
           hcfg.setAutoCommit(true)
           fn(hcfg)
+
           hcfg
         }
 
