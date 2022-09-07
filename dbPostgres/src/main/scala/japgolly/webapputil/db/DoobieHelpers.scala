@@ -139,6 +139,12 @@ object DoobieHelpers {
 
     def apply5[A, B, C, D, E, Z](f: (A, B, C, D, E) => Z)(implicit r: Read[(A, B, C, D, E)]): Read[Z] =
       r.map(f.tupled)
+
+    def apply6[A, B, C, D, E, F, Z](f: (A, B, C, D, E, F) => Z)(implicit r: Read[(A, B, C, D, E, F)]): Read[Z] =
+      r.map(f.tupled)
+
+    def apply7[A, B, C, D, E, F, G, Z](f: (A, B, C, D, E, F, G) => Z)(implicit r: Read[(A, B, C, D, E, F, G)]): Read[Z] =
+      r.map(f.tupled)
   }
 
   implicit class DoobieWriteObjExt(private val self: Write.type) extends AnyVal {
@@ -153,6 +159,12 @@ object DoobieHelpers {
       r.contramap(f)
 
     def apply5[A, B, C, D, E, Z](f: Z => (A, B, C, D, E))(implicit r: Write[(A, B, C, D, E)]): Write[Z] =
+      r.contramap(f)
+
+    def apply6[A, B, C, D, E, F, Z](f: Z => (A, B, C, D, E, F))(implicit r: Write[(A, B, C, D, E, F)]): Write[Z] =
+      r.contramap(f)
+
+    def apply7[A, B, C, D, E, F, G, Z](f: Z => (A, B, C, D, E, F, G))(implicit r: Write[(A, B, C, D, E, F, G)]): Write[Z] =
       r.contramap(f)
   }
 
