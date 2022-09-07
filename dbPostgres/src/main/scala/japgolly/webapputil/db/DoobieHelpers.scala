@@ -11,9 +11,6 @@ import java.time.{Duration, Instant}
 
 object DoobieHelpers {
 
-  val ConnectionIoUnit: ConnectionIO[Unit] =
-    ().pure[ConnectionIO]
-
   private val now: ConnectionIO[Instant] =
     Free.defer(Free.pure(Instant.now()))
 
@@ -99,7 +96,7 @@ object DoobieHelpers {
     def executeBatch(as: IterableOnce[A])(implicit c: Write[A]): ConnectionIO[Unit] =
       if (as.iterator.isEmpty) {
         // 0 rows
-        ConnectionIoUnit
+        C.unit
       } else {
         val it    = as.iterator
         val first = it.next()
@@ -125,6 +122,14 @@ object DoobieHelpers {
         .iterator
         .reduce((a, b) => a.flatMap(_ => b))
         .map(_ => ret)
+
+  def setTransactionLevelIfNeeded(level: Int): ConnectionIO[Unit] =
+    C.getTransactionIsolation.flatMap(orig =>
+      if (orig == level)
+        C.unit
+      else
+        C.setTransactionIsolation(level)
+    )
 
   implicit class DoobieReadObjExt(private val self: Read.type) extends AnyVal {
 

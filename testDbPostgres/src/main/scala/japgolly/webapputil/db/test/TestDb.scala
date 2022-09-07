@@ -45,6 +45,19 @@ abstract class TestDb {
   protected val logger: Logger =
     Logger(getClass)
 
+  protected def transactionIsolation: Option[Int] =
+    Some(Connection.TRANSACTION_SERIALIZABLE)
+
+  protected def initConnection: ConnectionIO[Unit] =
+    transactionIsolation match {
+      case None    => C.unit
+      case Some(t) => DoobieHelpers.setTransactionLevelIfNeeded(t)
+    }
+
+  /** Rollback everything */
+  protected def txnStrategy =
+    Strategy(initConnection *> C.setAutoCommit(false), C.rollback, C.rollback, C.unit)
+
   private def load(): Db = {
     logger.info("Creating Test Db...")
 
@@ -54,9 +67,6 @@ abstract class TestDb {
     var dataSrc: DataSource = cfg.pgDataSource
     for (t <- cfg.sqlTracer)
       dataSrc = t.inject(dataSrc)
-
-    /** Rollback everything */
-    val txnStrategy = Strategy(C.setAutoCommit(false), C.rollback, C.rollback, C.unit)
 
     val sync = true
 
@@ -276,11 +286,14 @@ abstract class TestDb {
       }
     }
 
+  protected def singleConnStrategy =
+    Strategy.void.copy(before = initConnection)
+
   private lazy val singleConnXA: Resource[IO, XA] =
     for {
       conn <- connection
     } yield {
-      val x = Transactor.fromConnection[IO](conn).copy(strategy0 = Strategy.void)
+      val x = Transactor.fromConnection[IO](conn).copy(strategy0 = singleConnStrategy)
       new XA(x)
     }
 
