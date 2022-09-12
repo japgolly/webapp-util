@@ -38,6 +38,12 @@ final case class JsonCodec[A](encoder: Encoder[A], decoder: Decoder[A]) {
       case a    => throw new IllegalArgumentException("Illegal supertype: " + a)
     })(b => b)
 
+  def inField(key: String): JsonCodec[A] = {
+    val enc = encoder.mapJson(j => Json.fromJsonObject(JsonObject.singleton(key, j)))
+    val dec = Decoder.instance[A](_.downField(key).as(decoder))
+    JsonCodec(enc, dec)
+  }
+
   @inline def encode(a: A): Json =
     encoder(a)
 
