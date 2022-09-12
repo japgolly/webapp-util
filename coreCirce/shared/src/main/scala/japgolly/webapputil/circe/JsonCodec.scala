@@ -59,6 +59,17 @@ object JsonCodec extends JsonCodecArityBoilerplate {
   def summon[A](implicit encoder: Encoder[A], decoder: Decoder[A]): JsonCodec[A] =
     apply(encoder, decoder)
 
+  lazy val boolean: JsonCodec[Boolean] = summon
+  lazy val byte   : JsonCodec[Byte   ] = summon
+  lazy val char   : JsonCodec[Char   ] = summon
+  lazy val double : JsonCodec[Double ] = summon
+  lazy val float  : JsonCodec[Float  ] = summon
+  lazy val int    : JsonCodec[Int    ] = summon
+  lazy val long   : JsonCodec[Long   ] = summon
+  lazy val short  : JsonCodec[Short  ] = summon
+  lazy val string : JsonCodec[String ] = summon
+  lazy val unit   : JsonCodec[Unit   ] = summon
+
   @deprecated("Use JsonCodec.summon[A].xmap", "2.0.0-RC3")
   def xmap[A, B](r: A => B)(w: B => A)(implicit encoder: Encoder[A], decoder: Decoder[A]): JsonCodec[B] =
     summon[A].xmap(r)(w)
@@ -99,9 +110,6 @@ object JsonCodec extends JsonCodecArityBoilerplate {
     JsonCodec(
       Encoder.instance[Fix[F]](Recursion.cata(enc)(_)),
       Decoder.instance[Fix[F]](Recursion.anaM(dec)(_)))
-
-  lazy val str: JsonCodec[String] =
-    summon
 
   object FromCirceImplicitly {
     @inline implicit def implicitCirceToJsonCodecToDecoder[A: Decoder: Encoder]: JsonCodec[A] =
