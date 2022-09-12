@@ -45,7 +45,7 @@ final case class JsonCodec[A](encoder: Encoder[A], decoder: Decoder[A]) {
     decoder.decodeJson(json)
 }
 
-object JsonCodec {
+object JsonCodec extends JsonCodecArityBoilerplate {
 
   @inline def apply[A](implicit j: JsonCodec[A]): JsonCodec[A] =
     j

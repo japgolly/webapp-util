@@ -16,6 +16,8 @@ object Build {
   import Dependencies._
   import Lib._
 
+  lazy val genArity = TaskKey[Unit]("genArity")
+
   private val ghProject = "webapp-util"
 
   private val publicationSettings =
@@ -258,7 +260,10 @@ object Build {
 
   // ===================================================================================================================
 
-  lazy val coreCirceJVM = coreCirce.jvm
+  lazy val coreCirceJVM = coreCirce.jvm.settings(
+    genArity := GenJsonCodecs(baseDirectory.value / ".." / "shared" / "src" / "main" / "scala"),
+  )
+
   lazy val coreCirceJS  = coreCirce.js
   lazy val coreCirce = crossProject(JSPlatform, JVMPlatform)
     .configureCross(commonSettings, publicationSettings, testSettings)
