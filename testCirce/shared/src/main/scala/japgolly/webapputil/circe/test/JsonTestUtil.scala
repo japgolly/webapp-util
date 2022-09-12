@@ -52,6 +52,20 @@ trait JsonTestUtil extends JsonUtil.UnivEqInstances {
   def assertJsonDecodeAll[A: Decoder: Eq](json: Seq[String], expect: Seq[A])(implicit l: Line): Unit =
     assertSeq(json.map(decode[A](_)), expect.map(Right(_)))
 
+  def assertJsonEncode[A: Encoder: Eq](a: A, expect: String)(implicit l: Line): Unit =
+    assertJsonEncode(a, expect.jsonParseOrThrow)
+
+  def assertJsonEncode[A: Encoder: Eq](a: A, expect: Json)(implicit l: Line): Unit =
+    assertEq("" + a, a.asJson, expect)
+
+  def assertJsonEncodeDecode[A: Decoder: Encoder: Eq](a: A, json: String)(implicit l: Line): Unit =
+    assertJsonEncodeDecode(a, json.jsonParseOrThrow)
+
+  def assertJsonEncodeDecode[A: Decoder: Encoder: Eq](a: A, json: Json)(implicit l: Line): Unit = {
+    assertJsonEncode(a, json)
+    assertJsonDecode(json, a)
+  }
+
   def assertJsonRoundTrip[A: Decoder: Encoder: Eq](a: A, as: A*)(implicit l: Line): Unit =
     if (as.isEmpty)
       assertJsonDecode(a.asJson, a)
