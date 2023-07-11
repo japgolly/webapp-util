@@ -32,9 +32,7 @@ trait TestNode {
 
   lazy val webCrypto: Crypto = {
     // https://github.com/nodejs/node/pull/35093
-    val c = require("crypto").webcrypto.asInstanceOf[Crypto]
-    window.crypto = c // TODO remove after https://github.com/scala-js/scala-js-dom/pull/432
-    c
+    require("crypto").webcrypto.asInstanceOf[Crypto]
   }
 }
 
