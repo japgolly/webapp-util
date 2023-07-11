@@ -36,7 +36,7 @@ object Build {
   )
 
   def scalac2Flags = Seq(
-    "-target:11",
+    "-release:11",
     "-Wdead-code",                                   // Warn when dead code is identified.
     "-Wunused:explicits",                            // Warn if an explicit parameter is unused.
     "-Wunused:implicits",                            // Warn if an implicit parameter is unused.

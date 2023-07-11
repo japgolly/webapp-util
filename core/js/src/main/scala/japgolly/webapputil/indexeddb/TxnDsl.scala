@@ -119,11 +119,11 @@ object TxnDsl {
 
   object RO extends TxnDsl[RO] {
     override implicit def catsInstance: Txn.CatsInstance[RO] = Txn.catsInstance(this)
-    override protected implicit def autoWrapStepRO[B](s: TxnStep[RO, B]) = Txn(s)
+    override protected implicit def autoWrapStepRO[B](s: TxnStep[RO, B]): Txn[RO, B] = Txn(s)
   }
 
   object RW extends TxnDsl[RW] {
     override implicit def catsInstance: Txn.CatsInstance[RW] = Txn.catsInstance(this)
-    override protected implicit def autoWrapStepRO[B](s: TxnStep[RO, B]) = Txn(s)
+    override protected implicit def autoWrapStepRO[B](s: TxnStep[RO, B]): Txn[RO, B] = Txn(s)
   }
 }
