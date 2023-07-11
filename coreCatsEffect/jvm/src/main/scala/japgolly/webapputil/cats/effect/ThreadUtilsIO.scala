@@ -18,7 +18,7 @@ object ThreadUtilsIO {
 
   def newDefaultRuntime(threadPrefix: String): IORuntime = {
     import IORuntime._
-    val (compute, _) = createDefaultComputeThreadPool(global, threadPrefix = s"$threadPrefix-compute")
+    val (compute, _) = createWorkStealingComputeThreadPool(threadPrefix = s"$threadPrefix-compute")
     val (blocking, _) = createDefaultBlockingExecutionContext(threadPrefix = s"$threadPrefix-blocking")
     val (scheduler, _) = createDefaultScheduler(threadPrefix = s"$threadPrefix-scheduler")
     IORuntime(compute, blocking, scheduler, () => (), IORuntimeConfig())

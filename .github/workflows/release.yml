@@ -17,6 +17,8 @@ jobs:
         uses: japgolly/setup-everything-scala@v3.1
         with:
           java-version: adopt@1.11
+          jsdom-version: 22.1.0
+          node-version: 19.9.0
 
       - name: Release
         run: >-

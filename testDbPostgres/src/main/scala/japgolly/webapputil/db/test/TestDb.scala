@@ -293,7 +293,7 @@ abstract class TestDb {
     for {
       conn <- connection
     } yield {
-      val x = Transactor.fromConnection[IO](conn).copy(strategy0 = singleConnStrategy)
+      val x = Transactor.fromConnection[IO](conn, None).copy(strategy0 = singleConnStrategy)
       new XA(x)
     }
 
