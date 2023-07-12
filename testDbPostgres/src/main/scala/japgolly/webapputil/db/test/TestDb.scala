@@ -18,7 +18,6 @@ import japgolly.webapputil.general.ThreadUtils
 import japgolly.webapputil.locks.SharedLock
 import java.sql.Connection
 import java.util.concurrent.atomic.AtomicReference
-import javax.sql.DataSource
 import scala.concurrent.ExecutionContext
 import sourcecode.Line
 
@@ -64,9 +63,7 @@ abstract class TestDb {
     val poolSize = if (cfg.poolSize == -1) 4 else cfg.poolSize
     assert(poolSize >= 1, s"DB pool size = $poolSize ?!")
 
-    var dataSrc: DataSource = cfg.pgDataSource
-    for (t <- cfg.sqlTracer)
-      dataSrc = t.inject(dataSrc)
+    val dataSrc = cfg.dataSourceInstance()
 
     val sync = true
 

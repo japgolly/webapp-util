@@ -17,19 +17,19 @@ final case class Db(config: DbConfig, dataSource: DataSource, xa: Resource[IO, X
   import Db.logger
 
   def host: String =
-    config.pgDataSource.getServerNames()(0)
+    config.dataSource.host
 
   def databaseName: String =
-    config.pgDataSource.getDatabaseName
+    config.dataSource.database
 
   def schema: Option[String] =
-    config.schema
+    config.dataSource.schema
 
   def absoluteSchema: String =
-    config.schema.getOrElse("public")
+    config.dataSource.schema.getOrElse("public")
 
   def schemaAsPrefix: String =
-    config.schema.map(_ + ".").getOrElse("")
+    config.dataSource.schema.map(_ + ".").getOrElse("")
 
   def desc: String =
     s"$host/$databaseName" + schema.map(":" + _).getOrElse("")
@@ -76,7 +76,7 @@ object Db {
       val poolSize = cfg.poolSize
       assert(poolSize >= 1, s"DB pool size is $poolSize but must be >= 1")
 
-      val dataSrc = new HikariDataSource(cfg.hikariConfig)
+      val dataSrc = new HikariDataSource(cfg.hikariInstance())
 
       hikari(
         cfg         = cfg,
@@ -114,7 +114,7 @@ object Db {
           new XA(xa)
         }
 
-      val migrator = DbMigration(dsMigration, cfg.schema)
+      val migrator = DbMigration(dsMigration, cfg.dataSource.schema)
 
       Db(cfg, dsMain, xaResource, migrator)
     }
