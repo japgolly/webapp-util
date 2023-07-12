@@ -1,8 +1,8 @@
 package japgolly.webapputil.webstorage
 
+import japgolly.microlibs.utils.SetOnceVar
 import japgolly.scalajs.react.{Callback, CallbackTo, Reusability}
 import japgolly.univeq.UnivEq
-import japgolly.webapputil.general.SetOnceVar
 import org.scalajs.dom.{Storage => StorageJs}
 import scala.scalajs.js
 
