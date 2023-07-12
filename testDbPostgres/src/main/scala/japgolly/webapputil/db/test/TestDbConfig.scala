@@ -34,8 +34,11 @@ trait TestDbConfig {
   protected def loadDbConfig[A](defn: ConfigDef[A]): A =
     defn.run(configSources).map(_.getOrDie()).value
 
+  protected def dbAppName: Option[String] =
+    None
+
   protected def dbConfig: ConfigDef[DbConfig] =
-    DbConfig.config.withPrefix(propsPrefixDb)
+    DbConfig.config(defaultAppName = dbAppName).withPrefix(propsPrefixDb)
 
   protected def loadDbConfigOrThrow(): DbConfig =
     loadDbConfig(dbConfig)

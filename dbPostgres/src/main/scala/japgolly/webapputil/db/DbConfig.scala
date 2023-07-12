@@ -42,8 +42,14 @@ final case class DbConfig(dataSource          : DbConfig.DataSource,
 object DbConfig {
 
   def config: ConfigDef[DbConfig] =
+    config(None)
+
+  def config(defaultAppName: String): ConfigDef[DbConfig] =
+    config(Some(defaultAppName))
+
+  def config(defaultAppName: Option[String]): ConfigDef[DbConfig] =
     (
-      DataSource.config,
+      DataSource.config(defaultAppName),
       Hikari.config.withPrefix("pool."),
       ConfigDef.getOrUse("log.sql", true),
     ).mapN { (ds, hikari, logSql) =>
@@ -113,14 +119,19 @@ object DbConfig {
   }
 
   object DataSource {
-    def config: ConfigDef[DataSource] = {
+    def config: ConfigDef[DataSource] =
+      config(None)
+
+    def config(defaultAppName: String): ConfigDef[DataSource] =
+      config(Some(defaultAppName))
+
+    def config(defaultAppName: Option[String]): ConfigDef[DataSource] = {
       implicit val vectorInt: ConfigValueParser[Vector[Int]] =
         ConfigValueParser(_.split(',').map(_.trim).filter(_.nonEmpty).toVector.traverse {
           case ParseInt(i) => Right(i)
           case s           => Left("Invalid integer: " + s)
         })
 
-      val appname                = ConfigDef.get[String]("appname")
       val binaryTransfer         = ConfigDef.get[Boolean]("binaryTransfer")
       val binaryTransferDisable  = ConfigDef.get[String]("binaryTransferDisable")
       val binaryTransferEnable   = ConfigDef.get[String]("binaryTransferEnable")
@@ -140,6 +151,12 @@ object DbConfig {
       val tcpKeepAlive           = ConfigDef.get[Boolean]("tcpKeepAlive")
       val unknownLength          = ConfigDef.get[Int]("unknownLength")
       val username               = ConfigDef.need[String]("username")
+
+      val appname: ConfigDef[Option[String]] =
+        defaultAppName match {
+          case None    => ConfigDef.get[String]("appname")
+          case Some(a) => ConfigDef.getOrUse[String]("appname", a).map(Some(_))
+        }
 
       val schema: ConfigDef[Option[String]] =
         ConfigDef.get[String]("schema").test(_.flatMap(validateSqlIdentifier).map(_.value))
