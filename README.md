@@ -91,11 +91,11 @@ val WebappUtilVer = "<version>"
   * `UrlEncoder` - cross-platform URL encoding and decoding
 
 * `japgolly.webapputil.experimental.indexeddb` *(JS only)*
-  * [`IndexedDb`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/experimental/IndexedDb.scala) - monadic API over IndexedDb that enforces transaction rules at compile-time, and provides higher-level ops such as atomic async modification *(JS only)*
-  * [`IndexedDbKey`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/experimental/IndexedDbKey.scala) - typed key for use in IndexedDb *(JS only)*
-  * [`KeyCodec`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/experimental/KeyCodec.scala) - codec between an arbitrary type and a IndexedDb key *(JS only)*
-  * [`ObjectStoreDef`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/experimental/ObjectStoreDef.scala) - IndexedDb store and codecs *(JS only)*
-  * [`ValueCodec`](./core/js/src/main/scala/japgolly/webapputil/indexeddb/experimental/ValueCodec.scala) - codec between an arbitrary type and a IndexedDb value *(JS only)*
+  * [`IndexedDb`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/IndexedDb.scala) - monadic API over IndexedDb that enforces transaction rules at compile-time, and provides higher-level ops such as atomic async modification *(JS only)*
+  * [`IndexedDbKey`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/IndexedDbKey.scala) - typed key for use in IndexedDb *(JS only)*
+  * [`KeyCodec`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/KeyCodec.scala) - codec between an arbitrary type and a IndexedDb key *(JS only)*
+  * [`ObjectStoreDef`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/ObjectStoreDef.scala) - IndexedDb store and codecs *(JS only)*
+  * [`ValueCodec`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/ValueCodec.scala) - codec between an arbitrary type and a IndexedDb value *(JS only)*
 
 * `japgolly.webapputil.locks`
   * [`LockMechanism`](./core/jvm/src/main/scala/japgolly/webapputil/locks/LockMechanism.scala) - means of implicitly specifying how to acquire locks *(JVM only)*
@@ -164,7 +164,6 @@ val WebappUtilVer = "<version>"
   * [`WebSocketTestUtil`](./testBoopickle/js/src/main/scala/japgolly/webapputil/boopickle/test/WebSocketTestUtil.scala) - util for testing WebSocket code *(JS only)*
 
 * `japgolly.webapputil.boopickle.test.experimental`
-  * [`FakeIndexedDb`](./testBoopickle/js/src/main/scala/japgolly/webapputil/boopickle/test/experimental/FakeIndexedDb.scala) *(JS only)*
   * [`TestIndexedDb`](./testBoopickle/js/src/main/scala/japgolly/webapputil/boopickle/test/experimental/TestIndexedDb.scala) - util for testing IndexedDb code *(JS only)*
 
 ## The `core-cats-effect` module:
