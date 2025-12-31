@@ -90,13 +90,6 @@ val WebappUtilVer = "<version>"
   * [`HttpClient`](./core/shared/src/main/scala/japgolly/webapputil/http/HttpClient.scala) - abstract HTTP (invocation) client
   * `UrlEncoder` - cross-platform URL encoding and decoding
 
-* `japgolly.webapputil.experimental.indexeddb` *(JS only)*
-  * [`IndexedDb`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/IndexedDb.scala) - monadic API over IndexedDb that enforces transaction rules at compile-time, and provides higher-level ops such as atomic async modification *(JS only)*
-  * [`IndexedDbKey`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/IndexedDbKey.scala) - typed key for use in IndexedDb *(JS only)*
-  * [`KeyCodec`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/KeyCodec.scala) - codec between an arbitrary type and a IndexedDb key *(JS only)*
-  * [`ObjectStoreDef`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/ObjectStoreDef.scala) - IndexedDb store and codecs *(JS only)*
-  * [`ValueCodec`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/ValueCodec.scala) - codec between an arbitrary type and a IndexedDb value *(JS only)*
-
 * `japgolly.webapputil.locks`
   * [`LockMechanism`](./core/jvm/src/main/scala/japgolly/webapputil/locks/LockMechanism.scala) - means of implicitly specifying how to acquire locks *(JVM only)*
   * [`LockUtils`](./core/jvm/src/main/scala/japgolly/webapputil/locks/LockUtils.scala) - helpers around Java locks *(JVM only)*
@@ -122,6 +115,13 @@ val WebappUtilVer = "<version>"
   * [`ManagedWebWorker`](./core/js/src/main/scala/japgolly/webapputil/webworker/ManagedWebWorker.scala) - web worker client & server implementations that handle all the low-level work
   * [`OnError`](./core/js/src/main/scala/japgolly/webapputil/webworker/OnError.scala) - web worker error handler
   * [`WebWorkerProtocol`](./core/js/src/main/scala/japgolly/webapputil/webworker/WebWorkerProtocol.scala) - protocol API for communication between web worker client and server
+
+* `japgolly.webapputil.experimental.indexeddb` *(JS only)*
+  * [`IndexedDb`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/IndexedDb.scala) - monadic API over IndexedDb that enforces transaction rules at compile-time, and provides higher-level ops such as atomic async modification *(JS only)*
+  * [`IndexedDbKey`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/IndexedDbKey.scala) - typed key for use in IndexedDb *(JS only)*
+  * [`KeyCodec`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/KeyCodec.scala) - codec between an arbitrary type and a IndexedDb key *(JS only)*
+  * [`ObjectStoreDef`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/ObjectStoreDef.scala) - IndexedDb store and codecs *(JS only)*
+  * [`ValueCodec`](./core/js/src/main/scala/japgolly/webapputil/experimental/indexeddb/ValueCodec.scala) - codec between an arbitrary type and a IndexedDb value *(JS only)*
 
 ## The `test` module:
 
