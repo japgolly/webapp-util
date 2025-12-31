@@ -1,4 +1,4 @@
-package japgolly.webapputil
+package japgolly.webapputil.experimental
 
 package object indexeddb {
 

@@ -1,8 +1,8 @@
-package japgolly.webapputil.boopickle.test
+package japgolly.webapputil.boopickle.test.experimental
 
 import japgolly.scalajs.react.{AsyncCallback, Callback}
-import japgolly.webapputil.indexeddb.IndexedDb._
-import japgolly.webapputil.indexeddb._
+import japgolly.webapputil.experimental.indexeddb.IndexedDb._
+import japgolly.webapputil.experimental.indexeddb._
 import japgolly.webapputil.test.node.TestNode
 import org.scalajs.dom.window
 import scala.scalajs.js

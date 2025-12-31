@@ -1,10 +1,10 @@
-package japgolly.webapputil.indexeddb
+package japgolly.webapputil.experimental.indexeddb
 
 import cats.kernel.Eq
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.util.Util.{identity => identityFn}
 import japgolly.univeq.UnivEqCats._
-import japgolly.webapputil.indexeddb.TxnMode._
+import japgolly.webapputil.experimental.indexeddb.TxnMode._
 import org.scalajs.dom._
 import scala.annotation.elidable
 import scala.scalajs.js

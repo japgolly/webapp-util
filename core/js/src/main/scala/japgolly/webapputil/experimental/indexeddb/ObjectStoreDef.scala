@@ -1,4 +1,4 @@
-package japgolly.webapputil.indexeddb
+package japgolly.webapputil.experimental.indexeddb
 
 import japgolly.scalajs.react.{AsyncCallback, CallbackTo}
 import japgolly.univeq.UnivEq

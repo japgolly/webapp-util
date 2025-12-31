@@ -1,4 +1,4 @@
-package japgolly.webapputil.boopickle.test
+package japgolly.webapputil.boopickle.test.experimental
 
 import boopickle.DefaultBasic._
 import japgolly.microlibs.testutil.TestUtil._
@@ -6,7 +6,8 @@ import japgolly.scalajs.react._
 import japgolly.webapputil.binary._
 import japgolly.webapputil.boopickle.SafePickler.ConstructionHelperImplicits._
 import japgolly.webapputil.boopickle._
-import japgolly.webapputil.indexeddb._
+import japgolly.webapputil.boopickle.test._
+import japgolly.webapputil.experimental.indexeddb._
 import japgolly.webapputil.test.node.TestNode.asyncTest
 import nyaya.gen.Gen
 import utest._

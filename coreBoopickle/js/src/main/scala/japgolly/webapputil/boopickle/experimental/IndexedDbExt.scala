@@ -1,7 +1,8 @@
-package japgolly.webapputil.boopickle
+package japgolly.webapputil.boopickle.experimental
 
 import japgolly.webapputil.binary._
-import japgolly.webapputil.indexeddb._
+import japgolly.webapputil.boopickle.SafePickler
+import japgolly.webapputil.experimental.indexeddb._
 
 object IndexedDbExt {
 

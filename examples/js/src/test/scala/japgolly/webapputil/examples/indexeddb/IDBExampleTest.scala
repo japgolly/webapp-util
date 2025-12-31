@@ -2,7 +2,8 @@ package japgolly.webapputil.examples.indexeddb
 
 import japgolly.webapputil.binary._
 import japgolly.webapputil.boopickle.test._
-import japgolly.webapputil.indexeddb._
+import japgolly.webapputil.boopickle.test.experimental._
+import japgolly.webapputil.experimental.indexeddb._
 import japgolly.webapputil.test.node.TestNode.asyncTest
 import java.util.UUID
 import utest._

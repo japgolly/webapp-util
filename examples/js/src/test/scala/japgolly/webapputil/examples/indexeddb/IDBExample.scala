@@ -3,7 +3,7 @@ package japgolly.webapputil.examples.indexeddb
 import japgolly.scalajs.react.AsyncCallback
 import japgolly.webapputil.binary._
 import japgolly.webapputil.boopickle._
-import japgolly.webapputil.indexeddb.IndexedDb
+import japgolly.webapputil.experimental.indexeddb.IndexedDb
 import java.util.UUID
 
 object IDBExample {

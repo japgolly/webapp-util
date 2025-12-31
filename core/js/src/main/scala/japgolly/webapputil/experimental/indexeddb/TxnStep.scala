@@ -1,7 +1,7 @@
-package japgolly.webapputil.indexeddb
+package japgolly.webapputil.experimental.indexeddb
 
 import japgolly.scalajs.react._
-import japgolly.webapputil.indexeddb.IndexedDb.ObjectStore
+import japgolly.webapputil.experimental.indexeddb.IndexedDb.ObjectStore
 import org.scalajs.dom._
 
 /** Embedded language for safely working with(in) an IndexedDB transaction.

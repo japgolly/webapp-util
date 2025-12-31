@@ -1,6 +1,6 @@
-package japgolly.webapputil.boopickle.test
+package japgolly.webapputil.boopickle.test.experimental
 
-import japgolly.webapputil.indexeddb._
+import japgolly.webapputil.experimental.indexeddb._
 import japgolly.webapputil.test.node.TestNode
 
 object FakeIndexedDb {

@@ -4,7 +4,7 @@ import boopickle.DefaultBasic._
 import japgolly.scalajs.react.{AsyncCallback, Callback}
 import japgolly.webapputil.binary._
 import japgolly.webapputil.boopickle._
-import japgolly.webapputil.indexeddb._
+import japgolly.webapputil.experimental.indexeddb._
 
 // Our example IndexedDB's stores (like DB tables)
 trait IDBExampleStores {

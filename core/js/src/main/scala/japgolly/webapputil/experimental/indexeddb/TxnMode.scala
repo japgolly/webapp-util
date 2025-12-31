@@ -1,4 +1,4 @@
-package japgolly.webapputil.indexeddb
+package japgolly.webapputil.experimental.indexeddb
 
 sealed trait TxnMode
 
