@@ -9,37 +9,37 @@ object Dependencies {
   object Ver {
 
     // Exported
-    def boopickle         = "1.4.0"
-    def catsEffect        = "3.5.1"
-    def catsRetry         = "3.1.0"
-    def circe             = "0.14.5"
-    def clearConfig       = "3.1.0"
-    def doobie            = "1.0.0-RC4"
-    def flyway            = "9.20.0"
-    def hikariCP          = "5.0.1"
-    def izumiReflect      = "2.3.8"
+    def boopickle         = "1.5.0"
+    def catsEffect        = "3.6.3"
+    def catsRetry         = "3.1.3"
+    def circe             = "0.14.15"
+    def clearConfig       = "3.3.0"
+    def doobie            = "1.0.0-RC11"
+    def flyway            = "12.0.0"
+    def hikariCP          = "7.0.2"
+    def izumiReflect      = "3.0.9"
     def javaxWebsocketApi = "1.0"
     def microlibs         = "4.2.1"
     def nyaya             = "1.1.0"
-    def okHttp4           = "4.11.0"
-    def postgresql        = "42.6.0"
-    def scala2            = "2.13.11"
-    def scala3            = "3.3.0"
-    def scalaJsDom        = "2.6.0"
-    def scalaJsReact      = "2.1.1"
-    def scalaLogging      = "3.9.5"
+    def okHttp4           = "4.12.0"
+    def postgresql        = "42.7.9"
+    def scala2            = "2.13.18"
+    def scala3            = "3.3.7"
+    def scalaJsDom        = "2.8.1"
+    def scalaJsReact      = "2.1.3"
+    def scalaLogging      = "3.9.6"
     def testState         = "3.1.0"
-    def univEq            = "2.0.1"
+    def univEq            = "2.1.0"
 
     // Internal
     def base32768           = "2.0.2"
     def betterMonadicFor    = "0.3.1"
-    def kindProjector       = "0.13.2"
+    def kindProjector       = "0.13.4"
     def pako                = "2.0.4"
     def reactJs             = "17.0.2"
     def scalaJsJavaTime     = "1.0.0"
     def scalaJsSecureRandom = "1.0.0"
-    def utest               = "0.8.1"
+    def utest               = "0.8.9"
   }
 
   object Dep {
@@ -55,6 +55,7 @@ object Dependencies {
     val doobiePostgres      = Def.setting("org.tpolecat"                      %%% "doobie-postgres"                         % Ver.doobie)
     val doobiePostgresCirce = Def.setting("org.tpolecat"                      %%% "doobie-postgres-circe"                   % Ver.doobie)
     val flyway              = Def.setting("org.flywaydb"                        % "flyway-core"                             % Ver.flyway)
+    val flywayPostgres      = Def.setting("org.flywaydb"                        % "flyway-database-postgresql"              % Ver.flyway)
     val hikariCP            = Def.setting("com.zaxxer"                          % "HikariCP"                                % Ver.hikariCP)
     val izumiReflect        = Def.setting("dev.zio"                            %% "izumi-reflect"                           % Ver.izumiReflect)
     val javaxWebsocketApi   = Def.setting("javax.websocket"                     % "javax.websocket-api"                     % Ver.javaxWebsocketApi)

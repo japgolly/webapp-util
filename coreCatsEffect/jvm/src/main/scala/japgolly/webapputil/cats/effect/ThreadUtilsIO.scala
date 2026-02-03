@@ -18,10 +18,11 @@ object ThreadUtilsIO {
 
   def newDefaultRuntime(threadPrefix: String): IORuntime = {
     import IORuntime._
-    val (compute, _) = createWorkStealingComputeThreadPool(threadPrefix = s"$threadPrefix-compute")
+    import scala.language.existentials
+    val (compute, poller, _) = createWorkStealingComputeThreadPool(threadPrefix = s"$threadPrefix-compute")
     val (blocking, _) = createDefaultBlockingExecutionContext(threadPrefix = s"$threadPrefix-blocking")
     val (scheduler, _) = createDefaultScheduler(threadPrefix = s"$threadPrefix-scheduler")
-    IORuntime(compute, blocking, scheduler, () => (), IORuntimeConfig())
+    IORuntime(compute, blocking, scheduler, poller :: Nil, () => (), IORuntimeConfig())
   }
 
   def runOnShutdown(name: String, proc: => Unit): Unit =

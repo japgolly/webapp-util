@@ -3,7 +3,7 @@
     Seq(
       ThisBuild / semanticdbEnabled          := true,
       ThisBuild / scalafixScalaBinaryVersion := "2.13",
-      ThisBuild / semanticdbVersion          := "4.8.3",
+      ThisBuild / semanticdbVersion          := "4.14.3",
 
       ThisBuild / scalacOptions ++= {
         if (scalaVersion.value startsWith "2")
