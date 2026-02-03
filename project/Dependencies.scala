@@ -24,12 +24,12 @@ object Dependencies {
     def okHttp4           = "4.12.0"
     def postgresql        = "42.7.9"
     def scala2            = "2.13.18"
-    def scala3            = "3.3.0"
+    def scala3            = "3.3.7"
     def scalaJsDom        = "2.8.1"
     def scalaJsReact      = "2.1.3"
     def scalaLogging      = "3.9.6"
     def testState         = "3.1.0"
-    def univEq            = "2.0.2"
+    def univEq            = "2.1.0"
 
     // Internal
     def base32768           = "2.0.2"
