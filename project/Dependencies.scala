@@ -55,6 +55,7 @@ object Dependencies {
     val doobiePostgres      = Def.setting("org.tpolecat"                      %%% "doobie-postgres"                         % Ver.doobie)
     val doobiePostgresCirce = Def.setting("org.tpolecat"                      %%% "doobie-postgres-circe"                   % Ver.doobie)
     val flyway              = Def.setting("org.flywaydb"                        % "flyway-core"                             % Ver.flyway)
+    val flywayPostgres      = Def.setting("org.flywaydb"                        % "flyway-database-postgresql"              % Ver.flyway)
     val hikariCP            = Def.setting("com.zaxxer"                          % "HikariCP"                                % Ver.hikariCP)
     val izumiReflect        = Def.setting("dev.zio"                            %% "izumi-reflect"                           % Ver.izumiReflect)
     val javaxWebsocketApi   = Def.setting("javax.websocket"                     % "javax.websocket-api"                     % Ver.javaxWebsocketApi)

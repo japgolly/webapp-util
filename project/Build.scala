@@ -313,6 +313,7 @@ object Build {
         Dep.doobiePostgres     .value,
         Dep.doobiePostgresCirce.value,
         Dep.flyway             .value,
+        Dep.flywayPostgres     .value,
         Dep.hikariCP           .value,
         Dep.postgresql         .value,
         Dep.scalaLogging       .value,
